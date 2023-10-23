@@ -50,6 +50,11 @@ namespace sc
     template <typename TIterator>
     void merge_sort(TIterator begin, TIterator end)
     {
+        static_assert(
+            std::is_same<typename std::iterator_traits<TIterator>::iterator_category,
+                         std::random_access_iterator_tag>::value,
+            "TIterator must be a random-access iterator.");
+
         auto result = merge_sort_internal(begin, end);
         std::copy(result.begin(), result.end(), begin);
     }

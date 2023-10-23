@@ -1,6 +1,9 @@
 #include "print.h"
 #include "merge_sort.h"
 
+#include <algorithm>
+#include <array>
+#include <list>
 #include <vector>
 
 int main(int argc, char** argv)
