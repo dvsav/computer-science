@@ -4,6 +4,20 @@
 namespace sc
 {
     template <typename T>
+    class DefaultComparator
+    {
+    public:
+        static bool LessThan(const T& a, const T& b) { return a < b; }
+    };
+
+    template <typename T>
+    class ReverseComparator
+    {
+    public:
+        static bool LessThan(const T& a, const T& b) { return a > b; }
+    };
+
+    template <typename T, typename TComparator = DefaultComparator<T> >
     static std::vector<T> merge(const std::vector<T>& a, const std::vector<T>& b)
     {
         std::vector<T> result;
@@ -14,7 +28,7 @@ namespace sc
 
         while (a_i < a.size() && b_i < b.size())
         {
-            if (a[a_i] < b[b_i])
+            if (TComparator::LessThan(a[a_i], b[b_i]))
                 result.push_back(a[a_i++]);
             else
                 result.push_back(b[b_i++]);
@@ -29,7 +43,7 @@ namespace sc
         return result;
     }
 
-    template <typename TIterator>
+    template <typename TIterator, typename TComparator = DefaultComparator<typename TIterator::value_type> >
     static std::vector<typename TIterator::value_type> merge_sort_internal(TIterator begin, TIterator end)
     {
         auto size = end - begin;
@@ -41,21 +55,28 @@ namespace sc
 
         auto middle = begin + size / 2;
 
-        auto left_part = merge_sort_internal(begin, middle);
-        auto right_part = merge_sort_internal(middle, end);
+        auto left_part = merge_sort_internal<TIterator, TComparator>(begin, middle);
+        auto right_part = merge_sort_internal<TIterator, TComparator>(middle, end);
 
-        return merge(left_part, right_part);
+        return merge<TIterator::value_type, TComparator>(left_part, right_part);
     }
 
-    template <typename TIterator>
+    template <typename TIterator, typename TComparator = DefaultComparator<typename TIterator::value_type> >
     void merge_sort(TIterator begin, TIterator end)
     {
+        // Check that TIterator is a random-access iterator
         static_assert(
             std::is_same<typename std::iterator_traits<TIterator>::iterator_category,
                          std::random_access_iterator_tag>::value,
             "TIterator must be a random-access iterator.");
 
-        auto result = merge_sort_internal(begin, end);
+        // Check for the existence of a member function "LessThan" in TComparator type
+        static_assert(
+            std::is_same<decltype(&TComparator::LessThan),
+                         bool (*)(const TIterator::value_type&, const TIterator::value_type&)>::value,
+            "LessThan function is missing in TComparator");
+
+        auto result = merge_sort_internal<TIterator, TComparator>(begin, end);
         std::copy(result.begin(), result.end(), begin);
     }
 }

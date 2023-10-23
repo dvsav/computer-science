@@ -9,7 +9,8 @@
 int main(int argc, char** argv)
 {
     std::vector<int> vec{ 5, 2, 8, 15, 1, -6, 7 };
-    sc::merge_sort(vec.begin(), vec.end());
+    sc::merge_sort<std::vector<int>::iterator, sc::ReverseComparator<int> >(vec.begin(), vec.end());
+    //sc::merge_sort(vec.begin(), vec.end());
     sc::print(vec.begin(), vec.end(), " ");
 
     return 0;
