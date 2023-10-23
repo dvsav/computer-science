@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace sc
+namespace cs
 {
     template <typename T>
     class DefaultComparator
@@ -61,6 +61,16 @@ namespace sc
         return merge<TIterator::value_type, TComparator>(left_part, right_part);
     }
 
+    /**
+     * @brief Sort specified range of values using merge sort algorithm.
+     *
+     * @tparam TIterator Iterator type (must be a random access iterator).
+     * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)
+     * where T is the value type of container being sorted).
+     *
+     * @param begin - Iterator specifying the beginning of a range to be sorted.
+     * @param end - Iterator specifying the end of a range to be sorted.
+     */
     template <typename TIterator, typename TComparator = DefaultComparator<typename TIterator::value_type> >
     void merge_sort(TIterator begin, TIterator end)
     {

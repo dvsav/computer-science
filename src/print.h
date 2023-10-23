@@ -1,6 +1,6 @@
 #include <iostream>
 
-namespace sc
+namespace cs
 {
     template <typename TIterator>
     void print(TIterator begin, TIterator end, const std::string& delimeter)
