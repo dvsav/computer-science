@@ -141,6 +141,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\print.h" />
     <ClInclude Include="..\..\..\src\merge_sort.h" />
+    <ClInclude Include="..\..\..\src\quick_sort.h" />
+    <ClInclude Include="..\..\..\src\utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp" />

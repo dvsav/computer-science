@@ -1,22 +1,12 @@
+#pragma once
+
+#include "utility.h"
+
 #include <algorithm>
 #include <vector>
 
 namespace cs
 {
-    template <typename T>
-    class DefaultComparator
-    {
-    public:
-        static bool LessThan(const T& a, const T& b) { return a < b; }
-    };
-
-    template <typename T>
-    class ReverseComparator
-    {
-    public:
-        static bool LessThan(const T& a, const T& b) { return a > b; }
-    };
-
     template <typename T, typename TComparator = DefaultComparator<T> >
     static std::vector<T> merge(const std::vector<T>& a, const std::vector<T>& b)
     {
@@ -66,7 +56,7 @@ namespace cs
      *
      * @tparam TIterator Iterator type (must be a random access iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)
-     * where T is the value type of container being sorted).
+     * where T is the value type of container being sorted). For example @see DefaultComparator, @see ReverseComparator.
      *
      * @param begin - Iterator specifying the beginning of a range to be sorted.
      * @param end - Iterator specifying the end of a range to be sorted.
