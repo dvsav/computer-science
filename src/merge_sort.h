@@ -2,8 +2,8 @@
 
 #include "utility.h"
 
-#include <algorithm>
-#include <vector>
+#include <algorithm> // for std::copy
+#include <vector>    // for std::vector
 
 namespace cs
 {

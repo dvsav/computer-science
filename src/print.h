@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include <iostream> // for std::cout
 
 namespace cs
 {
