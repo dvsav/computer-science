@@ -73,7 +73,7 @@ namespace cs
             std::random_access_iterator_tag>::value,
             "TIterator must be a random-access iterator.");
 
-        // Check for the existence of a member function "LessThan" in TComparator type
+        // Check for the existence of a member function "LessThanOrEqualTo" in TComparator type
         static_assert(
             std::is_same<decltype(&TComparator::LessThanOrEqualTo),
             bool (*)(const TIterator::value_type&, const TIterator::value_type&)>::value,
@@ -122,7 +122,7 @@ namespace cs
             std::random_access_iterator_tag>::value,
             "TIterator must be a random-access iterator.");
 
-        // Check for the existence of a member function "LessThan" in TComparator type
+        // Check for the existence of a member function "LessThanOrEqualTo" in TComparator type
         static_assert(
             std::is_same<decltype(&TComparator::LessThanOrEqualTo),
             bool (*)(const TIterator::value_type&, const TIterator::value_type&)>::value,
