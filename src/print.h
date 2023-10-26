@@ -8,7 +8,7 @@ namespace cs
     void print(std::ostream& os, TIterator begin, TIterator end, const std::string& delimeter)
     {
         for (auto i = begin; i != end; i++)
-            std::os << *i << delimeter;
+            os << *i << delimeter;
     }
 
     template <typename TIterator>
