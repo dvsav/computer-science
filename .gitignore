@@ -31,9 +31,17 @@
 *.out
 *.app
 
+# Directories
+bin/
+install/
+
 # Visual Studio cache/options directory
-build/vs2019/.vs/**
-build/vs2019/Debug/**
-build/vs2019/Release/**
-build/vs2019/computer-science/Debug/**
-build/vs2019/computer-science/Release/**
+**/.vs/
+**/x64/
+**/[Dd]ebug/
+**/[Rr]elease/
+
+# CMake
+!build/CMake/
+build/CMake/*
+!/build/CMake/CMakeLists.txt

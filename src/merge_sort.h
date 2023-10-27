@@ -48,7 +48,7 @@ namespace cs
         auto left_part = merge_sort_internal<TIterator, TComparator>(begin, middle);
         auto right_part = merge_sort_internal<TIterator, TComparator>(middle, end);
 
-        return merge<TIterator::value_type, TComparator>(left_part, right_part);
+        return merge<typename TIterator::value_type, TComparator>(left_part, right_part);
     }
 
     /**
@@ -73,7 +73,7 @@ namespace cs
         // Check for the existence of a member function "LessThan" in TComparator type
         static_assert(
             std::is_same<decltype(&TComparator::LessThan),
-                         bool (*)(const TIterator::value_type&, const TIterator::value_type&)>::value,
+                         bool (*)(const typename TIterator::value_type&, const typename TIterator::value_type&)>::value,
             "LessThan function is missing in TComparator");
 
         auto result = merge_sort_internal<TIterator, TComparator>(begin, end);

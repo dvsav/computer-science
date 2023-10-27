@@ -1,8 +1,9 @@
 #include "utility.h"
 
-#include <fstream>  // for std::ifstream
-#include <iostream> // for std::cerr
-#include <string>   // for std::string
+#include <algorithm> // for std::remove
+#include <fstream>   // for std::ifstream
+#include <iostream>  // for std::cerr
+#include <string>    // for std::string
 
 namespace cs
 {
