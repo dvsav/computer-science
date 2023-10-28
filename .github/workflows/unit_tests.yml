@@ -1,0 +1,31 @@
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - devel  # Project's branch name
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # You can choose a different runner (execution environment) if needed
+
+    steps:
+    - name: Check Out Repository
+      uses: actions/checkout@v2  # Pre-built GitHub Actions workflow called "actions/checkout" with version 2 (v2)
+
+    - name: Set Up GNU Make
+      run: |
+        sudo apt-get -y install make
+      shell: bash
+
+    - name: Build Project
+      run: |
+        cd build/GNUMake
+        make
+      working-directory: ${{ github.workspace }}  # the directory in which the subsequent steps of the workflow will be executed; github.workspace - the root of the repository
+
+    - name: Run Unit Tests
+      run: |
+        cd build/GNUMake
+        make test
+      working-directory: ${{ github.workspace }}
