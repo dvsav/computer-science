@@ -1,13 +1,13 @@
 name: Unit Tests
 
 on:
-  push:
+  push:        # This workflow is triggered by pushing to a git branch specified below
     branches:
       - devel  # Project's branch name
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # You can choose a different runner (execution environment) if needed
+  test-on-ubuntu-linux:
+    runs-on: ubuntu-latest  # Runner (execution environment)
 
     steps:
     - name: Check Out Repository
@@ -20,12 +20,42 @@ jobs:
 
     - name: Build Project
       run: |
-        cd build/GNUMake
         make
-      working-directory: ${{ github.workspace }}  # the directory in which the subsequent steps of the workflow will be executed; github.workspace - the root of the repository
+      working-directory: ${{ github.workspace }}/build/GNUMake  # the directory in which the subsequent steps of the workflow will be executed; github.workspace - the root of the repository
 
     - name: Run Unit Tests
       run: |
-        cd build/GNUMake
         make test
-      working-directory: ${{ github.workspace }}
+      working-directory: ${{ github.workspace }}/build/GNUMake
+
+  test-on-windows:
+    runs-on: windows-latest  # Runner (execution environment)
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set Up CMake
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+        shell: powershell
+
+      - name: Create Build Directory
+        run: |
+          mkdir win
+        working-directory: ${{ github.workspace }}/build/CMake
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B ./win
+        working-directory: ${{ github.workspace }}/build/CMake
+
+      - name: Build Project
+        run: |
+          cmake --build . --config Debug
+        working-directory: ${{ github.workspace }}/build/CMake/win
+
+      - name: Run Unit Tests
+        run: |
+          ctest --output-on-failure
+        working-directory: ${{ github.workspace }}/build/CMake/win
