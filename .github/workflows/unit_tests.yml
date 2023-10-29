@@ -57,5 +57,5 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          ctest --output-on-failure
+          ctest -C Debug --output-on-failure
         working-directory: ${{ github.workspace }}/build/CMake/win
