@@ -188,6 +188,10 @@ namespace cs
     public:
         Graph& operator=(const Graph&) = delete;
 
+        size_t VerticesNumber() const { return vertices.size(); }
+
+        size_t EdgesNumber() const { return edges.size(); }
+
         vertex_type* AddVertex(TId id, TData data)
         {
             vertex_type* vertex = new vertex_type(id, data);

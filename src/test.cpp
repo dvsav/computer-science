@@ -1,5 +1,6 @@
-#include "print.h"      // for cs::print
+#include "graph.h"
 #include "merge_sort.h" // for cs::merge_sort
+#include "print.h"      // for cs::print
 #include "quick_sort.h" // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
 #include "utility.h"    // for cs::ReverseComparator, cs::files_textually_equal
 
@@ -9,10 +10,6 @@
 // Catch2 - a single header unit test framework
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "Catch2/catch.hpp"
-
-unsigned int Factorial(unsigned int number) {
-    return number <= 1 ? number : Factorial(number - 1) * number;
-}
 
 TEST_CASE("Vectors are sorted", "[sort]")
 {
@@ -55,4 +52,16 @@ TEST_CASE("Vectors are sorted", "[sort]")
         cs::quick_sort_randomized_partition<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
     }
+}
+
+TEST_CASE("Graph depth-first search", "[graph]")
+{
+    cs::Graph<int, int, int> g;
+    for (int i = 0; i < 10; i++)
+    {
+        g.AddVertex(i, 0);
+    }
+    REQUIRE(g.VerticesNumber() == 10);
+
+    // TODO: depth-first search
 }
