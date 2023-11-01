@@ -1,7 +1,8 @@
 #pragma once
 
-#include <functional> // for std::function
-#include <list>       // for std::list
+#include <functional>    // for std::function
+#include <list>          // for std::list
+#include <unordered_map> // for std::unordered_map
 
 namespace cs
 {
@@ -40,77 +41,6 @@ namespace cs
         const TData& Data() const { return data; }
     };
 
-    template<typename TId, typename TData>
-    class Vertex : public VertexBase<TId, TData>
-    {
-        template<typename TId, typename TData, typename TLen>
-        friend class Graph;
-
-    private:
-        std::list<Vertex*> incomingNeighbors;
-        std::list<Vertex*> outgoingNeighbors;
-
-    public:
-        Vertex(
-            TId id,
-            TData data) :
-            VertexBase<TId, TData>(id, data),
-            incomingNeighbors(),
-            outgoingNeighbors()
-        {}
-
-        Vertex(const Vertex&) = delete;
-
-    private:
-        Vertex& operator=(const Vertex&) = delete;
-
-        void AddIncomingNeighbor(Vertex* neighbor) { incomingNeighbors.push_back(neighbor); }
-        void AddOutgoingNeighbor(Vertex* neighbor) { outgoingNeighbors.push_back(neighbor); }
-        void RemoveIncomingNeighbor(Vertex* neighbor) { incomingNeighbors.remove(neighbor); }
-        void RemoveOutgoingNeighbor(Vertex* neighbor) { outgoingNeighbors.remove(neighbor); }
-
-    public:
-        bool VisitIncomingNeighbors(std::function<bool(Vertex*)> visitor)
-        {
-            for (Vertex* neighbor : incomingNeighbors)
-            {
-                if (visitor(neighbor))
-                    return true;
-            }
-            return false;
-        }
-
-        bool VisitIncomingNeighbors(std::function<bool(const Vertex*)> visitor) const
-        {
-            for (const Vertex* neighbor : incomingNeighbors)
-            {
-                if (visitor(neighbor))
-                    return true;
-            }
-            return false;
-        }
-
-        bool VisitOutgoingNeighbors(std::function<bool(Vertex*)> visitor)
-        {
-            for (Vertex* neighbor : outgoingNeighbors)
-            {
-                if (visitor(neighbor))
-                    return true;
-            }
-            return false;
-        }
-
-        bool VisitOutgoingNeighbors(std::function<bool(const Vertex*)> visitor) const
-        {
-            for (const Vertex* neighbor : outgoingNeighbors)
-            {
-                if (visitor(neighbor))
-                    return true;
-            }
-            return false;
-        }
-    };
-
     template<typename TVertex, typename TLen>
     class Edge
     {
@@ -144,15 +74,93 @@ namespace cs
     };
 
     template<typename TId, typename TData, typename TLen>
+    class Vertex : public VertexBase<TId, TData>
+    {
+        template<typename TId, typename TData, typename TLen>
+        friend class Graph;
+
+    public:
+        using edge_type = Edge<Vertex, TLen>;
+
+    private:
+        std::list<edge_type*> incomingEdges;
+        std::list<edge_type*> outgoingEdges;
+
+    public:
+        Vertex(
+            TId id,
+            TData data) :
+            VertexBase<TId, TData>(id, data),
+            incomingEdges(),
+            outgoingEdges()
+        {}
+
+        Vertex(const Vertex&) = delete;
+
+    private:
+        Vertex& operator=(const Vertex&) = delete;
+
+        void AddIncomingEdge(edge_type* edge) { incomingEdges.push_back(edge); }
+        void AddOutgoingEdge(edge_type* edge) { outgoingEdges.push_back(edge); }
+        void RemoveIncomingEdge(edge_type* edge) { incomingEdges.remove(edge); }
+        void RemoveOutgoingEdge(edge_type* edge) { outgoingEdges.remove(edge); }
+
+    public:
+        size_t NumberOfIncomingEdges() const { return incomingEdges.size(); }
+
+        size_t NumberOfOutgoingEdges() const { return outgoingEdges.size(); }
+
+        bool VisitIncomingEdges(std::function<bool(edge_type*)> visitor)
+        {
+            for (edge_type* edge : incomingEdges)
+            {
+                if (visitor(edge))
+                    return true;
+            }
+            return false;
+        }
+
+        bool VisitIncomingEdges(std::function<bool(const edge_type*)> visitor) const
+        {
+            for (const edge_type* edge : incomingEdges)
+            {
+                if (visitor(edge))
+                    return true;
+            }
+            return false;
+        }
+
+        bool VisitOutgoingEdges(std::function<bool(edge_type*)> visitor)
+        {
+            for (edge_type* edge : outgoingEdges)
+            {
+                if (visitor(edge))
+                    return true;
+            }
+            return false;
+        }
+
+        bool VisitOutgoingEdges(std::function<bool(const edge_type*)> visitor) const
+        {
+            for (const edge_type* edge : outgoingEdges)
+            {
+                if (visitor(edge))
+                    return true;
+            }
+            return false;
+        }
+    };
+
+    template<typename TId, typename TData, typename TLen>
     class Graph
     {
     public:
-        using vertex_type = Vertex<TId, TData>;
+        using vertex_type = Vertex<TId, TData, TLen>;
         using edge_type = Edge<vertex_type, TLen>;
 
     private:
-        std::list<vertex_type*> vertices; // linked list doesn't preserve memory addresses of its elements, which is why we cannot use std::list<vertex_type>
-        std::list<edge_type*> edges;      // linked list doesn't preserve memory addresses of its elements, which is why we cannot use std::list<edge_type>
+        std::unordered_map<TId, vertex_type*> vertices; // unordered_map doesn't preserve memory addresses of its elements, which is why we cannot use std::unordered_map<vertex_type>
+        std::list<edge_type*> edges;                    // linked list doesn't preserve memory addresses of its elements, which is why we cannot use std::list<edge_type>
         bool is_disposed;
 
     public:
@@ -164,7 +172,8 @@ namespace cs
 
         Graph(Graph&& rvalue) :
             vertices(std::move(rvalue.vertices)),
-            edges(std::move(rvalue.edges))
+            edges(std::move(rvalue.edges)),
+            is_disposed(false)
         {
             rvalue.is_disposed = true;
         }
@@ -177,8 +186,8 @@ namespace cs
             {
                 is_disposed = true;
                 
-                for (vertex_type* vertex : vertices)
-                    delete vertex;
+                for (auto key_value : vertices)
+                    delete key_value.second;
 
                 for (edge_type* edge : edges)
                     delete edge;
@@ -195,24 +204,29 @@ namespace cs
         vertex_type* AddVertex(TId id, TData data)
         {
             vertex_type* vertex = new vertex_type(id, data);
-            vertices.push_back(vertex);
+            auto result = vertices.insert({ id, vertex });
+            if (!result.second)
+            {
+                delete vertex;
+                return nullptr;
+            }
             return vertex;
         }
 
         edge_type* AddEdge(vertex_type* head, vertex_type* tail, TLen length)
         {
             edge_type* edge = new edge_type(head, tail, length);
-            head->AddOutgoingNeighbor(tail);
-            tail->AddIncomingNeighbor(head);
+            head->AddIncomingEdge(edge);
+            tail->AddOutgoingEdge(edge);
             edges.push_back(edge);
             return edge;
         }
 
         bool VisitVertices(std::function<bool(vertex_type*)> visitor)
         {
-            for (vertex_type* vertex : vertices)
+            for (auto key_value : vertices)
             {
-                if (visitor(vertex))
+                if (visitor(key_value.second))
                     return true;
             }
             return false;
@@ -220,9 +234,9 @@ namespace cs
 
         bool VisitVertices(std::function<bool(const vertex_type*)> visitor) const
         {
-            for (const vertex_type* vertex : vertices)
+            for (auto key_value : vertices)
             {
-                if (visitor(vertex))
+                if (visitor(key_value.second))
                     return true;
             }
             return false;
@@ -230,7 +244,7 @@ namespace cs
 
         bool VisitEdges(std::function<bool(edge_type*)> visitor)
         {
-            for (edge_type* edge : vertices)
+            for (edge_type* edge : edges)
             {
                 if (visitor(edge))
                     return true;
@@ -240,12 +254,16 @@ namespace cs
 
         bool VisitEdges(std::function<bool(const edge_type*)> visitor) const
         {
-            for (const edge_type* edge : vertices)
+            for (const edge_type* edge : edges)
             {
                 if (visitor(edge))
                     return true;
             }
             return false;
         }
+
+        vertex_type* GetVertexById(TId id) { return vertices.at(id); }
+
+        const vertex_type* GetVertexById(TId id) const { return vertices.at(id); }
     };
 }

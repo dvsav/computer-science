@@ -63,5 +63,13 @@ TEST_CASE("Graph depth-first search", "[graph]")
     }
     REQUIRE(g.VerticesNumber() == 10);
 
+    g.AddEdge(/*head*/ g.GetVertexById(0), /*tail*/ g.GetVertexById(1), /*length*/ 1);
+    g.AddEdge(/*head*/ g.GetVertexById(0), /*tail*/ g.GetVertexById(2), /*length*/ 1);
+
+    REQUIRE(g.EdgesNumber() == 2);
+    REQUIRE(g.GetVertexById(0)->NumberOfIncomingEdges() == 2);
+    REQUIRE(g.GetVertexById(1)->NumberOfOutgoingEdges() == 1);
+    REQUIRE(g.GetVertexById(2)->NumberOfOutgoingEdges() == 1);
+
     // TODO: depth-first search
 }
