@@ -1,11 +1,13 @@
-#include "graph.h"
-#include "merge_sort.h" // for cs::merge_sort
-#include "print.h"      // for cs::print
-#include "quick_sort.h" // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
-#include "utility.h"    // for cs::ReverseComparator, cs::files_textually_equal
+#include "graph.h"            // for cs::Graph
+#include "graph_algorithms.h" // for cs::BreadthFirstSearch
+#include "merge_sort.h"       // for cs::merge_sort
+#include "print.h"            // for cs::print
+#include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
+#include "utility.h"          // for cs::ReverseComparator, cs::files_textually_equal
 
-#include <array>        // for std::array
-#include <vector>       // for std::vector
+#include <array>              // for std::array
+#include <iostream>           // for std:::cout
+#include <vector>             // for std::vector
 
 // Catch2 - a single header unit test framework
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
@@ -56,20 +58,78 @@ TEST_CASE("Vectors are sorted", "[sort]")
 
 TEST_CASE("Graph depth-first search", "[graph]")
 {
-    cs::Graph<int, int, int> g;
+    using graph_type = cs::Graph<int, int, int>;
+    using vertex_type = typename graph_type::vertex_type;
+
+    graph_type g;
     for (int i = 0; i < 10; i++)
     {
-        g.AddVertex(i, 0);
+        g.AddVertex(/*id*/ i, /*data*/ 0);
     }
     REQUIRE(g.VerticesNumber() == 10);
 
-    g.AddEdge(/*head*/ g.GetVertexById(0), /*tail*/ g.GetVertexById(1), /*length*/ 1);
-    g.AddEdge(/*head*/ g.GetVertexById(0), /*tail*/ g.GetVertexById(2), /*length*/ 1);
+    //   1 - 4
+    //  / \
+    // 0 - 2 - 5
+    //  \   \
+    //   3   6 - 7 - 8 - 9
 
-    REQUIRE(g.EdgesNumber() == 2);
-    REQUIRE(g.GetVertexById(0)->NumberOfIncomingEdges() == 2);
-    REQUIRE(g.GetVertexById(1)->NumberOfOutgoingEdges() == 1);
-    REQUIRE(g.GetVertexById(2)->NumberOfOutgoingEdges() == 1);
+    g.AddEdge(/*from_id*/ 0, /*to_id*/ 1, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 0, /*to_id*/ 2, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 0, /*to_id*/ 3, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 1, /*to_id*/ 2, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 1, /*to_id*/ 4, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 2, /*to_id*/ 5, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 2, /*to_id*/ 6, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 6, /*to_id*/ 7, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 7, /*to_id*/ 8, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 8, /*to_id*/ 9, /*length*/ 1);
 
-    // TODO: depth-first search
+    REQUIRE(g.EdgesNumber() == 10);
+
+    REQUIRE(g.GetVertexById(0).NumberOfOutgoingEdges() == 3);
+    REQUIRE(g.GetVertexById(0).NumberOfIncomingEdges() == 0);
+
+    REQUIRE(g.GetVertexById(1).NumberOfOutgoingEdges() == 2);
+    REQUIRE(g.GetVertexById(1).NumberOfIncomingEdges() == 1);
+
+    REQUIRE(g.GetVertexById(2).NumberOfOutgoingEdges() == 2);
+    REQUIRE(g.GetVertexById(2).NumberOfIncomingEdges() == 2);
+
+    REQUIRE(g.GetVertexById(3).NumberOfOutgoingEdges() == 0);
+    REQUIRE(g.GetVertexById(3).NumberOfIncomingEdges() == 1);
+
+    REQUIRE(g.GetVertexById(4).NumberOfOutgoingEdges() == 0);
+    REQUIRE(g.GetVertexById(4).NumberOfIncomingEdges() == 1);
+
+    REQUIRE(g.GetVertexById(5).NumberOfOutgoingEdges() == 0);
+    REQUIRE(g.GetVertexById(5).NumberOfIncomingEdges() == 1);
+
+    REQUIRE(g.GetVertexById(6).NumberOfOutgoingEdges() == 1);
+    REQUIRE(g.GetVertexById(6).NumberOfIncomingEdges() == 1);
+
+    REQUIRE(g.GetVertexById(7).NumberOfOutgoingEdges() == 1);
+    REQUIRE(g.GetVertexById(7).NumberOfIncomingEdges() == 1);
+
+    REQUIRE(g.GetVertexById(8).NumberOfOutgoingEdges() == 1);
+    REQUIRE(g.GetVertexById(8).NumberOfIncomingEdges() == 1);
+
+    REQUIRE(g.GetVertexById(9).NumberOfOutgoingEdges() == 0);
+    REQUIRE(g.GetVertexById(9).NumberOfIncomingEdges() == 1);
+
+    // depth-first search
+
+    std::vector<int> ethalon_search_order{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    std::vector<int> search_order;
+    search_order.reserve(10);
+
+    cs::BreadthFirstSearch<int, int, int>(
+        /*root*/ g.GetVertexById(0),
+        /*visit*/
+        [&search_order](vertex_type& v) -> void
+        {
+            search_order.push_back(v.Id());
+        });
+
+    REQUIRE(search_order == ethalon_search_order);
 }

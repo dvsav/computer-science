@@ -139,10 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\conditional_compilation.h" />
     <ClInclude Include="..\..\..\src\graph.h" />
+    <ClInclude Include="..\..\..\src\graph_algorithms.h" />
     <ClInclude Include="..\..\..\src\print.h" />
     <ClInclude Include="..\..\..\src\merge_sort.h" />
     <ClInclude Include="..\..\..\src\quick_sort.h" />
+    <ClInclude Include="..\..\..\src\requires.h" />
     <ClInclude Include="..\..\..\src\utility.h" />
   </ItemGroup>
   <ItemGroup>
