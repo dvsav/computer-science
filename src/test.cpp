@@ -117,14 +117,30 @@ TEST_CASE("Graph depth-first search", "[graph]")
     REQUIRE(g.GetVertexById(9).NumberOfOutgoingEdges() == 0);
     REQUIRE(g.GetVertexById(9).NumberOfIncomingEdges() == 1);
 
-    // depth-first search
+    // breadth-first search (undirected graph)
 
     std::vector<int> ethalon_search_order{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     std::vector<int> search_order;
     search_order.reserve(10);
 
-    cs::BreadthFirstSearch<int, int, int>(
-        /*root*/ g.GetVertexById(0),
+    cs::BreadthFirstSearch_Undirected<int, int, int>(
+        /*graph*/ g,
+        /*root_id*/ 0,
+        /*visit*/
+        [&search_order](vertex_type& v) -> void
+        {
+            search_order.push_back(v.Id());
+        });
+
+    REQUIRE(search_order == ethalon_search_order);
+
+    // breadth-first search (directed graph)
+
+    search_order.clear();
+
+    cs::BreadthFirstSearch_Directed<int, int, int>(
+        /*graph*/ g,
+        /*root_id*/ 0,
         /*visit*/
         [&search_order](vertex_type& v) -> void
         {

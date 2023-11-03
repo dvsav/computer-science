@@ -97,6 +97,8 @@ namespace cs
             AuxiliaryData() :
                 intValue(0)
             {}
+
+            void Clear() { intValue = 0; }
         };
 
     private:
@@ -173,6 +175,23 @@ namespace cs
 
         AuxiliaryData& AuxData() { return auxData; }
     };
+
+    template<typename TId, typename TData, typename TLen>
+    bool VisitNeighbors(
+        Vertex<TId, TData, TLen>& vertex,
+        std::function<bool(Vertex<TId, TData, TLen>&)> visitor)
+    {
+        using vertex_type = Vertex<TId, TData, TLen>;
+        using edge_type = Edge<vertex_type, TLen>;
+
+        if (vertex.VisitIncomingEdges([visitor](edge_type& edge) -> bool { return visitor(edge.From()); }))
+            return true;
+
+        if (vertex.VisitOutgoingEdges([visitor](edge_type& edge) -> bool { return visitor(edge.To()); }))
+            return true;
+
+        return false;
+    }
 
     template<typename TId, typename TData, typename TLen>
     class Graph
@@ -291,4 +310,17 @@ namespace cs
 
         const vertex_type& GetVertexById(TId id) const { return *vertices.at(id); }
     };
+
+    template<typename TId, typename TData, typename TLen>
+    void ClearAuxData(Graph<TId, TData, TLen>& graph)
+    {
+        using vertex_type = Vertex<TId, TData, TLen>;
+
+        graph.VisitVertices(
+            [](vertex_type& v)
+            {
+                v.AuxData().Clear();
+                return false;
+            });
+    }
 }
