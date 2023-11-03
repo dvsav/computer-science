@@ -56,7 +56,7 @@ TEST_CASE("Vectors are sorted", "[sort]")
     }
 }
 
-TEST_CASE("Graph depth-first search", "[graph]")
+TEST_CASE("Graph breadth/depth-first search", "[graph]")
 {
     using graph_type = cs::Graph<int, int, int>;
     using vertex_type = typename graph_type::vertex_type;
@@ -119,7 +119,6 @@ TEST_CASE("Graph depth-first search", "[graph]")
 
     // breadth-first search (undirected graph)
 
-    std::vector<int> ethalon_search_order{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     std::vector<int> search_order;
     search_order.reserve(10);
 
@@ -132,7 +131,7 @@ TEST_CASE("Graph depth-first search", "[graph]")
             search_order.push_back(v.Id());
         });
 
-    REQUIRE(search_order == ethalon_search_order);
+    REQUIRE(search_order == std::vector<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
     // breadth-first search (directed graph)
 
@@ -147,5 +146,35 @@ TEST_CASE("Graph depth-first search", "[graph]")
             search_order.push_back(v.Id());
         });
 
-    REQUIRE(search_order == ethalon_search_order);
+    REQUIRE(search_order == std::vector<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+
+    // depth-first search (undirected graph)
+
+    search_order.clear();
+
+    cs::DepthFirstSearch_Undirected<int, int, int>(
+        /*graph*/ g,
+        /*root_id*/ 0,
+        /*visit*/
+        [&search_order](vertex_type& v) -> void
+        {
+            search_order.push_back(v.Id());
+        });
+
+    REQUIRE(search_order == std::vector<int>{ 0, 3, 2, 6, 7, 8, 9, 5, 1, 4 });
+
+    // depth-first search (directed graph)
+
+    search_order.clear();
+
+    cs::DepthFirstSearch_Directed<int, int, int>(
+        /*graph*/ g,
+        /*root_id*/ 0,
+        /*visit*/
+        [&search_order](vertex_type& v) -> void
+        {
+            search_order.push_back(v.Id());
+        });
+
+    REQUIRE(search_order == std::vector<int>{ 0, 3, 2, 6, 7, 8, 9, 5, 1, 4 });
 }
