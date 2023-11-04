@@ -131,44 +131,28 @@ namespace cs
 
         size_t NumberOfOutgoingEdges() const { return outgoingEdges.size(); }
 
-        bool VisitIncomingEdges(std::function<bool(edge_type&)> visitor)
+        void VisitIncomingEdges(std::function<void(edge_type&)> visitor)
         {
             for (edge_type* edge : incomingEdges)
-            {
-                if (visitor(*edge))
-                    return true;
-            }
-            return false;
+                visitor(*edge);
         }
 
-        bool VisitIncomingEdges(std::function<bool(const edge_type&)> visitor) const
+        void VisitIncomingEdges(std::function<void(const edge_type&)> visitor) const
         {
             for (const edge_type* edge : incomingEdges)
-            {
-                if (visitor(*edge))
-                    return true;
-            }
-            return false;
+                visitor(*edge);
         }
 
-        bool VisitOutgoingEdges(std::function<bool(edge_type&)> visitor)
+        void VisitOutgoingEdges(std::function<void(edge_type&)> visitor)
         {
             for (edge_type* edge : outgoingEdges)
-            {
-                if (visitor(*edge))
-                    return true;
-            }
-            return false;
+                visitor(*edge);
         }
 
-        bool VisitOutgoingEdges(std::function<bool(const edge_type&)> visitor) const
+        void VisitOutgoingEdges(std::function<void(const edge_type&)> visitor) const
         {
             for (const edge_type* edge : outgoingEdges)
-            {
-                if (visitor(*edge))
-                    return true;
-            }
-            return false;
+                visitor(*edge);
         }
 
         const AuxiliaryData& AuxData() const { return auxData; }
@@ -177,20 +161,34 @@ namespace cs
     };
 
     template<typename TId, typename TData, typename TLen>
-    bool VisitNeighbors(
+    void VisitInNeighbors(
         Vertex<TId, TData, TLen>& vertex,
-        std::function<bool(Vertex<TId, TData, TLen>&)> visitor)
+        std::function<void(Vertex<TId, TData, TLen>&)> visitor)
     {
         using vertex_type = Vertex<TId, TData, TLen>;
         using edge_type = Edge<vertex_type, TLen>;
 
-        if (vertex.VisitIncomingEdges([visitor](edge_type& edge) -> bool { return visitor(edge.From()); }))
-            return true;
+        vertex.VisitIncomingEdges([visitor](edge_type& edge) -> void { return visitor(edge.From()); });
+    }
 
-        if (vertex.VisitOutgoingEdges([visitor](edge_type& edge) -> bool { return visitor(edge.To()); }))
-            return true;
+    template<typename TId, typename TData, typename TLen>
+    void VisitOutNeighbors(
+        Vertex<TId, TData, TLen>& vertex,
+        std::function<void(Vertex<TId, TData, TLen>&)> visitor)
+    {
+        using vertex_type = Vertex<TId, TData, TLen>;
+        using edge_type = Edge<vertex_type, TLen>;
 
-        return false;
+        vertex.VisitOutgoingEdges([visitor](edge_type& edge) -> void { return visitor(edge.To()); });
+    }
+
+    template<typename TId, typename TData, typename TLen>
+    void VisitNeighbors(
+        Vertex<TId, TData, TLen>& vertex,
+        std::function<void(Vertex<TId, TData, TLen>&)> visitor)
+    {
+        VisitInNeighbors<TId, TData, TLen>(vertex, visitor);
+        VisitOutNeighbors<TId, TData, TLen>(vertex, visitor);
     }
 
     template<typename TId, typename TData, typename TLen>
@@ -266,44 +264,28 @@ namespace cs
             return edge;
         }
 
-        bool VisitVertices(std::function<bool(vertex_type&)> visitor)
+        void VisitVertices(std::function<void(vertex_type&)> visitor)
         {
             for (auto key_value : vertices)
-            {
-                if (visitor(*key_value.second))
-                    return true;
-            }
-            return false;
+                visitor(*key_value.second);
         }
 
-        bool VisitVertices(std::function<bool(const vertex_type&)> visitor) const
+        void VisitVertices(std::function<void(const vertex_type&)> visitor) const
         {
             for (auto key_value : vertices)
-            {
-                if (visitor(*key_value.second))
-                    return true;
-            }
-            return false;
+                visitor(*key_value.second);
         }
 
-        bool VisitEdges(std::function<bool(edge_type&)> visitor)
+        void VisitEdges(std::function<void(edge_type&)> visitor)
         {
             for (edge_type* edge : edges)
-            {
-                if (visitor(*edge))
-                    return true;
-            }
-            return false;
+                visitor(*edge);
         }
 
-        bool VisitEdges(std::function<bool(const edge_type&)> visitor) const
+        void VisitEdges(std::function<void(const edge_type&)> visitor) const
         {
             for (const edge_type* edge : edges)
-            {
-                if (visitor(*edge))
-                    return true;
-            }
-            return false;
+                visitor(*edge);
         }
 
         vertex_type& GetVertexById(TId id) { return *vertices.at(id); }

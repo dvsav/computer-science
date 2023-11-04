@@ -15,7 +15,6 @@ namespace cs
         std::function<void(Vertex<TId, TData, TLen>&)> visit)
     {
         using vertex_type = Vertex<TId, TData, TLen>;
-        using edge_type = typename vertex_type::edge_type;
 
         vertex_type& root = graph.GetVertexById(root_id);
 
@@ -34,16 +33,16 @@ namespace cs
 
             wavefront.pop();
 
-            v.VisitOutgoingEdges(
-                [&wavefront](edge_type& e) -> bool
+            VisitOutNeighbors<TId, TData, TLen>(
+                /*vertex*/ v,
+                [&wavefront](vertex_type& neighbor) -> void
                 {
-                    if (!e.To().AuxData().boolValue)
+                    if (!neighbor.AuxData().boolValue)
                     {
-                        wavefront.push(&e.To());
+                        wavefront.push(&neighbor);
                         // explored = true
-                        e.To().AuxData().boolValue = true;
+                        neighbor.AuxData().boolValue = true;
                     }
-                    return false; // 'false' means 'continue visiting'
                 }
             );
         }
@@ -77,8 +76,8 @@ namespace cs
             wavefront.pop();
 
             VisitNeighbors<TId, TData, TLen>(
-                /*root*/ v,
-                [&wavefront](vertex_type& neighbor) -> bool
+                /*vertex*/ v,
+                [&wavefront](vertex_type& neighbor) -> void
                 {
                     if (!neighbor.AuxData().boolValue)
                     {
@@ -86,7 +85,6 @@ namespace cs
                         // explored = true
                         neighbor.AuxData().boolValue = true;
                     }
-                    return false; // 'false' means 'continue visiting'
                 }
             );
         }
@@ -101,7 +99,6 @@ namespace cs
         std::function<void(Vertex<TId, TData, TLen>&)> visit)
     {
         using vertex_type = Vertex<TId, TData, TLen>;
-        using edge_type = typename vertex_type::edge_type;
 
         vertex_type& root = graph.GetVertexById(root_id);
 
@@ -120,16 +117,16 @@ namespace cs
 
             track.pop();
 
-            v.VisitOutgoingEdges(
-                [&track](edge_type& e) -> bool
+            VisitOutNeighbors<TId, TData, TLen>(
+                /*vertex*/ v,
+                [&track](vertex_type& neighbor) -> void
                 {
-                    if (!e.To().AuxData().boolValue)
+                    if (!neighbor.AuxData().boolValue)
                     {
-                        track.push(&e.To());
+                        track.push(&neighbor);
                         // explored = true
-                        e.To().AuxData().boolValue = true;
+                        neighbor.AuxData().boolValue = true;
                     }
-                    return false; // 'false' means 'continue visiting'
                 }
             );
         }
@@ -164,7 +161,7 @@ namespace cs
 
             VisitNeighbors<TId, TData, TLen>(
                 /*root*/ v,
-                [&track](vertex_type& neighbor) -> bool
+                [&track](vertex_type& neighbor) -> void
                 {
                     if (!neighbor.AuxData().boolValue)
                     {
@@ -172,7 +169,6 @@ namespace cs
                         // explored = true
                         neighbor.AuxData().boolValue = true;
                     }
-                    return false; // 'false' means 'continue visiting'
                 }
             );
         }
