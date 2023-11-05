@@ -1,5 +1,5 @@
-#include "graph.h"            // for cs::Graph
-#include "graph_algorithms.h" // for cs::BreadthFirstSearch
+#include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
+#include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
 #include "merge_sort.h"       // for cs::merge_sort
 #include "print.h"            // for cs::print
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
@@ -131,6 +131,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
             search_order.push_back(v.Id());
         });
 
+    // WARNING: there can be multiple correct breadth-first search results
     REQUIRE(search_order == std::vector<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
     // breadth-first search (directed graph)
@@ -146,6 +147,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
             search_order.push_back(v.Id());
         });
 
+    // WARNING: there can be multiple correct breadth-first search results
     REQUIRE(search_order == std::vector<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
     // depth-first search (undirected graph)
@@ -161,6 +163,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
             search_order.push_back(v.Id());
         });
 
+    // WARNING: there can be multiple correct depth-first search results
     REQUIRE(search_order == std::vector<int>{ 0, 3, 2, 6, 7, 8, 9, 5, 1, 4 });
 
     // depth-first search (directed graph)
@@ -176,5 +179,16 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
             search_order.push_back(v.Id());
         });
 
+    // WARNING: there can be multiple correct depth-first search results
     REQUIRE(search_order == std::vector<int>{ 0, 3, 2, 6, 7, 8, 9, 5, 1, 4 });
+
+    cs::TopologicalSort<int, int, int>(
+        /*graph*/ g,
+        /*visit*/
+        [](vertex_type& v)
+        {
+            std::cout << v.Id() << " ";
+        });
+
+    // WARNING: there can be multiple correct topological orders
 }
