@@ -22,8 +22,7 @@ namespace cs
         std::queue<vertex_type*> wavefront;
         wavefront.push(&root);
 
-        // explored = true
-        root.AuxData().boolValue = true;
+        root.Discovered() = true;
 
         while (!wavefront.empty())
         {
@@ -37,11 +36,10 @@ namespace cs
                 /*vertex*/ v,
                 [&wavefront](vertex_type& neighbor) -> void
                 {
-                    if (!neighbor.AuxData().boolValue)
+                    if (!neighbor.Discovered())
                     {
                         wavefront.push(&neighbor);
-                        // explored = true
-                        neighbor.AuxData().boolValue = true;
+                        neighbor.Discovered() = true;
                     }
                 }
             );
@@ -64,8 +62,7 @@ namespace cs
         std::queue<vertex_type*> wavefront;
         wavefront.push(&root);
 
-        // explored = true
-        root.AuxData().boolValue = true;
+        root.Discovered() = true;
 
         while (!wavefront.empty())
         {
@@ -79,11 +76,10 @@ namespace cs
                 /*vertex*/ v,
                 [&wavefront](vertex_type& neighbor) -> void
                 {
-                    if (!neighbor.AuxData().boolValue)
+                    if (!neighbor.Discovered())
                     {
                         wavefront.push(&neighbor);
-                        // explored = true
-                        neighbor.AuxData().boolValue = true;
+                        neighbor.Discovered() = true;
                     }
                 }
             );
@@ -106,8 +102,7 @@ namespace cs
         std::stack<vertex_type*> track;
         track.push(&root);
 
-        // explored = true
-        root.AuxData().boolValue = true;
+        root.Discovered() = true;
 
         while (!track.empty())
         {
@@ -121,11 +116,10 @@ namespace cs
                 /*vertex*/ v,
                 [&track](vertex_type& neighbor) -> void
                 {
-                    if (!neighbor.AuxData().boolValue)
+                    if (!neighbor.Discovered())
                     {
                         track.push(&neighbor);
-                        // explored = true
-                        neighbor.AuxData().boolValue = true;
+                        neighbor.Discovered() = true;
                     }
                 }
             );
@@ -148,8 +142,7 @@ namespace cs
         std::stack<vertex_type*> track;
         track.push(&root);
 
-        // explored = true
-        root.AuxData().boolValue = true;
+        root.Discovered() = true;
 
         while (!track.empty())
         {
@@ -163,11 +156,10 @@ namespace cs
                 /*root*/ v,
                 [&track](vertex_type& neighbor) -> void
                 {
-                    if (!neighbor.AuxData().boolValue)
+                    if (!neighbor.Discovered())
                     {
                         track.push(&neighbor);
-                        // explored = true
-                        neighbor.AuxData().boolValue = true;
+                        neighbor.Discovered() = true;
                     }
                 }
             );

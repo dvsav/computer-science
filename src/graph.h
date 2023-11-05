@@ -87,24 +87,10 @@ namespace cs
     public:
         using edge_type = Edge<Vertex, TLen>;
 
-        union AuxiliaryData
-        {
-            int intValue;
-            bool boolValue;
-            void* voidPtr;
-            Vertex* vertexPtr;
-
-            AuxiliaryData() :
-                intValue(0)
-            {}
-
-            void Clear() { intValue = 0; }
-        };
-
     private:
         std::list<edge_type*> incomingEdges;
         std::list<edge_type*> outgoingEdges;
-        AuxiliaryData auxData; // auxiliary data which may be needed for graph algorithms (e.g. bool explored in breadth-firs search algorithm)
+        bool discovered; // used in many algorithms (breadth-first search, depth-first search, Dijkstra's shortest path etc.)
 
     public:
         Vertex(
@@ -113,7 +99,7 @@ namespace cs
             VertexBase<TId, TData>(id, data),
             incomingEdges(),
             outgoingEdges(),
-            auxData()
+            discovered(false)
         {}
 
         Vertex(const Vertex&) = delete;
@@ -155,9 +141,11 @@ namespace cs
                 visitor(*edge);
         }
 
-        const AuxiliaryData& AuxData() const { return auxData; }
+        bool Discovered() const { return discovered; }
 
-        AuxiliaryData& AuxData() { return auxData; }
+        bool& Discovered() { return discovered; }
+
+        void ClearAuxData() { discovered = false; }
     };
 
     template<typename TId, typename TData, typename TLen>
@@ -301,7 +289,7 @@ namespace cs
         graph.VisitVertices(
             [](vertex_type& v)
             {
-                v.AuxData().Clear();
+                v.ClearAuxData();
                 return false;
             });
     }
