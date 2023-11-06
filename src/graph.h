@@ -37,7 +37,7 @@ namespace cs
         TId Id() const { return id; }
     };
 
-    template<typename TVertex, typename TLen>
+    template<typename TVertex, typename TLen = int>
     class Edge
     {
     private:
@@ -72,7 +72,7 @@ namespace cs
         TLen Length() const { return length; }
     };
 
-    template<typename TId, typename TLen>
+    template<typename TId, typename TLen = int>
     class Vertex : public VertexBase<TId>
     {
         template<typename, typename>
@@ -141,7 +141,7 @@ namespace cs
         void ClearAuxData() { discovered = false; }
     };
 
-    template<typename TId, typename TLen>
+    template<typename TId, typename TLen = int>
     void VisitInNeighbors(
         Vertex<TId, TLen>& vertex,
         std::function<void(Vertex<TId, TLen>&)> visitor)
@@ -152,7 +152,7 @@ namespace cs
         vertex.VisitIncomingEdges([visitor](edge_type& edge) -> void { return visitor(edge.From()); });
     }
 
-    template<typename TId, typename TLen>
+    template<typename TId, typename TLen = int>
     void VisitOutNeighbors(
         Vertex<TId, TLen>& vertex,
         std::function<void(Vertex<TId, TLen>&)> visitor)
@@ -163,7 +163,7 @@ namespace cs
         vertex.VisitOutgoingEdges([visitor](edge_type& edge) -> void { return visitor(edge.To()); });
     }
 
-    template<typename TId, typename TLen>
+    template<typename TId, typename TLen = int>
     void VisitNeighbors(
         Vertex<TId, TLen>& vertex,
         std::function<void(Vertex<TId, TLen>&)> visitor)
@@ -172,7 +172,7 @@ namespace cs
         VisitOutNeighbors<TId, TLen>(vertex, visitor);
     }
 
-    template<typename TId, typename TLen>
+    template<typename TId, typename TLen = int>
     class Graph
     {
     public:
@@ -274,7 +274,7 @@ namespace cs
         const vertex_type& GetVertexById(TId id) const { return *vertices.at(id); }
     };
 
-    template<typename TId, typename TLen>
+    template<typename TId, typename TLen = int>
     void ClearAuxData(Graph<TId, TLen>& graph)
     {
         using vertex_type = Vertex<TId, TLen>;
