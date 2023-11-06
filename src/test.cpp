@@ -194,6 +194,16 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
         {
             std::cout << v.Id() << " ";
         });
+    std::cout << std::endl;
 
     // WARNING: there can be multiple correct topological orders
+
+    cs::VisitStronglyConnectedComponents_Kosaraju<int, int>(
+        /*graph*/ g,
+        /*visit*/
+        [](vertex_type& v, int scc_id)
+        {
+            std::cout << "vertex = " << v.Id() << " SCC = " << scc_id << std::endl;
+        }
+    );
 }

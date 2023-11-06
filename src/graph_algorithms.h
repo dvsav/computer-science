@@ -230,9 +230,29 @@ namespace cs
     }
 
     template<typename TId, typename TLen>
-    void FindStronglyConnectedComponents_Kosaraju(
-        Graph<TId, TLen>& graph)
+    void VisitStronglyConnectedComponents_Kosaraju(
+        Graph<TId, TLen>& graph,
+        std::function<void(Vertex<TId, TLen>& /*vertex*/, TId /*scc_id*/)> visit)
     {
-        // TODO
+        TopologicalSort<TId, TLen>(
+            /*graph*/ graph,
+            /*visit*/
+            [&graph, visit](Vertex<TId, TLen>& vertex)
+            {
+                TId scc_id = vertex.Id();
+                DepthFirstSearch_Directed<TId, TLen>(
+                    /*graph*/ graph,
+                    /*root_id*/ vertex.Id(),
+                    /*visit*/
+                    [scc_id, visit](Vertex<TId, TLen>& successor_of_vertex) -> void
+                    {
+                        visit(successor_of_vertex, scc_id);
+                    },
+                    /*clearAuxData*/ false
+                );
+            },
+            /*visit_in_reverse_order*/ true
+        );
+        ClearAuxData(graph);
     }
 }
