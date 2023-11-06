@@ -58,13 +58,13 @@ TEST_CASE("Vectors are sorted", "[sort]")
 
 TEST_CASE("Graph breadth/depth-first search", "[graph]")
 {
-    using graph_type = cs::Graph<int, int, int>;
+    using graph_type = cs::Graph<int, int>;
     using vertex_type = typename graph_type::vertex_type;
 
     graph_type g;
     for (int i = 0; i < 10; i++)
     {
-        g.AddVertex(/*id*/ i, /*data*/ 0);
+        g.AddVertex(/*id*/ i);
     }
     REQUIRE(g.VerticesNumber() == 10);
 
@@ -122,7 +122,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
     std::vector<int> search_order;
     search_order.reserve(10);
 
-    cs::BreadthFirstSearch_Undirected<int, int, int>(
+    cs::BreadthFirstSearch_Undirected<int, int>(
         /*graph*/ g,
         /*root_id*/ 0,
         /*visit*/
@@ -138,7 +138,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
 
     search_order.clear();
 
-    cs::BreadthFirstSearch_Directed<int, int, int>(
+    cs::BreadthFirstSearch_Directed<int, int>(
         /*graph*/ g,
         /*root_id*/ 0,
         /*visit*/
@@ -154,7 +154,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
 
     search_order.clear();
 
-    cs::DepthFirstSearch_Undirected<int, int, int>(
+    cs::DepthFirstSearch_Undirected<int, int>(
         /*graph*/ g,
         /*root_id*/ 0,
         /*visit*/
@@ -170,7 +170,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
 
     search_order.clear();
 
-    cs::DepthFirstSearch_Directed<int, int, int>(
+    cs::DepthFirstSearch_Directed<int, int>(
         /*graph*/ g,
         /*root_id*/ 0,
         /*visit*/
@@ -182,7 +182,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
     // WARNING: there can be multiple correct depth-first search results
     REQUIRE(search_order == std::vector<int>{ 0, 3, 2, 6, 7, 8, 9, 5, 1, 4 });
 
-    cs::TopologicalSort<int, int, int>(
+    cs::TopologicalSort<int, int>(
         /*graph*/ g,
         /*visit*/
         [](vertex_type& v)

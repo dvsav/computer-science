@@ -8,14 +8,14 @@
 
 namespace cs
 {
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void BreadthFirstSearch_Directed(
-        Graph<TId, TData, TLen>& graph,
+        Graph<TId, TLen>& graph,
         TId root_id,
-        std::function<void(Vertex<TId, TData, TLen>&)> visit,
+        std::function<void(Vertex<TId, TLen>&)> visit,
         bool clearAuxData = true)
     {
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
 
         vertex_type& root = graph.GetVertexById(root_id);
 
@@ -33,7 +33,7 @@ namespace cs
 
             wavefront.pop();
 
-            VisitOutNeighbors<TId, TData, TLen>(
+            VisitOutNeighbors<TId, TLen>(
                 /*vertex*/ v,
                 [&wavefront](vertex_type& neighbor) -> void
                 {
@@ -50,14 +50,14 @@ namespace cs
             ClearAuxData(graph);
     }
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void BreadthFirstSearch_Undirected(
-        Graph<TId, TData, TLen>& graph,
+        Graph<TId, TLen>& graph,
         TId root_id,
-        std::function<void(Vertex<TId, TData, TLen>&)> visit,
+        std::function<void(Vertex<TId, TLen>&)> visit,
         bool clearAuxData = true)
     {
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
 
         vertex_type& root = graph.GetVertexById(root_id);
 
@@ -75,7 +75,7 @@ namespace cs
 
             wavefront.pop();
 
-            VisitNeighbors<TId, TData, TLen>(
+            VisitNeighbors<TId, TLen>(
                 /*vertex*/ v,
                 [&wavefront](vertex_type& neighbor) -> void
                 {
@@ -92,14 +92,14 @@ namespace cs
             ClearAuxData(graph);
     }
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void DepthFirstSearch_Directed(
-        Graph<TId, TData, TLen>& graph,
+        Graph<TId, TLen>& graph,
         TId root_id,
-        std::function<void(Vertex<TId, TData, TLen>&)> visit,
+        std::function<void(Vertex<TId, TLen>&)> visit,
         bool clearAuxData = true)
     {
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
 
         vertex_type& root = graph.GetVertexById(root_id);
 
@@ -117,7 +117,7 @@ namespace cs
 
             track.pop();
 
-            VisitOutNeighbors<TId, TData, TLen>(
+            VisitOutNeighbors<TId, TLen>(
                 /*vertex*/ v,
                 [&track](vertex_type& neighbor) -> void
                 {
@@ -134,14 +134,14 @@ namespace cs
             ClearAuxData(graph);
     }
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void DepthFirstSearch_Undirected(
-        Graph<TId, TData, TLen>& graph,
+        Graph<TId, TLen>& graph,
         TId root_id,
-        std::function<void(Vertex<TId, TData, TLen>&)> visit,
+        std::function<void(Vertex<TId, TLen>&)> visit,
         bool clearAuxData = true)
     {
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
 
         vertex_type& root = graph.GetVertexById(root_id);
 
@@ -159,7 +159,7 @@ namespace cs
 
             track.pop();
 
-            VisitNeighbors<TId, TData, TLen>(
+            VisitNeighbors<TId, TLen>(
                 /*root*/ v,
                 [&track](vertex_type& neighbor) -> void
                 {
@@ -176,13 +176,13 @@ namespace cs
             ClearAuxData(graph);
     }
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void TopologicalSort(
-        Graph<TId, TData, TLen>& graph,
-        std::function<void(Vertex<TId, TData, TLen>&)> visit,
+        Graph<TId, TLen>& graph,
+        std::function<void(Vertex<TId, TLen>&)> visit,
         bool visit_in_reverse_order = false)
     {
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
 
         std::vector<vertex_type*> topological_order(graph.VerticesNumber(), nullptr);
         size_t index = topological_order.size() - 1;
@@ -194,7 +194,7 @@ namespace cs
                 {
                     std::stack<vertex_type*> dfs_stack;
 
-                    DepthFirstSearch_Directed<TId, TData, TLen>(
+                    DepthFirstSearch_Directed<TId, TLen>(
                         /*graph*/ graph,
                         /*root_id*/ v.Id(),
                         /*visit*/ [&dfs_stack](vertex_type& u) { dfs_stack.push(&u); },
@@ -229,9 +229,9 @@ namespace cs
         }
     }
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void FindStronglyConnectedComponents_Kosaraju(
-        Graph<TId, TData, TLen>& graph)
+        Graph<TId, TLen>& graph)
     {
         // TODO
     }

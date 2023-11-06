@@ -8,28 +8,25 @@
 
 namespace cs
 {
-    template<typename TId, typename TData>
+    template<typename TId>
     class VertexBase;
 
     template<typename TVertex, typename TLen>
     class Edge;
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     class Graph;
 
-    template<typename TId, typename TData>
+    template<typename TId>
     class VertexBase
     {
     private:
         TId id;
-        TData data;
 
     public:
         VertexBase(
-            TId id,
-            TData data) :
-            id(id),
-            data(data)
+            TId id) :
+            id(id)
         {}
 
         VertexBase(const VertexBase&) = delete;
@@ -38,9 +35,6 @@ namespace cs
         VertexBase& operator=(const VertexBase&) = delete;
 
         TId Id() const { return id; }
-
-        TData& Data() { return data; }
-        const TData& Data() const { return data; }
     };
 
     template<typename TVertex, typename TLen>
@@ -78,10 +72,10 @@ namespace cs
         TLen Length() const { return length; }
     };
 
-    template<typename TId, typename TData, typename TLen>
-    class Vertex : public VertexBase<TId, TData>
+    template<typename TId, typename TLen>
+    class Vertex : public VertexBase<TId>
     {
-        template<typename, typename, typename>
+        template<typename, typename>
         friend class Graph;
 
     public:
@@ -94,9 +88,8 @@ namespace cs
 
     public:
         Vertex(
-            TId id,
-            TData data) :
-            VertexBase<TId, TData>(id, data),
+            TId id) :
+            VertexBase<TId>(id),
             incomingEdges(),
             outgoingEdges(),
             discovered(false)
@@ -148,42 +141,42 @@ namespace cs
         void ClearAuxData() { discovered = false; }
     };
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void VisitInNeighbors(
-        Vertex<TId, TData, TLen>& vertex,
-        std::function<void(Vertex<TId, TData, TLen>&)> visitor)
+        Vertex<TId, TLen>& vertex,
+        std::function<void(Vertex<TId, TLen>&)> visitor)
     {
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
         using edge_type = Edge<vertex_type, TLen>;
 
         vertex.VisitIncomingEdges([visitor](edge_type& edge) -> void { return visitor(edge.From()); });
     }
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void VisitOutNeighbors(
-        Vertex<TId, TData, TLen>& vertex,
-        std::function<void(Vertex<TId, TData, TLen>&)> visitor)
+        Vertex<TId, TLen>& vertex,
+        std::function<void(Vertex<TId, TLen>&)> visitor)
     {
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
         using edge_type = Edge<vertex_type, TLen>;
 
         vertex.VisitOutgoingEdges([visitor](edge_type& edge) -> void { return visitor(edge.To()); });
     }
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     void VisitNeighbors(
-        Vertex<TId, TData, TLen>& vertex,
-        std::function<void(Vertex<TId, TData, TLen>&)> visitor)
+        Vertex<TId, TLen>& vertex,
+        std::function<void(Vertex<TId, TLen>&)> visitor)
     {
-        VisitInNeighbors<TId, TData, TLen>(vertex, visitor);
-        VisitOutNeighbors<TId, TData, TLen>(vertex, visitor);
+        VisitInNeighbors<TId, TLen>(vertex, visitor);
+        VisitOutNeighbors<TId, TLen>(vertex, visitor);
     }
 
-    template<typename TId, typename TData, typename TLen>
+    template<typename TId, typename TLen>
     class Graph
     {
     public:
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
         using edge_type = Edge<vertex_type, TLen>;
 
     private:
@@ -229,9 +222,9 @@ namespace cs
 
         size_t EdgesNumber() const { return edges.size(); }
 
-        vertex_type* AddVertex(TId id, TData data)
+        vertex_type* AddVertex(TId id)
         {
-            vertex_type* vertex = new vertex_type(id, data);
+            vertex_type* vertex = new vertex_type(id);
             auto result = vertices.insert({ id, vertex });
             if (!result.second)
             {
@@ -281,10 +274,10 @@ namespace cs
         const vertex_type& GetVertexById(TId id) const { return *vertices.at(id); }
     };
 
-    template<typename TId, typename TData, typename TLen>
-    void ClearAuxData(Graph<TId, TData, TLen>& graph)
+    template<typename TId, typename TLen>
+    void ClearAuxData(Graph<TId, TLen>& graph)
     {
-        using vertex_type = Vertex<TId, TData, TLen>;
+        using vertex_type = Vertex<TId, TLen>;
 
         graph.VisitVertices(
             [](vertex_type& v)
