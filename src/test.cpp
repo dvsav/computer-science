@@ -74,20 +74,20 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
     //  \   \
     //   3   6 - 7 - 8 - 9
 
-    g.AddEdge(/*from_id*/ 0, /*to_id*/ 1, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 0, /*to_id*/ 2, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 0, /*to_id*/ 3, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 1, /*to_id*/ 2, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 1, /*to_id*/ 4, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 2, /*to_id*/ 5, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 2, /*to_id*/ 6, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 6, /*to_id*/ 7, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 7, /*to_id*/ 8, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 8, /*to_id*/ 9, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 0, /*to_id*/ 1);
+    g.AddEdge(/*from_id*/ 0, /*to_id*/ 2);
+    g.AddEdge(/*from_id*/ 0, /*to_id*/ 3);
+    g.AddEdge(/*from_id*/ 1, /*to_id*/ 2);
+    g.AddEdge(/*from_id*/ 1, /*to_id*/ 4);
+    g.AddEdge(/*from_id*/ 2, /*to_id*/ 5);
+    g.AddEdge(/*from_id*/ 2, /*to_id*/ 6);
+    g.AddEdge(/*from_id*/ 6, /*to_id*/ 7);
+    g.AddEdge(/*from_id*/ 7, /*to_id*/ 8);
+    g.AddEdge(/*from_id*/ 8, /*to_id*/ 9);
 
     g.AddVertex(/*id*/ 10);
-    g.AddEdge(/*from_id*/ 10, /*to_id*/ 9, /*length*/ 1);
-    g.AddEdge(/*from_id*/ 8, /*to_id*/ 10, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 10, /*to_id*/ 9);
+    g.AddEdge(/*from_id*/ 8, /*to_id*/ 10);
     g.RemoveVertex(/*id*/ 10);
 
     REQUIRE(g.EdgesNumber() == 10);

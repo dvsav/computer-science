@@ -49,7 +49,7 @@ namespace cs
         Edge(
             TVertex* from,
             TVertex* to,
-            TLen length) :
+            TLen length = TLen()) :
             from(from),
             to(to),
             length(length)
@@ -276,7 +276,7 @@ namespace cs
             delete vertex;
         }
 
-        edge_type* AddEdge(TId from_id, TId to_id, TLen length)
+        edge_type* AddEdge(TId from_id, TId to_id, TLen length = TLen())
         {
             vertex_type& from = GetVertexById(from_id);
             vertex_type& to = GetVertexById(to_id);
