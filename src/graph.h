@@ -173,6 +173,21 @@ namespace cs
     }
 
     template<typename TId, typename TLen = int>
+    void VisitEdges(
+        Vertex<TId, TLen>& vertex,
+        std::function<void(Edge<Vertex<TId, TLen>, TLen>&)> visitor)
+    {
+        vertex.VisitIncomingEdges(visitor);
+        vertex.VisitOutgoingEdges(visitor);
+    }
+
+    template<typename TId, typename TLen = int>
+    size_t NumberOfEdges(Vertex<TId, TLen>& vertex)
+    {
+        return vertex.NumberOfIncomingEdges() + vertex.NumberOfOutgoingEdges();
+    }
+
+    template<typename TId, typename TLen = int>
     class Graph
     {
     public:
@@ -234,6 +249,33 @@ namespace cs
             return vertex;
         }
 
+        void RemoveVertex(TId id)
+        {
+            vertex_type* vertex = vertices.at(id);
+
+            vertex->VisitIncomingEdges(
+                /*visitor*/
+                [this](edge_type& in_edge)
+                {
+                    in_edge.From().RemoveOutgoingEdge(&in_edge);
+                    edges.remove(&in_edge);
+                }
+            );
+
+            vertex->VisitOutgoingEdges(
+                /*visitor*/
+                [this](edge_type& out_edge)
+                {
+                    out_edge.To().RemoveIncomingEdge(&out_edge);
+                    edges.remove(&out_edge);
+                }
+            );
+
+            vertices.erase(id);
+
+            delete vertex;
+        }
+
         edge_type* AddEdge(TId from_id, TId to_id, TLen length)
         {
             vertex_type& from = GetVertexById(from_id);
@@ -243,6 +285,13 @@ namespace cs
             to.AddIncomingEdge(edge);
             edges.push_back(edge);
             return edge;
+        }
+
+        void RemoveEdge(edge_type& edge)
+        {
+            edge.From().RemoveOutgoingEdge(&edge);
+            edge.To().RemoveIncomingEdge(&edge);
+            edges.remove(&edge);
         }
 
         void VisitVertices(std::function<void(vertex_type&)> visitor)

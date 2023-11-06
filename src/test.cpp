@@ -85,6 +85,11 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
     g.AddEdge(/*from_id*/ 7, /*to_id*/ 8, /*length*/ 1);
     g.AddEdge(/*from_id*/ 8, /*to_id*/ 9, /*length*/ 1);
 
+    g.AddVertex(/*id*/ 10);
+    g.AddEdge(/*from_id*/ 10, /*to_id*/ 9, /*length*/ 1);
+    g.AddEdge(/*from_id*/ 8, /*to_id*/ 10, /*length*/ 1);
+    g.RemoveVertex(/*id*/ 10);
+
     REQUIRE(g.EdgesNumber() == 10);
 
     REQUIRE(g.GetVertexById(0).NumberOfOutgoingEdges() == 3);
