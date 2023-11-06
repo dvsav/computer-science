@@ -1,7 +1,8 @@
-#include "print.h"      // for cs::print
-#include "merge_sort.h" // for cs::merge_sort
-#include "quick_sort.h" // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
-#include "utility.h"    // for cs::ReverseComparator, cs::files_textually_equal
+#include "print.h"         // for cs::print
+#include "merge_sort.h"    // for cs::merge_sort
+#include "quick_sort.h"    // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
+#include "simple_sorts.h"  // for cs::selection_sort, cs::insertion_sort, cs::bubble_sort
+#include "utility.h"       // for cs::ReverseComparator, cs::files_textually_equal
 
 #include <array>        // for std::array
 #include <vector>       // for std::vector
@@ -17,7 +18,7 @@ unsigned int Factorial(unsigned int number) {
 TEST_CASE("Vectors are sorted", "[sort]")
 {
     std::vector<int> vec{ 5, 2, 8, 15, 48, 1, -6, 7, 3, 8, -10 };
-    std::vector<int> ascend_vec{ -10, -6, 1, 2, 3, 5, 7, 8, 8, 15, 48 };
+    std::vector<int> ascend_vec{ -10, -6, 1, 2, 3, 5, 7, 8, 8, 15, 48 }; 
     std::vector<int> descen_vec{ 48, 15, 8, 8, 7, 5, 3, 2, 1, -6, -10 };
 
     SECTION("merge_sort in ascending order")
@@ -53,6 +54,42 @@ TEST_CASE("Vectors are sorted", "[sort]")
     SECTION("quick_sort_randomized_partition in descending order")
     {
         cs::quick_sort_randomized_partition<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
+        REQUIRE(vec == descen_vec);
+    }
+
+    SECTION("selection_sort in ascending order")
+    {
+        cs::selection_sort(vec.begin(), vec.end());
+        REQUIRE(vec == ascend_vec);
+    }
+
+    SECTION("selection_sort in descending order")
+    {
+        cs::selection_sort<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
+        REQUIRE(vec == descen_vec);
+    }
+
+    SECTION("insertion_sort in ascending order")
+    {
+        cs::insertion_sort(vec.begin(), vec.end());
+        REQUIRE(vec == ascend_vec);
+    }
+
+    SECTION("insertion_sort in descending order")
+    {
+        cs::insertion_sort<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
+        REQUIRE(vec == descen_vec);
+    }
+
+    SECTION("bubble_sort in ascending order")
+    {
+        cs::bubble_sort(vec.begin(), vec.end());
+        REQUIRE(vec == ascend_vec);
+    }
+
+    SECTION("ibubble_sort in descending order")
+    {
+        cs::bubble_sort<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
     }
 }
