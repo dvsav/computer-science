@@ -18,6 +18,8 @@ namespace cs
         using vertex_type = Vertex<TId, TLen>;
 
         vertex_type& root = graph.GetVertexById(root_id);
+        if (root.Discovered())
+            return;
 
         // queue is what makes the search BREADTH-first search
         std::queue<vertex_type*> wavefront;
@@ -60,6 +62,8 @@ namespace cs
         using vertex_type = Vertex<TId, TLen>;
 
         vertex_type& root = graph.GetVertexById(root_id);
+        if (root.Discovered())
+            return;
 
         // queue is what makes the search BREADTH-first search
         std::queue<vertex_type*> wavefront;
@@ -102,6 +106,8 @@ namespace cs
         using vertex_type = Vertex<TId, TLen>;
 
         vertex_type& root = graph.GetVertexById(root_id);
+        if (root.Discovered())
+            return;
 
         // stack is what makes the search DEPTH-first search
         std::stack<vertex_type*> track;
@@ -144,6 +150,8 @@ namespace cs
         using vertex_type = Vertex<TId, TLen>;
 
         vertex_type& root = graph.GetVertexById(root_id);
+        if (root.Discovered())
+            return;
 
         // stack is what makes the search DEPTH-first search
         std::stack<vertex_type*> track;
@@ -177,6 +185,53 @@ namespace cs
     }
 
     template<typename TId, typename TLen>
+    void DepthFirstSearch_Directed_Inverse(
+        Graph<TId, TLen>& graph,
+        TId root_id,
+        std::function<void(Vertex<TId, TLen>&)> visit,
+        bool clearAuxData = true)
+    {
+        using vertex_type = Vertex<TId, TLen>;
+
+        vertex_type& root = graph.GetVertexById(root_id);
+        if (root.Discovered())
+            return;
+
+        // stack is what makes the search DEPTH-first search
+        std::stack<vertex_type*> track;
+        track.push(&root);
+        root.Discovered() = true;
+
+        while (!track.empty())
+        {
+            vertex_type& v = *track.top();
+
+            bool no_outgoing_edges = true;
+            VisitOutNeighbors<TId, TLen>(
+                /*vertex*/ v,
+                [&no_outgoing_edges, &track](vertex_type& neighbor) -> void
+                {
+                    if (!neighbor.Discovered())
+                    {
+                        track.push(&neighbor);
+                        neighbor.Discovered() = true;
+                        no_outgoing_edges = false;
+                    }
+                }
+            );
+
+            if (no_outgoing_edges)
+            {
+                visit(v);
+                track.pop();
+            }
+        }
+
+        if (clearAuxData)
+            ClearAuxData(graph);
+    }
+
+    template<typename TId, typename TLen>
     void TopologicalSort(
         Graph<TId, TLen>& graph,
         std::function<void(Vertex<TId, TLen>&)> visit,
@@ -192,19 +247,11 @@ namespace cs
             {
                 if (!v.Discovered())
                 {
-                    std::stack<vertex_type*> dfs_stack;
-
-                    DepthFirstSearch_Directed<TId, TLen>(
+                    DepthFirstSearch_Directed_Inverse<TId, TLen>(
                         /*graph*/ graph,
                         /*root_id*/ v.Id(),
-                        /*visit*/ [&dfs_stack](vertex_type& u) { dfs_stack.push(&u); },
+                        /*visit*/ [&topological_order, &index](vertex_type& u) { topological_order[index--] = &u; },
                         /*clearAuxData*/ false);
-
-                    while (!dfs_stack.empty())
-                    {
-                        topological_order[index--] = dfs_stack.top();
-                        dfs_stack.pop();
-                    }
                 }
             }
         );

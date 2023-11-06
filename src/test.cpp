@@ -187,6 +187,8 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
     // WARNING: there can be multiple correct depth-first search results
     REQUIRE(search_order == std::vector<int>{ 0, 3, 2, 6, 7, 8, 9, 5, 1, 4 });
 
+    // TODO: write a function to check if vertices are in topological order
+
     cs::TopologicalSort<int, int>(
         /*graph*/ g,
         /*visit*/
