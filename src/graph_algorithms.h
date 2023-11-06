@@ -179,7 +179,8 @@ namespace cs
     template<typename TId, typename TData, typename TLen>
     void TopologicalSort(
         Graph<TId, TData, TLen>& graph,
-        std::function<void(Vertex<TId, TData, TLen>&)> visit)
+        std::function<void(Vertex<TId, TData, TLen>&)> visit,
+        bool visit_in_reverse_order = false)
     {
         using vertex_type = Vertex<TId, TData, TLen>;
 
@@ -210,8 +211,22 @@ namespace cs
 
         ClearAuxData(graph);
 
-        for (vertex_type* v : topological_order)
-            visit(*v);
+        if (visit_in_reverse_order)
+        {
+            for (auto i = topological_order.rbegin(); i != topological_order.rend(); i++)
+            {
+                vertex_type* v = *i;
+                visit(*v);
+            }
+        }
+        else
+        {
+            for (auto i = topological_order.begin(); i != topological_order.end(); i++)
+            {
+                vertex_type* v = *i;
+                visit(*v);
+            }
+        }
     }
 
     template<typename TId, typename TData, typename TLen>
