@@ -112,15 +112,12 @@ namespace cs
         // stack is what makes the search DEPTH-first search
         std::stack<vertex_type*> track;
         track.push(&root);
-
         root.Discovered() = true;
 
         while (!track.empty())
         {
             vertex_type& v = *track.top();
-
             visit(v);
-
             track.pop();
 
             VisitOutNeighbors<TId, TLen>(
@@ -185,7 +182,7 @@ namespace cs
     }
 
     template<typename TId, typename TLen>
-    void DepthFirstSearch_Directed_Inverse(
+    void DepthFirstSearch_Directed_InverseTopological(
         Graph<TId, TLen>& graph,
         TId root_id,
         std::function<void(Vertex<TId, TLen>&)> visit,
@@ -200,11 +197,11 @@ namespace cs
         // stack is what makes the search DEPTH-first search
         std::stack<vertex_type*> track;
         track.push(&root);
-        root.Discovered() = true;
 
         while (!track.empty())
         {
             vertex_type& v = *track.top();
+            v.Discovered() = true;
 
             bool no_outgoing_edges = true;
             VisitOutNeighbors<TId, TLen>(
@@ -214,7 +211,6 @@ namespace cs
                     if (!neighbor.Discovered())
                     {
                         track.push(&neighbor);
-                        neighbor.Discovered() = true;
                         no_outgoing_edges = false;
                     }
                 }
@@ -247,7 +243,7 @@ namespace cs
             {
                 if (!v.Discovered())
                 {
-                    DepthFirstSearch_Directed_Inverse<TId, TLen>(
+                    DepthFirstSearch_Directed_InverseTopological<TId, TLen>(
                         /*graph*/ graph,
                         /*root_id*/ v.Id(),
                         /*visit*/ [&topological_order, &index](vertex_type& u) { topological_order[index--] = &u; },

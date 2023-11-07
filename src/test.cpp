@@ -208,4 +208,24 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
             std::cout << "vertex = " << v.Id() << " SCC = " << scc_id << std::endl;
         }
     );
+
+    cs::DepthFirstSearch_Directed<int, int>(
+        /*graph*/ g,
+        /*root_id*/ 0,
+        /*visit*/
+        [](vertex_type& v)
+        {
+            std::cout << v.Id() << " ";
+        });
+
+    std::cout << std::endl;
+
+    cs::DepthFirstSearch_Directed_InverseTopological<int, int>(
+        /*graph*/ g,
+        /*root_id*/ 0,
+        /*visit*/
+        [](vertex_type& v)
+        {
+            std::cout << v.Id() << " ";
+        });
 }
