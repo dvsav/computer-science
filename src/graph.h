@@ -133,6 +133,26 @@ namespace cs
             for (const edge_type* edge : outgoingEdges)
                 visitor(*edge);
         }
+        
+        bool FindIncomingEdge(std::function<bool(const edge_type&)> visitor) const
+        {
+            for (const edge_type* edge : incomingEdges)
+            {
+                if (visitor(*edge))
+                    return true;
+            }
+            return false;
+        }
+
+        bool FindOutgoingEdge(std::function<bool(const edge_type&)> visitor) const
+        {
+            for (const edge_type* edge : outgoingEdges)
+            {
+                if (visitor(*edge))
+                    return true;
+            }
+            return false;
+        }
 
         bool Discovered() const { return discovered; }
 
@@ -185,6 +205,27 @@ namespace cs
     size_t NumberOfEdges(Vertex<TId, TLen>& vertex)
     {
         return vertex.NumberOfIncomingEdges() + vertex.NumberOfOutgoingEdges();
+    }
+
+    template<typename TId, typename TLen>
+    bool DirectedEdgeExists(
+        const Vertex<TId, TLen>& from,
+        const Vertex<TId, TLen>& to)
+    {
+        using vertex_type = Vertex<TId, TLen>;
+        using edge_type = Edge<vertex_type, TLen>;
+
+        return
+            from.FindOutgoingEdge([&to](const edge_type& edge) { return &edge.To() == &to; }) &&
+            to.FindIncomingEdge([&from](const edge_type& edge) { return &edge.From() == &from; });
+    }
+
+    template<typename TId, typename TLen>
+    bool UndirectedEdgeExists(
+        const Vertex<TId, TLen>& a,
+        const Vertex<TId, TLen>& b)
+    {
+        return DirectedEdgeExists(a, b) || DirectedEdgeExists(b, a);
     }
 
     template<typename TId = int, typename TLen = int>

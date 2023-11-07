@@ -92,6 +92,28 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
 
     REQUIRE(g.EdgesNumber() == 10);
 
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(1)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(2)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(3)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(2)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(4)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(5)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(6)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(6), /*to*/ g.GetVertexById(7)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(7), /*to*/ g.GetVertexById(8)));
+    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(8), /*to*/ g.GetVertexById(9)));
+
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(1)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(2)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(3)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(2)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(4)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(5)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(6)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(6), /*to*/ g.GetVertexById(7)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(7), /*to*/ g.GetVertexById(8)));
+    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(8), /*to*/ g.GetVertexById(9)));
+
     REQUIRE(g.GetVertexById(0).NumberOfOutgoingEdges() == 3);
     REQUIRE(g.GetVertexById(0).NumberOfIncomingEdges() == 0);
 
@@ -121,6 +143,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
 
     REQUIRE(g.GetVertexById(9).NumberOfOutgoingEdges() == 0);
     REQUIRE(g.GetVertexById(9).NumberOfIncomingEdges() == 1);
+
 
     // breadth-first search (undirected graph)
 
