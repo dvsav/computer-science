@@ -17,7 +17,7 @@ namespace cs
     template<typename TId, typename TLen>
     class Graph;
 
-    template<typename TId>
+    template<typename TId = int>
     class VertexBase
     {
     private:
@@ -72,7 +72,7 @@ namespace cs
         TLen Length() const { return length; }
     };
 
-    template<typename TId, typename TLen = int>
+    template<typename TId, typename TLen>
     class Vertex : public VertexBase<TId>
     {
         template<typename, typename>
@@ -141,7 +141,7 @@ namespace cs
         void ClearAuxData() { discovered = false; }
     };
 
-    template<typename TId, typename TLen = int>
+    template<typename TId, typename TLen>
     void VisitInNeighbors(
         Vertex<TId, TLen>& vertex,
         std::function<void(Vertex<TId, TLen>&)> visitor)
@@ -152,7 +152,7 @@ namespace cs
         vertex.VisitIncomingEdges([visitor](edge_type& edge) -> void { return visitor(edge.From()); });
     }
 
-    template<typename TId, typename TLen = int>
+    template<typename TId, typename TLen>
     void VisitOutNeighbors(
         Vertex<TId, TLen>& vertex,
         std::function<void(Vertex<TId, TLen>&)> visitor)
@@ -163,7 +163,7 @@ namespace cs
         vertex.VisitOutgoingEdges([visitor](edge_type& edge) -> void { return visitor(edge.To()); });
     }
 
-    template<typename TId, typename TLen = int>
+    template<typename TId, typename TLen>
     void VisitNeighbors(
         Vertex<TId, TLen>& vertex,
         std::function<void(Vertex<TId, TLen>&)> visitor)
@@ -172,7 +172,7 @@ namespace cs
         VisitOutNeighbors<TId, TLen>(vertex, visitor);
     }
 
-    template<typename TId, typename TLen = int>
+    template<typename TId, typename TLen>
     void VisitEdges(
         Vertex<TId, TLen>& vertex,
         std::function<void(Edge<Vertex<TId, TLen>, TLen>&)> visitor)
@@ -181,13 +181,13 @@ namespace cs
         vertex.VisitOutgoingEdges(visitor);
     }
 
-    template<typename TId, typename TLen = int>
+    template<typename TId, typename TLen>
     size_t NumberOfEdges(Vertex<TId, TLen>& vertex)
     {
         return vertex.NumberOfIncomingEdges() + vertex.NumberOfOutgoingEdges();
     }
 
-    template<typename TId, typename TLen = int>
+    template<typename TId = int, typename TLen = int>
     class Graph
     {
     public:
@@ -323,7 +323,7 @@ namespace cs
         const vertex_type& GetVertexById(TId id) const { return *vertices.at(id); }
     };
 
-    template<typename TId, typename TLen = int>
+    template<typename TId, typename TLen>
     void ClearAuxData(Graph<TId, TLen>& graph)
     {
         using vertex_type = Vertex<TId, TLen>;

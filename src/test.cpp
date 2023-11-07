@@ -58,7 +58,7 @@ TEST_CASE("Vectors are sorted", "[sort]")
 
 TEST_CASE("Graph breadth/depth-first search", "[graph]")
 {
-    using graph_type = cs::Graph<int>;
+    using graph_type = cs::Graph<>;
     using vertex_type = typename graph_type::vertex_type;
 
     graph_type g;
@@ -228,4 +228,6 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
         {
             std::cout << v.Id() << " ";
         });
+
+    std::cout << std::endl;
 }
