@@ -234,6 +234,8 @@ namespace cs
     public:
         using vertex_type = Vertex<TId, TLen>;
         using edge_type = Edge<vertex_type, TLen>;
+        using id_type = TId;
+        using length_type = TLen;
 
     private:
         std::unordered_map<TId, vertex_type*> vertices; // unordered_map doesn't preserve memory addresses of its elements, which is why we cannot use std::unordered_map<vertex_type>

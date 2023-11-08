@@ -5,6 +5,7 @@
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
 #include "utility.h"          // for cs::ReverseComparator, cs::files_textually_equal
 
+#include <algorithm>          // for std::find
 #include <array>              // for std::array
 #include <iostream>           // for std:::cout
 #include <vector>             // for std::vector
@@ -56,23 +57,25 @@ TEST_CASE("Vectors are sorted", "[sort]")
     }
 }
 
-TEST_CASE("Graph breadth/depth-first search", "[graph]")
+TEST_CASE("Graph algorithms", "[graph]")
 {
     using graph_type = cs::Graph<>;
     using vertex_type = typename graph_type::vertex_type;
+    using id_type = graph_type::id_type;
+    using length_type = graph_type::length_type;
 
+    const id_type vertices_number = 10;
     graph_type g;
-    for (int i = 0; i < 10; i++)
-    {
+    for (id_type i = 0; i < vertices_number; i++)
         g.AddVertex(/*id*/ i);
-    }
-    REQUIRE(g.VerticesNumber() == 10);
 
-    //   1 - 4
-    //  / \
-    // 0 - 2 - 5
-    //  \   \
-    //   3   6 - 7 - 8 - 9
+    /*
+       1 - 4
+      / \
+     0 - 2 - 5
+      \   \
+       3   6 - 7 - 8 - 9
+    */
 
     g.AddEdge(/*from_id*/ 0, /*to_id*/ 1);
     g.AddEdge(/*from_id*/ 0, /*to_id*/ 2);
@@ -85,176 +88,198 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
     g.AddEdge(/*from_id*/ 7, /*to_id*/ 8);
     g.AddEdge(/*from_id*/ 8, /*to_id*/ 9);
 
-    g.AddVertex(/*id*/ 10);
-    g.AddEdge(/*from_id*/ 10, /*to_id*/ 9);
-    g.AddEdge(/*from_id*/ 8, /*to_id*/ 10);
-    g.RemoveVertex(/*id*/ 10);
+    SECTION("check that graph constructed correctly")
+    {
+        REQUIRE(g.EdgesNumber() == 10);
+        REQUIRE(g.VerticesNumber() == vertices_number);
 
-    REQUIRE(g.EdgesNumber() == 10);
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(1)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(2)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(3)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(2)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(4)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(5)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(6)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(6), /*to*/ g.GetVertexById(7)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(7), /*to*/ g.GetVertexById(8)));
+        REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(8), /*to*/ g.GetVertexById(9)));
 
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(1)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(2)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(3)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(2)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(4)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(5)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(6)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(6), /*to*/ g.GetVertexById(7)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(7), /*to*/ g.GetVertexById(8)));
-    REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(8), /*to*/ g.GetVertexById(9)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(1)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(2)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(3)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(1), /*b*/ g.GetVertexById(2)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(1), /*b*/ g.GetVertexById(4)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(2), /*b*/ g.GetVertexById(5)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(2), /*b*/ g.GetVertexById(6)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(6), /*b*/ g.GetVertexById(7)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(7), /*b*/ g.GetVertexById(8)));
+        REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(8), /*b*/ g.GetVertexById(9)));
 
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(1)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(2)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(3)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(1), /*b*/ g.GetVertexById(2)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(1), /*b*/ g.GetVertexById(4)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(2), /*b*/ g.GetVertexById(5)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(2), /*b*/ g.GetVertexById(6)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(6), /*b*/ g.GetVertexById(7)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(7), /*b*/ g.GetVertexById(8)));
-    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(8), /*b*/ g.GetVertexById(9)));
+        REQUIRE(g.GetVertexById(0).NumberOfOutgoingEdges() == 3);
+        REQUIRE(g.GetVertexById(0).NumberOfIncomingEdges() == 0);
 
-    REQUIRE(g.GetVertexById(0).NumberOfOutgoingEdges() == 3);
-    REQUIRE(g.GetVertexById(0).NumberOfIncomingEdges() == 0);
+        REQUIRE(g.GetVertexById(1).NumberOfOutgoingEdges() == 2);
+        REQUIRE(g.GetVertexById(1).NumberOfIncomingEdges() == 1);
 
-    REQUIRE(g.GetVertexById(1).NumberOfOutgoingEdges() == 2);
-    REQUIRE(g.GetVertexById(1).NumberOfIncomingEdges() == 1);
+        REQUIRE(g.GetVertexById(2).NumberOfOutgoingEdges() == 2);
+        REQUIRE(g.GetVertexById(2).NumberOfIncomingEdges() == 2);
 
-    REQUIRE(g.GetVertexById(2).NumberOfOutgoingEdges() == 2);
-    REQUIRE(g.GetVertexById(2).NumberOfIncomingEdges() == 2);
+        REQUIRE(g.GetVertexById(3).NumberOfOutgoingEdges() == 0);
+        REQUIRE(g.GetVertexById(3).NumberOfIncomingEdges() == 1);
 
-    REQUIRE(g.GetVertexById(3).NumberOfOutgoingEdges() == 0);
-    REQUIRE(g.GetVertexById(3).NumberOfIncomingEdges() == 1);
+        REQUIRE(g.GetVertexById(4).NumberOfOutgoingEdges() == 0);
+        REQUIRE(g.GetVertexById(4).NumberOfIncomingEdges() == 1);
 
-    REQUIRE(g.GetVertexById(4).NumberOfOutgoingEdges() == 0);
-    REQUIRE(g.GetVertexById(4).NumberOfIncomingEdges() == 1);
+        REQUIRE(g.GetVertexById(5).NumberOfOutgoingEdges() == 0);
+        REQUIRE(g.GetVertexById(5).NumberOfIncomingEdges() == 1);
 
-    REQUIRE(g.GetVertexById(5).NumberOfOutgoingEdges() == 0);
-    REQUIRE(g.GetVertexById(5).NumberOfIncomingEdges() == 1);
+        REQUIRE(g.GetVertexById(6).NumberOfOutgoingEdges() == 1);
+        REQUIRE(g.GetVertexById(6).NumberOfIncomingEdges() == 1);
 
-    REQUIRE(g.GetVertexById(6).NumberOfOutgoingEdges() == 1);
-    REQUIRE(g.GetVertexById(6).NumberOfIncomingEdges() == 1);
+        REQUIRE(g.GetVertexById(7).NumberOfOutgoingEdges() == 1);
+        REQUIRE(g.GetVertexById(7).NumberOfIncomingEdges() == 1);
 
-    REQUIRE(g.GetVertexById(7).NumberOfOutgoingEdges() == 1);
-    REQUIRE(g.GetVertexById(7).NumberOfIncomingEdges() == 1);
+        REQUIRE(g.GetVertexById(8).NumberOfOutgoingEdges() == 1);
+        REQUIRE(g.GetVertexById(8).NumberOfIncomingEdges() == 1);
 
-    REQUIRE(g.GetVertexById(8).NumberOfOutgoingEdges() == 1);
-    REQUIRE(g.GetVertexById(8).NumberOfIncomingEdges() == 1);
+        REQUIRE(g.GetVertexById(9).NumberOfOutgoingEdges() == 0);
+        REQUIRE(g.GetVertexById(9).NumberOfIncomingEdges() == 1);
+    }
 
-    REQUIRE(g.GetVertexById(9).NumberOfOutgoingEdges() == 0);
-    REQUIRE(g.GetVertexById(9).NumberOfIncomingEdges() == 1);
+    SECTION("add and remove a vertex")
+    {
+        g.AddVertex(/*id*/ 10);
+        REQUIRE(g.VerticesNumber() == vertices_number + 1);
 
+        g.AddEdge(/*from_id*/ 10, /*to_id*/ 9);
+        REQUIRE(g.EdgesNumber() == 11);
 
-    // breadth-first search (undirected graph)
+        g.AddEdge(/*from_id*/ 8, /*to_id*/ 10);
+        REQUIRE(g.EdgesNumber() == 12);
 
-    std::vector<int> search_order;
-    search_order.reserve(g.VerticesNumber());
+        g.RemoveVertex(/*id*/ 10);
+        REQUIRE(g.VerticesNumber() == vertices_number);
+        REQUIRE(g.EdgesNumber() == 10);
+    }
 
-    cs::BreadthFirstSearch_Undirected<int, int>(
-        /*graph*/ g,
-        /*root_id*/ 0,
-        /*visit*/
-        [&search_order](vertex_type& v) -> void
-        {
-            search_order.push_back(v.Id());
-        });
+    SECTION("breadth-first search (undirected graph)")
+    {
+        std::vector<id_type> search_order;
+        search_order.reserve(g.VerticesNumber());
 
-    // WARNING: there can be multiple correct breadth-first search results
-    REQUIRE(search_order == std::vector<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        cs::BreadthFirstSearch_Undirected<id_type, length_type>(
+            /*graph*/ g,
+            /*root_id*/ 0,
+            /*visit*/
+            [&search_order](vertex_type& v) -> void
+            {
+                search_order.push_back(v.Id());
+            });
 
-    // breadth-first search (directed graph)
+        // check that all graph vertices are present in the search result
+        REQUIRE(search_order.size() == g.VerticesNumber());
+        g.VisitVertices(
+            [&search_order](const vertex_type& v)
+            {
+                REQUIRE(std::find(search_order.begin(), search_order.end(), v.Id()) != search_order.end());
+            });
+    }
 
-    search_order.clear();
+    SECTION("breadth-first search (directed graph)")
+    {
+        std::vector<id_type> search_order;
+        search_order.reserve(g.VerticesNumber());
 
-    cs::BreadthFirstSearch_Directed<int, int>(
-        /*graph*/ g,
-        /*root_id*/ 0,
-        /*visit*/
-        [&search_order](vertex_type& v) -> void
-        {
-            search_order.push_back(v.Id());
-        });
+        cs::BreadthFirstSearch_Directed<id_type, length_type>(
+            /*graph*/ g,
+            /*root_id*/ 0,
+            /*visit*/
+            [&search_order](vertex_type& v) -> void
+            {
+                search_order.push_back(v.Id());
+            });
 
-    // WARNING: there can be multiple correct breadth-first search results
-    REQUIRE(search_order == std::vector<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        // check that all graph vertices are present in the search result
+        REQUIRE(search_order.size() == g.VerticesNumber());
+        g.VisitVertices(
+            [&search_order](const vertex_type& v)
+            {
+                REQUIRE(std::find(search_order.begin(), search_order.end(), v.Id()) != search_order.end());
+            });
+    }
 
-    // depth-first search (undirected graph)
+    SECTION("depth-first search (undirected graph)")
+    {
+        std::vector<id_type> search_order;
+        search_order.reserve(g.VerticesNumber());
 
-    search_order.clear();
+        cs::DepthFirstSearch_Undirected<id_type, length_type>(
+            /*graph*/ g,
+            /*root_id*/ 0,
+            /*visit*/
+            [&search_order](vertex_type& v) -> void
+            {
+                search_order.push_back(v.Id());
+            });
 
-    cs::DepthFirstSearch_Undirected<int, int>(
-        /*graph*/ g,
-        /*root_id*/ 0,
-        /*visit*/
-        [&search_order](vertex_type& v) -> void
-        {
-            search_order.push_back(v.Id());
-        });
+        // check that all graph vertices are present in the search result
+        REQUIRE(search_order.size() == g.VerticesNumber());
+        g.VisitVertices(
+            [&search_order](const vertex_type& v)
+            {
+                REQUIRE(std::find(search_order.begin(), search_order.end(), v.Id()) != search_order.end());
+            });
+    }
 
-    // WARNING: there can be multiple correct depth-first search results
-    REQUIRE(search_order == std::vector<int>{ 0, 3, 2, 6, 7, 8, 9, 5, 1, 4 });
+    SECTION("depth-first search (directed graph)")
+    {
+        std::vector<id_type> search_order;
+        search_order.reserve(g.VerticesNumber());
 
-    // depth-first search (directed graph)
+        cs::DepthFirstSearch_Directed<id_type, length_type>(
+            /*graph*/ g,
+            /*root_id*/ 0,
+            /*visit*/
+            [&search_order](vertex_type& v) -> void
+            {
+                search_order.push_back(v.Id());
+            });
 
-    search_order.clear();
+        // check that all graph vertices are present in the search result
+        REQUIRE(search_order.size() == g.VerticesNumber());
+        g.VisitVertices(
+            [&search_order](const vertex_type& v)
+            {
+                REQUIRE(std::find(search_order.begin(), search_order.end(), v.Id()) != search_order.end());
+            });
+    }
 
-    cs::DepthFirstSearch_Directed<int, int>(
-        /*graph*/ g,
-        /*root_id*/ 0,
-        /*visit*/
-        [&search_order](vertex_type& v) -> void
-        {
-            search_order.push_back(v.Id());
-        });
+    SECTION("sort vertices in topological order")
+    {
+        std::vector<vertex_type*> topological_order;
+        topological_order.reserve(g.VerticesNumber());
 
-    // WARNING: there can be multiple correct depth-first search results
-    REQUIRE(search_order == std::vector<int>{ 0, 3, 2, 6, 7, 8, 9, 5, 1, 4 });
+        cs::TopologicalSort<id_type, length_type>(
+            /*graph*/ g,
+            /*visit*/
+            [&topological_order](vertex_type& v)
+            {
+                topological_order.push_back(&v);
+            });
 
-    // TODO: write a function to check if vertices are in topological order
+        REQUIRE(cs::IsTopologicalOrder<id_type, length_type>(topological_order.begin(), topological_order.end()));
+        REQUIRE(!cs::IsTopologicalOrder<id_type, length_type>(topological_order.rbegin(), topological_order.rend()));
+    }
 
-    std::vector<vertex_type*> topological_order;
-    topological_order.reserve(g.VerticesNumber());
-
-    cs::TopologicalSort<int, int>(
-        /*graph*/ g,
-        /*visit*/
-        [&topological_order](vertex_type& v)
-        {
-            topological_order.push_back(&v);
-        });
-    REQUIRE(cs::IsTopologicalOrder<int, int>(topological_order.begin(), topological_order.end()));
-    REQUIRE(!cs::IsTopologicalOrder<int, int>(topological_order.rbegin(), topological_order.rend()));
-
-    // WARNING: there can be multiple correct topological orders
-
-    cs::VisitStronglyConnectedComponents_Kosaraju<int, int>(
-        /*graph*/ g,
-        /*visit*/
-        [](vertex_type& v, int scc_id)
-        {
-            std::cout << "vertex = " << v.Id() << " SCC = " << scc_id << std::endl;
-        }
-    );
-
-    cs::DepthFirstSearch_Directed<int, int>(
-        /*graph*/ g,
-        /*root_id*/ 0,
-        /*visit*/
-        [](vertex_type& v)
-        {
-            std::cout << v.Id() << " ";
-        });
-
-    std::cout << std::endl;
-
-    cs::DepthFirstSearch_Directed_InverseTopological<int, int>(
-        /*graph*/ g,
-        /*root_id*/ 0,
-        /*visit*/
-        [](vertex_type& v)
-        {
-            std::cout << v.Id() << " ";
-        });
-
-    std::cout << std::endl;
+    SECTION("find strongly connected components via Kosaraju's algorithm")
+    {
+        cs::VisitStronglyConnectedComponents_Kosaraju<id_type, length_type>(
+            /*graph*/ g,
+            /*visit*/
+            [](vertex_type& v, id_type scc_id)
+            {
+                REQUIRE(v.Id() == scc_id);
+            }
+        );
+    }
 }
