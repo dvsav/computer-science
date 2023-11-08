@@ -3,6 +3,7 @@
 #include "utility.h"
 
 #include <algorithm> // for std::swap
+#include <iterator>  // for std::iterator_traits
 #include <random>    // for std::random_device, std::mt19937, std::uniform_int_distribution
 
 namespace cs

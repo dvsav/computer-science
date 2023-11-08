@@ -3,6 +3,7 @@
 #include "graph.h"    // for cs::Graph, cs::Vertex, cs::Edge
 
 #include <functional> // for std::function
+#include <iterator>   // for std::iterator_traits
 #include <queue>      // for std::queue
 #include <stack>      // for std::stack
 
@@ -270,6 +271,31 @@ namespace cs
                 visit(*v);
             }
         }
+    }
+
+    template<typename TId, typename TLen, typename TIterator>
+    bool IsTopologicalOrder(TIterator begin, TIterator end)
+    {
+        // Check that TIterator contains pointer to Vertex<TId, TLen>
+        static_assert(
+            std::is_same<typename std::iterator_traits<TIterator>::value_type, typename cs::Vertex<TId, TLen>* >::value,
+            "TIterator has the wrong value type");
+
+        // Check that TIterator is a random-access iterator
+        static_assert(
+            std::is_same<typename std::iterator_traits<TIterator>::iterator_category,
+            std::random_access_iterator_tag>::value,
+            "TIterator must be a random-access iterator.");
+
+        for (TIterator i = begin + 1; i != end; i++)
+        {
+            for (TIterator j = begin; j != i; j++)
+            {
+                if (DirectedEdgeExists<TId, TLen>(/*from*/ **i, /*to*/ **j))
+                    return false;
+            }
+        }
+        return true;
     }
 
     template<typename TId, typename TLen>

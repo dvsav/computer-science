@@ -103,16 +103,16 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
     REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(7), /*to*/ g.GetVertexById(8)));
     REQUIRE(cs::DirectedEdgeExists(/*from*/ g.GetVertexById(8), /*to*/ g.GetVertexById(9)));
 
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(1)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(2)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(0), /*to*/ g.GetVertexById(3)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(2)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(1), /*to*/ g.GetVertexById(4)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(5)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(2), /*to*/ g.GetVertexById(6)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(6), /*to*/ g.GetVertexById(7)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(7), /*to*/ g.GetVertexById(8)));
-    REQUIRE(cs::UndirectedEdgeExists(/*from*/ g.GetVertexById(8), /*to*/ g.GetVertexById(9)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(1)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(2)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(0), /*b*/ g.GetVertexById(3)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(1), /*b*/ g.GetVertexById(2)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(1), /*b*/ g.GetVertexById(4)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(2), /*b*/ g.GetVertexById(5)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(2), /*b*/ g.GetVertexById(6)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(6), /*b*/ g.GetVertexById(7)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(7), /*b*/ g.GetVertexById(8)));
+    REQUIRE(cs::UndirectedEdgeExists(/*a*/ g.GetVertexById(8), /*b*/ g.GetVertexById(9)));
 
     REQUIRE(g.GetVertexById(0).NumberOfOutgoingEdges() == 3);
     REQUIRE(g.GetVertexById(0).NumberOfIncomingEdges() == 0);
@@ -148,7 +148,7 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
     // breadth-first search (undirected graph)
 
     std::vector<int> search_order;
-    search_order.reserve(10);
+    search_order.reserve(g.VerticesNumber());
 
     cs::BreadthFirstSearch_Undirected<int, int>(
         /*graph*/ g,
@@ -212,14 +212,18 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
 
     // TODO: write a function to check if vertices are in topological order
 
+    std::vector<vertex_type*> topological_order;
+    topological_order.reserve(g.VerticesNumber());
+
     cs::TopologicalSort<int, int>(
         /*graph*/ g,
         /*visit*/
-        [](vertex_type& v)
+        [&topological_order](vertex_type& v)
         {
-            std::cout << v.Id() << " ";
+            topological_order.push_back(&v);
         });
-    std::cout << std::endl;
+    REQUIRE(cs::IsTopologicalOrder<int, int>(topological_order.begin(), topological_order.end()));
+    REQUIRE(!cs::IsTopologicalOrder<int, int>(topological_order.rbegin(), topological_order.rend()));
 
     // WARNING: there can be multiple correct topological orders
 

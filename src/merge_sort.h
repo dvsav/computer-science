@@ -3,6 +3,7 @@
 #include "utility.h"
 
 #include <algorithm> // for std::copy
+#include <iterator>  // for std::iterator_traits
 #include <vector>    // for std::vector
 
 namespace cs
