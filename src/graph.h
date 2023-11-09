@@ -1,10 +1,13 @@
 #pragma once
 
-#include "requires.h"
-
 #include <functional>    // for std::function
 #include <list>          // for std::list
+#include <iostream>      // for std::ostream, std::istream
+#include <iomanip>       // for std::ws, std::noskips
 #include <unordered_map> // for std::unordered_map
+
+#include "requires.h"    // for Requires::ArgumentNotNull
+#include "utility.h"     // for operator>>
 
 namespace cs
 {
@@ -184,6 +187,17 @@ namespace cs
     }
 
     template<typename TId, typename TLen>
+    void VisitOutNeighbors(
+        const Vertex<TId, TLen>& vertex,
+        std::function<void(const Vertex<TId, TLen>&)> visitor)
+    {
+        using vertex_type = Vertex<TId, TLen>;
+        using edge_type = Edge<vertex_type, TLen>;
+
+        vertex.VisitOutgoingEdges([visitor](const edge_type& edge) -> void { return visitor(edge.To()); });
+    }
+
+    template<typename TId, typename TLen>
     void VisitNeighbors(
         Vertex<TId, TLen>& vertex,
         std::function<void(Vertex<TId, TLen>&)> visitor)
@@ -264,12 +278,7 @@ namespace cs
             if (!is_disposed)
             {
                 is_disposed = true;
-                
-                for (auto key_value : vertices)
-                    delete key_value.second;
-
-                for (edge_type* edge : edges)
-                    delete edge;
+                Clear();
             }
         }
 
@@ -284,12 +293,8 @@ namespace cs
         {
             vertex_type* vertex = new vertex_type(id);
             auto result = vertices.insert({ id, vertex });
-            if (!result.second)
-            {
-                delete vertex;
-                return nullptr;
-            }
-            return vertex;
+            if (!result.second) delete vertex;
+            return result.first->second;
         }
 
         void RemoveVertex(TId id)
@@ -364,6 +369,17 @@ namespace cs
         vertex_type& GetVertexById(TId id) { return *vertices.at(id); }
 
         const vertex_type& GetVertexById(TId id) const { return *vertices.at(id); }
+
+        void Clear()
+        {
+            for (auto key_value : vertices)
+                delete key_value.second;
+            vertices.clear();
+
+            for (edge_type* edge : edges)
+                delete edge;
+            edges.clear();
+        }
     };
 
     template<typename TId, typename TLen>
@@ -378,4 +394,76 @@ namespace cs
                 return false;
             });
     }
+
+} // namespace cs
+
+template<typename TId, typename TLen>
+std::ostream& operator<<(std::ostream& os, const cs::Graph<TId, TLen>& g)
+{
+    using vertex_type = cs::Vertex<TId, TLen>;
+
+    os << '{' << std::endl;
+    g.VisitVertices(
+        [&os](const vertex_type& v)
+        {
+            os << v.Id();
+            cs::VisitOutNeighbors<TId, TLen>(
+                v,
+                [&os](const vertex_type& u)
+                {
+                    os << ' ' << u.Id();
+                }
+            );
+            os << std::endl;
+        }
+    );
+    os << '}' << std::endl;
+
+    return os;
+}
+
+template<typename TId, typename TLen>
+std::istream& operator>>(std::istream& is, cs::Graph<TId, TLen> g)
+{
+    using vertex_type = cs::Vertex<TId, TLen>;
+
+    g.Clear();
+
+    char ch{};
+    if (!(is >> ch)) return is;
+    if (ch != '{')
+    {
+        is.unget();
+        is.clear(std::ios_base::failbit);
+        return is;
+    }
+
+    while (true)
+    {
+        std::vector<TId> adjacency_list;
+        is >> adjacency_list;
+
+        if (is.fail())
+        {
+            is.clear();
+            if (!(is >> ch)) return is;
+            if (ch != '}')
+            {
+                is.unget();
+                is.clear(std::ios_base::failbit);
+            }
+            return is;
+        }
+        
+        TId vertex_id = adjacency_list[0];
+        g.AddVertex(vertex_id);
+        for (auto i = adjacency_list.begin() + 1; i != adjacency_list.end; i++)
+        {
+            TId neighbor_id = *i;
+            g.AddVertex(neighbor_id);
+            g.AddEdge(/*from_id*/ vertex_id, /*to_id*/ neighbor_id);
+        }
+    }
+
+    return is;
 }
