@@ -87,7 +87,7 @@ TEST_CASE("Vectors are sorted", "[sort]")
         REQUIRE(vec == ascend_vec);
     }
 
-    SECTION("ibubble_sort in descending order")
+    SECTION("bubble_sort in descending order")
     {
         cs::bubble_sort<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
