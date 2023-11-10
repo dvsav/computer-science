@@ -20,35 +20,29 @@ namespace cs
     template<typename TId, typename TLen>
     class Graph;
 
-    template<typename TId = int>
-    class VertexBase
-    {
-    private:
-        TId id;
-
-    public:
-        VertexBase(
-            TId id) :
-            id(id)
-        {}
-
-        VertexBase(const VertexBase&) = delete;
-
-    public:
-        VertexBase& operator=(const VertexBase&) = delete;
-
-        TId Id() const { return id; }
-    };
-
+    /**
+     * @class Edge
+     * @brief Class representing an edge between two vertices of of a graph.
+     *
+     * An edge has a tail vertex (from) and a head vertex (to).
+     * An edge can be treated as directed or undirected depending on your purposes.
+     * An edge has a length which may or may not be used depending on your purposes.
+     *
+     * @tparam TVertex The data type of vertex.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TVertex, typename TLen = int>
     class Edge
     {
+        template<typename, typename>
+        friend class Graph;
+
     private:
         TVertex* from;
         TVertex* to;
         TLen length;
 
-    public:
+    private:
         Edge(
             TVertex* from,
             TVertex* to,
@@ -75,8 +69,19 @@ namespace cs
         TLen Length() const { return length; }
     };
 
-    template<typename TId, typename TLen>
-    class Vertex : public VertexBase<TId>
+    /**
+     * @class Vertex
+     * @brief Class representing a vertex of a graph.
+     *
+     * Each vertex is identified by an Id.
+     * The class stores a collection of incoming and outgoing edges.
+     * It also includes 'discovered' boolean flag used in many graph algorithms.
+     *
+     * @tparam TId The data type of Id.
+     * @tparam TLen The data type of edge length.
+     */
+    template<typename TId, typename TLen = int>
+    class Vertex
     {
         template<typename, typename>
         friend class Graph;
@@ -85,14 +90,15 @@ namespace cs
         using edge_type = Edge<Vertex, TLen>;
 
     private:
+        TId id;
         std::list<edge_type*> incomingEdges;
         std::list<edge_type*> outgoingEdges;
         bool discovered; // used in many algorithms (breadth-first search, depth-first search, Dijkstra's shortest path etc.)
 
-    public:
+    private:
         Vertex(
             TId id) :
-            VertexBase<TId>(id),
+            id(id),
             incomingEdges(),
             outgoingEdges(),
             discovered(false)
@@ -109,6 +115,8 @@ namespace cs
         void RemoveOutgoingEdge(edge_type* edge) { outgoingEdges.remove(edge); }
 
     public:
+        TId Id() const { return id; }
+
         size_t NumberOfIncomingEdges() const { return incomingEdges.size(); }
 
         size_t NumberOfOutgoingEdges() const { return outgoingEdges.size(); }
@@ -242,6 +250,19 @@ namespace cs
         return DirectedEdgeExists(a, b) || DirectedEdgeExists(b, a);
     }
 
+    /**
+     * @class Graph
+     * @brief Class representing a graph.
+     *
+     * A graph consists of a set of vertices connected by edges.
+     * Graph can be treated as directed or undirected,
+     * weighted (edges have lengths) or unweighted
+     * (edges don't have length or it doesn't matter),
+     * depending on your purposes.
+     *
+     * @tparam TId The data type of Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId = int, typename TLen = int>
     class Graph
     {
@@ -425,8 +446,6 @@ std::ostream& operator<<(std::ostream& os, const cs::Graph<TId, TLen>& g)
 template<typename TId, typename TLen>
 std::istream& operator>>(std::istream& is, cs::Graph<TId, TLen> g)
 {
-    using vertex_type = cs::Vertex<TId, TLen>;
-
     g.Clear();
 
     char ch{};
