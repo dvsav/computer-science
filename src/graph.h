@@ -25,7 +25,7 @@ namespace cs
      * @brief Class representing an edge between two vertices of of a graph.
      *
      * An edge has a tail vertex (from) and a head vertex (to).
-     * An edge can be treated as directed or undirected depending on your purposes.
+     * An edge can be treated as directed (from ---> to) or undirected depending on your purposes.
      * An edge has a length which may or may not be used depending on your purposes.
      *
      * @tparam TVertex The data type of vertex.
@@ -43,6 +43,13 @@ namespace cs
         TLen length;
 
     private:
+        /**
+         * @brief Creates a graph edge.
+         *
+         * @param from - pointer to the tail of the edge.
+         * @param to - pointe to the head of the edge.
+         * @param length - length of the edge.
+         */
         Edge(
             TVertex* from,
             TVertex* to,
@@ -60,12 +67,32 @@ namespace cs
     public:
         Edge& operator=(const Edge&) = default;
 
+        /**
+         * @brief Returns a pointer to the tail of the edge.
+         * @return Pointer to the tail of the edge.
+         */
         TVertex& From() { return *from; }
+        /**
+         * @brief Returns a pointer to the tail of the edge.
+         * @return Pointer to the tail of the edge.
+         */
         const TVertex& From() const { return *from; }
 
+        /**
+         * @brief Returns a pointer to the head of the edge.
+         * @return Pointer to the head of the edge.
+         */
         TVertex& To() { return *to; }
+        /**
+         * @brief Returns a pointer to the head of the edge.
+         * @return Pointer to the head of the edge.
+         */
         const TVertex& To() const { return *to; }
 
+        /**
+         * @brief Returns the length of the edge.
+         * @return Length of the edge.
+         */
         TLen Length() const { return length; }
     };
 
