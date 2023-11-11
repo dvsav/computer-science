@@ -471,7 +471,7 @@ std::ostream& operator<<(std::ostream& os, const cs::Graph<TId, TLen>& g)
 }
 
 template<typename TId, typename TLen>
-std::istream& operator>>(std::istream& is, cs::Graph<TId, TLen> g)
+std::istream& operator>>(std::istream& is, cs::Graph<TId, TLen>& g)
 {
     g.Clear();
 
@@ -503,7 +503,7 @@ std::istream& operator>>(std::istream& is, cs::Graph<TId, TLen> g)
         
         TId vertex_id = adjacency_list[0];
         g.AddVertex(vertex_id);
-        for (auto i = adjacency_list.begin() + 1; i != adjacency_list.end; i++)
+        for (auto i = adjacency_list.begin() + 1; i != adjacency_list.end(); i++)
         {
             TId neighbor_id = *i;
             g.AddVertex(neighbor_id);

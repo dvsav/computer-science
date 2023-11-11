@@ -7,6 +7,8 @@
 
 #include <algorithm>          // for std::find
 #include <array>              // for std::array
+#include <cstdio>             // for std::remove
+#include <fstream>            // for std::ifstream, std::ofstream
 #include <iostream>           // for std:::cout
 #include <vector>             // for std::vector
 
@@ -282,4 +284,31 @@ TEST_CASE("Graph algorithms", "[graph]")
             }
         );
     }
+}
+
+TEST_CASE("Graph input-output", "[graph]")
+{
+    using graph_type = cs::Graph<>;
+    using vertex_type = typename graph_type::vertex_type;
+    using id_type = graph_type::id_type;
+    using length_type = graph_type::length_type;
+
+    const char* path_input = "./graph/graph.txt";
+    const char* path_output = "./graph/graph_out.txt";
+
+    {
+        std::ifstream ifs(path_input);
+        REQUIRE(ifs);
+
+        graph_type g;
+        ifs >> g;
+
+        std::ofstream ofs(path_output);
+        REQUIRE(ofs);
+        ofs << g;
+    }
+
+    REQUIRE(files_textually_equal(path_input, path_output));
+
+    REQUIRE(std::remove(path_output) == 0);
 }
