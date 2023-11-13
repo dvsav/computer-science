@@ -275,6 +275,8 @@ TEST_CASE("Graph algorithms", "[graph]")
 
     SECTION("find strongly connected components via Kosaraju's algorithm")
     {
+        // In this particular graph every vertex is a strongly connected component
+        // (which may not be true for every graph out there)
         cs::VisitStronglyConnectedComponents_Kosaraju<id_type, length_type>(
             /*graph*/ g,
             /*visit*/
@@ -289,26 +291,26 @@ TEST_CASE("Graph algorithms", "[graph]")
 TEST_CASE("Graph input-output", "[graph]")
 {
     using graph_type = cs::Graph<>;
-    using vertex_type = typename graph_type::vertex_type;
-    using id_type = graph_type::id_type;
-    using length_type = graph_type::length_type;
 
-    const char* path_input = "./graph/graph.txt";
-    const char* path_output = "./graph/graph_out.txt";
+    const char* path_adjacency_list = "./graph/adjacency_list.txt";
+    const char* path_vertex_edge_list = "./graph/vertex_edge_list.txt";
 
+    graph_type graph_adjacency_list;
     {
-        std::ifstream ifs(path_input);
+        std::ifstream ifs(path_adjacency_list);
         REQUIRE(ifs);
 
-        graph_type g;
-        ifs >> g;
-
-        std::ofstream ofs(path_output);
-        REQUIRE(ofs);
-        ofs << g;
+        cs::read_adjacency_list(ifs, graph_adjacency_list);
     }
 
-    REQUIRE(files_textually_equal(path_input, path_output));
+    graph_type graph_vertex_edge_list;
+    {
+        std::ifstream ifs(path_vertex_edge_list);
+        REQUIRE(ifs);
 
-    REQUIRE(std::remove(path_output) == 0);
+        cs::read_vertex_edge_list(ifs, graph_vertex_edge_list);
+    }
+
+    REQUIRE(graph_adjacency_list.VerticesNumber() == graph_vertex_edge_list.VerticesNumber());
+    REQUIRE(graph_adjacency_list.EdgesNumber() == graph_vertex_edge_list.EdgesNumber());
 }

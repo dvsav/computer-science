@@ -443,73 +443,171 @@ namespace cs
             });
     }
 
-} // namespace cs
-
-template<typename TId, typename TLen>
-std::ostream& operator<<(std::ostream& os, const cs::Graph<TId, TLen>& g)
-{
-    using vertex_type = cs::Vertex<TId, TLen>;
-
-    os << '{' << std::endl;
-    g.VisitVertices(
-        [&os](const vertex_type& v)
-        {
-            os << v.Id();
-            cs::VisitOutNeighbors<TId, TLen>(
-                v,
-                [&os](const vertex_type& u)
-                {
-                    os << ' ' << u.Id();
-                }
-            );
-            os << std::endl;
-        }
-    );
-    os << '}' << std::endl;
-
-    return os;
-}
-
-template<typename TId, typename TLen>
-std::istream& operator>>(std::istream& is, cs::Graph<TId, TLen>& g)
-{
-    g.Clear();
-
-    char ch{};
-    if (!(is >> ch)) return is;
-    if (ch != '{')
+    template<typename TId, typename TLen>
+    std::ostream& write_adjacency_list(std::ostream& os, const cs::Graph<TId, TLen>& g)
     {
-        is.unget();
-        is.clear(std::ios_base::failbit);
+        using vertex_type = cs::Vertex<TId, TLen>;
+
+        os << '{' << std::endl;
+        g.VisitVertices(
+            [&os](const vertex_type& v)
+            {
+                os << v.Id();
+                cs::VisitOutNeighbors<TId, TLen>(
+                    v,
+                    [&os](const vertex_type& u)
+                    {
+                        os << ' ' << u.Id();
+                    }
+                );
+                os << std::endl;
+            }
+        );
+        os << '}' << std::endl;
+
+        return os;
+    }
+
+    template<typename TId, typename TLen>
+    std::istream& read_adjacency_list(std::istream& is, cs::Graph<TId, TLen>& g)
+    {
+        g.Clear();
+
+        while (skip_comment(is, "#")) {};
+
+        char ch{};
+        if (!(is >> ch))
+            return is;
+
+        // The fist non-whitespace character must be '{'
+        // (why? - because we have the indicator of the end of input, see below)
+        if (ch != '{')
+        {
+            is.unget();
+            is.clear(std::ios_base::failbit);
+            return is;
+        }
+
+        while (true)
+        {
+            std::vector<TId> adjacency_list;
+            is >> adjacency_list;
+
+            if (is.fail())
+            {
+                // The last character must be '}'
+                // (why? - because we need to have the indicator of the end of input)
+                is.clear();
+                if (!(is >> ch)) return is;
+                if (ch != '}')
+                {
+                    is.unget();
+                    is.clear(std::ios_base::failbit);
+                }
+                return is;
+            }
+
+            TId vertex_id = adjacency_list[0];
+            g.AddVertex(vertex_id);
+            for (auto i = adjacency_list.begin() + 1; i != adjacency_list.end(); i++)
+            {
+                TId neighbor_id = *i;
+                g.AddVertex(neighbor_id);
+                g.AddEdge(/*from_id*/ vertex_id, /*to_id*/ neighbor_id);
+            }
+        }
+
         return is;
     }
 
-    while (true)
+    template<typename TId, typename TLen>
+    std::ostream& write_vertex_edge_list(std::ostream& os, const cs::Graph<TId, TLen>& g)
     {
-        std::vector<TId> adjacency_list;
-        is >> adjacency_list;
+        using vertex_type = cs::Vertex<TId, TLen>;
+        using edge_type = typename vertex_type::edge_type;
 
-        if (is.fail())
-        {
-            is.clear();
-            if (!(is >> ch)) return is;
-            if (ch != '}')
+        os << '{' << std::endl;
+
+        // Write vertices
+        g.VisitVertices(
+            [&os](const vertex_type& v)
             {
-                is.unget();
-                is.clear(std::ios_base::failbit);
+                os << v.Id() << ' ';
             }
-            return is;
-        }
-        
-        TId vertex_id = adjacency_list[0];
-        g.AddVertex(vertex_id);
-        for (auto i = adjacency_list.begin() + 1; i != adjacency_list.end(); i++)
-        {
-            TId neighbor_id = *i;
-            g.AddVertex(neighbor_id);
-            g.AddEdge(/*from_id*/ vertex_id, /*to_id*/ neighbor_id);
-        }
+        );
+        os << std::endl;
+
+        // Write edges
+        g.VisitEdges(
+            [&os](const edge_type& e)
+            {
+                os << e.From().Id() << ' ' << e.To().Id() << std::endl;
+            }
+        );
+
+        os << '}' << std::endl;
+
+        return os;
     }
 
-    return is;
-}
+    template<typename TId, typename TLen>
+    std::istream& read_vertex_edge_list(std::istream& is, cs::Graph<TId, TLen>& g)
+    {
+        g.Clear();
+
+        while (skip_comment(is, "#")) {};
+
+        char ch{};
+        if (!(is >> ch))
+            return is;
+
+        // The fist non-whitespace character must be '{'
+        // (why? - because we have the indicator of the end of input, see below)
+        if (ch != '{')
+        {
+            is.unget();
+            is.clear(std::ios_base::failbit);
+            return is;
+        }
+
+        // Read vertices list
+        std::vector<TId> vertex_list;
+        is >> vertex_list;
+        if (!is)
+            return is;
+
+        for (auto v : vertex_list)
+            g.AddVertex(v);
+
+        while (true)
+        {
+            std::vector<TId> edge;
+            edge.reserve(2);
+            is >> edge;
+
+            if (is.fail())
+            {
+                // The last character must be '}'
+                // (why? - because we need to have the indicator of the end of input)
+                is.clear();
+                if (!(is >> ch)) return is;
+                if (ch != '}')
+                {
+                    is.unget();
+                    is.clear(std::ios_base::failbit);
+                }
+                return is;
+            }
+
+            if (edge.size() != 2)
+            {
+                is.clear(std::ios_base::failbit);
+                return is;
+            }
+
+            g.AddEdge(edge[0], edge[1]);
+        }
+
+        return is;
+    }
+} // namespace cs

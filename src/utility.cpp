@@ -12,9 +12,15 @@ bool files_textually_equal(
     std::ifstream f1(filePathA);
     std::ifstream f2(filePathB);
 
-    if (f1.fail() || f2.fail())
+    if (f1.fail())
     {
-        std::cerr << __FUNCTION__ << ": file problem" << std::endl;
+        std::cerr << __FUNCTION__ << ": couldn't open file " << filePathA << std::endl;
+        return false; // file problem
+    }
+
+    if (f2.fail())
+    {
+        std::cerr << __FUNCTION__ << ": couldn't open file " << filePathB << std::endl;
         return false; // file problem
     }
 
@@ -37,4 +43,39 @@ bool files_textually_equal(
             return false;
         }
     }
+}
+
+bool skip_comment(
+    std::istream& is,
+    const std::string& comment_begins_with)
+{
+    Requires::That(comment_begins_with.size() > 0, FUNCTION_INFO);
+
+    skip_whitespace(is);
+
+    // read the 1st character of comment_begins_with
+    int ch = is.get();
+    if (ch != comment_begins_with[0])
+    {
+        is.unget();
+        return false;
+    }
+
+    // read the rest of comment_begins_with
+    for (size_t i = 1; i < comment_begins_with.size(); i++)
+    {
+        ch = is.get();
+        if (ch != comment_begins_with[i])
+        {
+            is.unget();
+            is.clear(std::ios_base::failbit);
+            return false;
+        }
+    }
+
+    // read and doscard a single line
+    std::string line;
+    std::getline(is, line);
+
+    return true;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "requires.h"
+
 #include <cctype>   // for std::isspace
 #include <iostream> // for std::ostream, std::istream
 #include <sstream>  // for std::stringstream
@@ -37,15 +39,20 @@ namespace cs
  * ignoring possible differences in end-of-line symbols).
  * @param filePathA path to file A
  * @param filePathB path to file B
- * @return true if the contents of two files are equal
- * @return false if either of files is nonexistent or
- * if the files differ by at least one character
+ * @return true if the contents of two files are equal and
+ * false if either of files is nonexistent or if the files differ
+ * by at least one character
  * (not taking into account end-of-line symbols)
  */
 bool files_textually_equal(
     const std::string& filePathA,
     const std::string& filePathB);
 
+/**
+ * @brief Reads and discards all whitespace characters until
+ * it encounters a non-whitespace one.
+ * @param is - input stream
+ */
 inline void skip_whitespace(std::istream& is)
 {
     int ch{};
@@ -53,6 +60,16 @@ inline void skip_whitespace(std::istream& is)
     while ((ch = is.peek()) != EOF && std::isspace(ch))
         is.get(); // Discard the whitespace character
 }
+
+/**
+ * @brief Reads and discards a single line beginning with specified string @p comment_begins_with.
+ * @param is - input stream
+ * @param comment_begins_with - the string that begins the comment
+ * @return true the input line was a comment and false otherwise
+ */
+bool skip_comment(
+    std::istream& is,
+    const std::string& comment_begins_with);
 
 /**
  * @brief This operator reads space-separated elements of type T from

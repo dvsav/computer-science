@@ -9,6 +9,7 @@
 PROJDIR = $(CURDIR)/../..
 SRC_DIR = $(PROJDIR)/src
 BIN_DIR = $(CURDIR)/bin
+TEST_DIR = $(PROJDIR)/test
 
 # installation directory (used by 'install' target, can be specified in make command line)
 # example: sudo make install DESTDIR=/usr/local/bin
@@ -83,7 +84,7 @@ $(TEST) : $(OBJECTS)
 # cd $(BIN_DIR) is done to use the same relative path to 'tests' directory as in Visual Studio
 test : $(TEST)
 	@echo -e "\n(You may specify test case name using RUN_TEST parameter)"
-	$(QUIET)cd $(BIN_DIR) && $(DEBUGGER) ./test.exe $(RUN_TEST)
+	$(QUIET)cd $(TEST_DIR) && $(DEBUGGER) $(BIN_DIR)/test.exe $(RUN_TEST)
 
 # 'install' command is mostly similar to 'cp' but provides additionally the option to
 # set the destination file properties directly without having to use chmod separately.
