@@ -122,6 +122,7 @@ namespace cs
         std::list<edge_type*> incomingEdges;
         std::list<edge_type*> outgoingEdges;
         bool discovered; // used in many algorithms (breadth-first search, depth-first search, Dijkstra's shortest path etc.)
+        void* auxData;
 
     private:
         Vertex(
@@ -129,7 +130,8 @@ namespace cs
             id(id),
             incomingEdges(),
             outgoingEdges(),
-            discovered(false)
+            discovered(false),
+            auxData(nullptr)
         {}
 
         Vertex(const Vertex&) = delete;
@@ -196,6 +198,12 @@ namespace cs
         bool Discovered() const { return discovered; }
 
         bool& Discovered() { return discovered; }
+
+        template<typename T>
+        const T*& AuxData() const { return reinterpret_cast<const T*>(auxData); }
+
+        template<typename T>
+        T*& AuxData() { return reinterpret_cast<T*>(auxData); }
     };
 
     template<typename TId, typename TLen>
