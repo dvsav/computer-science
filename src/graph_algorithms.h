@@ -14,7 +14,7 @@ namespace cs
         Graph<TId, TLen>& graph,
         TId root_id,
         std::function<void(Vertex<TId, TLen>&)> visit,
-        bool clearAuxData = true)
+        bool clearDiscovered = true)
     {
         using vertex_type = Vertex<TId, TLen>;
 
@@ -49,8 +49,8 @@ namespace cs
             );
         }
 
-        if (clearAuxData)
-            ClearAuxData(graph);
+        if (clearDiscovered)
+            ClearDiscovered(graph);
     }
 
     template<typename TId, typename TLen>
@@ -58,7 +58,7 @@ namespace cs
         Graph<TId, TLen>& graph,
         TId root_id,
         std::function<void(Vertex<TId, TLen>&)> visit,
-        bool clearAuxData = true)
+        bool clearDiscovered = true)
     {
         using vertex_type = Vertex<TId, TLen>;
 
@@ -93,8 +93,8 @@ namespace cs
             );
         }
 
-        if (clearAuxData)
-            ClearAuxData(graph);
+        if (clearDiscovered)
+            ClearDiscovered(graph);
     }
 
     template<typename TId, typename TLen>
@@ -102,7 +102,7 @@ namespace cs
         Graph<TId, TLen>& graph,
         TId root_id,
         std::function<void(Vertex<TId, TLen>&)> visit,
-        bool clearAuxData = true)
+        bool clearDiscovered = true)
     {
         using vertex_type = Vertex<TId, TLen>;
 
@@ -134,8 +134,8 @@ namespace cs
             );
         }
 
-        if (clearAuxData)
-            ClearAuxData(graph);
+        if (clearDiscovered)
+            ClearDiscovered(graph);
     }
 
     template<typename TId, typename TLen>
@@ -143,7 +143,7 @@ namespace cs
         Graph<TId, TLen>& graph,
         TId root_id,
         std::function<void(Vertex<TId, TLen>&)> visit,
-        bool clearAuxData = true)
+        bool clearDiscovered = true)
     {
         using vertex_type = Vertex<TId, TLen>;
 
@@ -178,8 +178,8 @@ namespace cs
             );
         }
 
-        if (clearAuxData)
-            ClearAuxData(graph);
+        if (clearDiscovered)
+            ClearDiscovered(graph);
     }
 
     template<typename TId, typename TLen>
@@ -187,7 +187,7 @@ namespace cs
         Graph<TId, TLen>& graph,
         TId root_id,
         std::function<void(Vertex<TId, TLen>&)> visit,
-        bool clearAuxData = true)
+        bool clearDiscovered = true)
     {
         using vertex_type = Vertex<TId, TLen>;
 
@@ -224,8 +224,8 @@ namespace cs
             }
         }
 
-        if (clearAuxData)
-            ClearAuxData(graph);
+        if (clearDiscovered)
+            ClearDiscovered(graph);
     }
 
     template<typename TId, typename TLen>
@@ -248,12 +248,12 @@ namespace cs
                         /*graph*/ graph,
                         /*root_id*/ v.Id(),
                         /*visit*/ [&topological_order, &index](vertex_type& u) { topological_order[index--] = &u; },
-                        /*clearAuxData*/ false);
+                        /*clearDiscovered*/ false);
                 }
             }
         );
 
-        ClearAuxData(graph);
+        ClearDiscovered(graph);
 
         if (visit_in_reverse_order)
         {
@@ -317,11 +317,11 @@ namespace cs
                     {
                         visit(successor_of_vertex, scc_id);
                     },
-                    /*clearAuxData*/ false
+                    /*clearDiscovered*/ false
                 );
             },
             /*visit_in_reverse_order*/ true
         );
-        ClearAuxData(graph);
+        ClearDiscovered(graph);
     }
 }

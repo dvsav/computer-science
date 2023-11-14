@@ -107,13 +107,14 @@ namespace cs
      * @tparam TId The data type of Id.
      * @tparam TLen The data type of edge length.
      */
-    template<typename TId, typename TLen = int>
+    template<typename TId, typename TLen>
     class Vertex
     {
         template<typename, typename>
         friend class Graph;
 
     public:
+        using id_type = TId;
         using edge_type = Edge<Vertex, TLen>;
 
     private:
@@ -195,8 +196,6 @@ namespace cs
         bool Discovered() const { return discovered; }
 
         bool& Discovered() { return discovered; }
-
-        void ClearAuxData() { discovered = false; }
     };
 
     template<typename TId, typename TLen>
@@ -431,14 +430,14 @@ namespace cs
     };
 
     template<typename TId, typename TLen>
-    void ClearAuxData(Graph<TId, TLen>& graph)
+    void ClearDiscovered(Graph<TId, TLen>& graph)
     {
         using vertex_type = Vertex<TId, TLen>;
 
         graph.VisitVertices(
             [](vertex_type& v)
             {
-                v.ClearAuxData();
+                v.Discovered() = false;
                 return false;
             });
     }
