@@ -1,13 +1,13 @@
 #pragma once
 
+#include "requires.h"    // for Requires::ArgumentNotNull
+#include "utility.h"     // for operator>>
+
 #include <functional>    // for std::function
 #include <list>          // for std::list
 #include <iostream>      // for std::ostream, std::istream
 #include <iomanip>       // for std::ws, std::noskips
 #include <unordered_map> // for std::unordered_map
-
-#include "requires.h"    // for Requires::ArgumentNotNull
-#include "utility.h"     // for operator>>
 
 namespace cs
 {
@@ -114,14 +114,21 @@ namespace cs
         friend class Graph;
 
     public:
+        /**
+         * @brief The type of id which uniquely identifies a vertex.
+         */
         using id_type = TId;
+
+        /**
+        * @brief The type of edge between two vertices.
+        */
         using edge_type = Edge<Vertex, TLen>;
 
     private:
         TId id;
         std::list<edge_type*> incomingEdges;
         std::list<edge_type*> outgoingEdges;
-        bool discovered; // used in many algorithms (breadth-first search, depth-first search, Dijkstra's shortest path etc.)
+        bool discovered;
         void* auxData;
 
     private:
@@ -145,36 +152,89 @@ namespace cs
         void RemoveOutgoingEdge(edge_type* edge) { outgoingEdges.remove(edge); }
 
     public:
+        /**
+         * @brief Vertex id, is supposed to uniquely identify a vertex.
+         */
         TId Id() const { return id; }
 
+        /**
+         * @brief The number of incoming edges. Incoming edge of a vertex is an edge whose head points to this vertex.
+         * Differentiation between incoming and ougoing edges makes sense only in directed graphs.
+         * In undirected graph incoming and outgoing edges can be treated as two parts of a larger collection containing all edges.
+         */
         size_t NumberOfIncomingEdges() const { return incomingEdges.size(); }
 
+        /**
+         * @brief The number of outgoing edges. Outgoing edge of a vertex is an edge for which this vertex is a tail.
+         * Differentiation between incoming and ougoing edges makes sense only in directed graphs.
+         * In undirected graph incoming and outgoing edges can be treated as two parts of a larger collection containing all edges.
+         */
         size_t NumberOfOutgoingEdges() const { return outgoingEdges.size(); }
 
+        /**
+         * @brief Calls function @p visitor for each of incoming edges.
+         * @param visitor - functor called for each incoming edge, accepts a reference to that edge as a parameter.
+         */
         void VisitIncomingEdges(std::function<void(edge_type&)> visitor)
         {
             for (edge_type* edge : incomingEdges)
                 visitor(*edge);
         }
 
+        /**
+         * @brief Calls function @p visitor for each of incoming edges.
+         * @param visitor - functor called for each incoming edge, accepts a reference to that edge as a parameter.
+         */
         void VisitIncomingEdges(std::function<void(const edge_type&)> visitor) const
         {
             for (const edge_type* edge : incomingEdges)
                 visitor(*edge);
         }
 
+        /**
+         * @brief Calls function @p visitor for each of outgoing edges.
+         * @param visitor - functor called for each outgoing edge, accepts a reference to that edge as a parameter.
+         */
         void VisitOutgoingEdges(std::function<void(edge_type&)> visitor)
         {
             for (edge_type* edge : outgoingEdges)
                 visitor(*edge);
         }
 
+        /**
+         * @brief Calls function @p visitor for each of outgoing edges.
+         * @param visitor - functor called for each outgoing edge, accepts a reference to that edge as a parameter.
+         */
         void VisitOutgoingEdges(std::function<void(const edge_type&)> visitor) const
         {
             for (const edge_type* edge : outgoingEdges)
                 visitor(*edge);
         }
-        
+
+        /**
+         * @brief Calls function @p visitor for each of incoming edges. Iterates over the incoming edges until either
+         * all the edges have been visited or a @p visitor has returned true. In the latter case the function itself returns true.
+         * @param visitor - functor called for each incoming edge, accepts a reference to that edge as a parameter, returns true if
+         * the desired edge has been found and the search should be stopped.
+         * @return true if a @p visitor has ever returned true, false - otherwise
+         */
+        bool FindIncomingEdge(std::function<bool(edge_type&)> visitor)
+        {
+            for (edge_type* edge : incomingEdges)
+            {
+                if (visitor(*edge))
+                    return true;
+            }
+            return false;
+        }
+
+        /**
+         * @brief Calls function @p visitor for each of incoming edges. Iterates over the incoming edges until either
+         * all the edges have been visited or a @p visitor has returned true. In the latter case the function itself returns true.
+         * @param visitor - functor called for each incoming edge, accepts a reference to that edge as a parameter, returns true if
+         * the desired edge has been found and the search should be stopped.
+         * @return true if a @p visitor has ever returned true, false - otherwise
+         */
         bool FindIncomingEdge(std::function<bool(const edge_type&)> visitor) const
         {
             for (const edge_type* edge : incomingEdges)
@@ -185,6 +245,30 @@ namespace cs
             return false;
         }
 
+        /**
+         * @brief Calls function @p visitor for each of outgoing edges. Iterates over the outgoing edges until either
+         * all the edges have been visited or a @p visitor has returned true. In the latter case the function itself returns true.
+         * @param visitor - functor called for each outgoing edge, accepts a reference to that edge as a parameter, returns true if
+         * the desired edge has been found and the search should be stopped.
+         * @return true if a @p visitor has ever returned true, false - otherwise
+         */
+        bool FindOutgoingEdge(std::function<bool(edge_type&)> visitor)
+        {
+            for (edge_type* edge : outgoingEdges)
+            {
+                if (visitor(*edge))
+                    return true;
+            }
+            return false;
+        }
+
+        /**
+         * @brief Calls function @p visitor for each of outgoing edges. Iterates over the outgoing edges until either
+         * all the edges have been visited or a @p visitor has returned true. In the latter case the function itself returns true.
+         * @param visitor - functor called for each outgoing edge, accepts a reference to that edge as a parameter, returns true if
+         * the desired edge has been found and the search should be stopped.
+         * @return true if a @p visitor has ever returned true, false - otherwise
+         */
         bool FindOutgoingEdge(std::function<bool(const edge_type&)> visitor) const
         {
             for (const edge_type* edge : outgoingEdges)
@@ -195,13 +279,27 @@ namespace cs
             return false;
         }
 
+        /**
+         * @brief Boolean flag used by practically all graph algorithms (breadth-first search, depth-first search, Dijkstra's shortest path etc.).
+         */
         bool Discovered() const { return discovered; }
 
+        /**
+         * @brief Boolean flag used by practically all graph algorithms (breadth-first search, depth-first search, Dijkstra's shortest path etc.).
+         */
         bool& Discovered() { return discovered; }
 
+        /**
+         * @brief Pointer to auxiliary data allowing graph algorithms to store (most probably - temporarily) arbitrary data (depending on a particular algorithm).
+         * For example, Dijkstra's shortest path algorithm may store there the Dijkstra's greedy score and a pointer to previous vertex).
+         */
         template<typename T>
         const T*& AuxData() const { return reinterpret_cast<const T*>(auxData); }
 
+        /**
+         * @brief Pointer to auxiliary data allowing graph algorithms to store (most probably - temporarily) arbitrary data (depending on a particular algorithm).
+         * For example, Dijkstra's shortest path algorithm may store there the Dijkstra's greedy score and a pointer to previous vertex).
+         */
         template<typename T>
         T*& AuxData() { return reinterpret_cast<T*>(auxData); }
     };
