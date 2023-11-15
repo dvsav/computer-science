@@ -2,9 +2,10 @@
 
 #include "requires.h"
 
-#include <functional>    // for std::function
+#include <functional>    // for std::function, std::hash
 #include <list>          // for std::list
 #include <unordered_map> // for std::unordered_map
+#include <utility>       // for std::pair
 
 namespace cs
 {
@@ -179,6 +180,7 @@ namespace cs
         VisitOutNeighbors<TId, TData, TLen>(vertex, visitor);
     }
 
+
     template<typename TId, typename TData, typename TLen>
     class Graph
     {
@@ -188,7 +190,17 @@ namespace cs
 
     private:
         std::unordered_map<TId, vertex_type*> vertices; // unordered_map doesn't preserve memory addresses of its elements, which is why we cannot use std::unordered_map<vertex_type>
-        std::list<edge_type*> edges;                    // linked list doesn't preserve memory addresses of its elements, which is why we cannot use std::list<edge_type>
+
+        struct PairHash
+        {
+            std::size_t operator () (const std::pair<TId, TId>& p) const
+            {
+                // Combine the hashes of the two elements using bit shift and birwise xor
+                return std::hash<TId>{}(p.first) ^ (std::hash<TId>{}(p.second) << 1);
+            }
+        };
+
+        std::unordered_map<std::pair<TId, TId>, edge_type*, PairHash> edges; // unordered_map doesn't preserve memory addresses of its elements, which is why we cannot use std::unordered_map<vertex_type>
         bool is_disposed;
 
     public:
@@ -217,8 +229,8 @@ namespace cs
                 for (auto key_value : vertices)
                     delete key_value.second;
 
-                for (edge_type* edge : edges)
-                    delete edge;
+                for (auto key_value : edges)
+                    delete key_value.second;
             }
         }
 
@@ -248,7 +260,7 @@ namespace cs
             edge_type* edge = new edge_type(&from, &to, length);
             from.AddOutgoingEdge(edge);
             to.AddIncomingEdge(edge);
-            edges.push_back(edge);
+            edges[{from_id, to_id}] = edge;
             return edge;
         }
 
@@ -266,19 +278,23 @@ namespace cs
 
         void VisitEdges(std::function<void(edge_type&)> visitor)
         {
-            for (edge_type* edge : edges)
-                visitor(*edge);
+            for (auto& key_value : edges)
+                visitor(*key_value.second);
         }
 
         void VisitEdges(std::function<void(const edge_type&)> visitor) const
         {
-            for (const edge_type* edge : edges)
-                visitor(*edge);
+            for (const auto& key_value : edges)
+                visitor(*key_value.second);
         }
 
         vertex_type& GetVertexById(TId id) { return *vertices.at(id); }
 
         const vertex_type& GetVertexById(TId id) const { return *vertices.at(id); }
+
+        edge_type& GetEdgeByIds(TId from_id, TId to_id) { return *edges.at({from_id, to_id}); }
+
+        const edge_type& GetEdgeByIds(TId from_id, TId to_id) const { return *edges.at({from_id, to_id}); }
     };
 
     template<typename TId, typename TData, typename TLen>

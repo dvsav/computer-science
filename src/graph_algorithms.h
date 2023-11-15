@@ -5,6 +5,11 @@
 #include <functional> // for std::function
 #include <queue>      // for std::queue
 #include <stack>      // for std::stack
+#include <utility>    // for std::pair
+#include <list>       // for std::list
+#include <vector>     // for std::vector
+#include <algorithm>  // for std::upper_bound
+#include <limits>     // for std::numeric_limits
 
 namespace cs
 {
@@ -219,5 +224,93 @@ namespace cs
         Graph<TId, TData, TLen>& graph)
     {
         // TODO
+    }
+
+    template<typename TLen>
+    TLen GetInfinity() 
+    {
+        if (std::numeric_limits<TLen>::has_infinity)
+            return std::numeric_limits<TLen>::infinity();
+        return std::numeric_limits<TLen>::max();
+    }
+
+    template<typename TId, typename TLen>
+    std::pair<std::list<TId>, TLen> FindShortestPath_Dijkstra(
+        Graph<TId, std::pair<TId, TLen>, TLen>& graph,
+        TId start_id,
+        TId finish_id,
+        std::function<void(Vertex<TId, std::pair<TId, TLen>, TLen>&)> visit,
+        bool clearAuxData = true)
+    {
+        using vertex_type = Vertex<TId, std::pair<TId, TLen>, TLen>;
+
+        // initialize data:
+        // path lengths from start vertex to other verteces is infinite 
+        const TLen max_length = GetInfinity<TLen>(); 
+        graph.VisitVertices([max_length](vertex_type& vertex) -> void { vertex.Data().second = max_length; });
+        // path length from start vertex to itself is zero 
+        vertex_type& start = graph.GetVertexById(start_id);
+        start.Data().second = 0;
+
+        // list is used because we need to insert vertices in order by path length from the start
+        // list will be maintained in sorted state
+        std::list<vertex_type*> vertices;
+        vertices.push_back(&start);
+
+        while (!vertices.empty() && vertices.front()->Id() != finish_id) 
+        {
+            vertex_type& v = *vertices.front();    
+            visit(v);
+            vertices.pop_front();
+            v.Discovered() = true;
+            TLen v_length = v.Data().second;
+
+            VisitOutNeighbors<TId, std::pair<TId, TLen>, TLen>(
+                /*vertex*/ v,
+                /*visit*/
+                [&vertices, &graph, v_length, &v](vertex_type& neighbor) -> void
+                {
+                    if (!neighbor.Discovered())
+                    {
+                        TLen edge_length = graph.GetEdgeByIds(v.Id(), neighbor.Id()).Length();
+                        TLen total_length = v_length + edge_length;
+
+                        if (total_length < neighbor.Data().second)
+                        {
+                            neighbor.Data().first = v.Id();
+                            neighbor.Data().second = total_length;
+
+                            auto pos = std::upper_bound(vertices.begin(), vertices.end(), total_length,
+                                    [](TLen l, const vertex_type* v) { return l < v->Data().second; });
+                            vertices.insert(pos, &neighbor);
+                        }
+                    }
+                }
+            );
+        }
+
+        // if no way found from start to finish return empty path and max (infinite) length
+        vertex_type& finish = graph.GetVertexById(finish_id);
+        if (finish.Data().second == max_length) 
+            return {{}, max_length};
+
+        // otherwise construct the path by backtracking from finish to start
+        std::list<TId> path;
+        for (TId id = finish_id; id != start_id; )
+        {
+            path.push_front(id);
+            vertex_type& v = graph.GetVertexById(id);
+            id = v.Data().first;
+        }
+        path.push_front(start_id);
+
+        // total length is length of path from start to finish
+        TLen total_length = finish.Data().second;
+
+        if (clearAuxData)
+            graph.VisitVertices([](vertex_type& vertex) -> void { vertex.Data() = {}; });
+    
+        // return the path from start to finish and path's length
+        return {path, total_length};
     }
 }

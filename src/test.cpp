@@ -6,8 +6,10 @@
 #include "utility.h"          // for cs::ReverseComparator, cs::files_textually_equal
 
 #include <array>              // for std::array
-#include <iostream>           // for std:::cout
+#include <iostream>           // for std::cout
 #include <vector>             // for std::vector
+#include <utility>            // for std::pair
+#include <list>               // for std::list
 
 // Catch2 - a single header unit test framework
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
@@ -191,4 +193,83 @@ TEST_CASE("Graph breadth/depth-first search", "[graph]")
         });
 
     // WARNING: there can be multiple correct topological orders
+}
+
+TEST_CASE("Dijkstra's algorithm", "[graph]")
+{
+    using id_type = int;
+    using length_type = double;
+
+    // TData for Dijkstra's algorithm is std::pair of: 
+    //     id of the previous vertex on the shortest path from the start to current vertex
+    //     length of the shortest path from the start to current vertex 
+    using graph_type = cs::Graph<id_type, std::pair<id_type, length_type>, length_type>;
+    using vertex_type = typename graph_type::vertex_type;
+
+    graph_type g;
+
+    for (id_type i = 0; i < 4; i++)
+    {
+        g.AddVertex(/*id*/ i, /*data*/ {});
+    }
+    REQUIRE(g.VerticesNumber() == 4);
+
+    // g: (edges are symmetric)
+    //             0  (start vertex)
+    // length = 3 / \ 5
+    //           1 - 2  (edge length between 1 and 2 = 1)
+    //          9 \ / 2
+    //             3  (finish vertex)
+    //
+    // path: 0 -> 1 -> 2 -> 3;
+    // total length = 3 + 1 + 2 = 6
+    // vertex visit order: 0, 1, 2, 2 (again, from 1)
+
+    g.AddEdge(/*from_id*/ 0, /*to_id*/ 1, /*length*/ 3.0);
+    g.AddEdge(/*from_id*/ 1, /*to_id*/ 0, /*length*/ 3.0);
+
+    g.AddEdge(/*from_id*/ 0, /*to_id*/ 2, /*length*/ 5.0);
+    g.AddEdge(/*from_id*/ 2, /*to_id*/ 0, /*length*/ 5.0);
+
+    g.AddEdge(/*from_id*/ 1, /*to_id*/ 2, /*length*/ 1.0);
+    g.AddEdge(/*from_id*/ 2, /*to_id*/ 1, /*length*/ 1.0);
+
+    g.AddEdge(/*from_id*/ 1, /*to_id*/ 3, /*length*/ 9.0);
+    g.AddEdge(/*from_id*/ 3, /*to_id*/ 1, /*length*/ 9.0);
+
+    g.AddEdge(/*from_id*/ 2, /*to_id*/ 3, /*length*/ 2.0);
+    g.AddEdge(/*from_id*/ 3, /*to_id*/ 2, /*length*/ 2.0);
+
+    REQUIRE(g.EdgesNumber() == 10);
+
+    REQUIRE(g.GetVertexById(0).NumberOfOutgoingEdges() == 2);
+    REQUIRE(g.GetVertexById(0).NumberOfIncomingEdges() == 2);
+
+    REQUIRE(g.GetVertexById(1).NumberOfOutgoingEdges() == 3);
+    REQUIRE(g.GetVertexById(1).NumberOfIncomingEdges() == 3);
+
+    REQUIRE(g.GetVertexById(2).NumberOfOutgoingEdges() == 3);
+    REQUIRE(g.GetVertexById(2).NumberOfIncomingEdges() == 3);
+
+    REQUIRE(g.GetVertexById(3).NumberOfOutgoingEdges() == 2);
+    REQUIRE(g.GetVertexById(3).NumberOfIncomingEdges() == 2);
+
+
+    std::vector<id_type> visit_order;
+    visit_order.reserve(4);
+
+    auto result = cs::FindShortestPath_Dijkstra<id_type, length_type>(
+        /*graph*/ g,
+        /*start_id*/ 0,
+        /*finish_id*/ 3,
+        /*visitor*/
+        [&visit_order](vertex_type& v) -> void
+        {
+            visit_order.push_back(v.Id());
+        });
+
+    std::pair<std::list<id_type>, length_type> expected = { /*path*/ { 0, 1, 2, 3 }, /*total length*/ 6.0};
+
+    REQUIRE(result == expected);
+    REQUIRE(visit_order == std::vector<id_type>{ 0, 1, 2, 2 });
 }
