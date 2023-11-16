@@ -294,14 +294,14 @@ namespace cs
          * For example, Dijkstra's shortest path algorithm may store there the Dijkstra's greedy score and a pointer to previous vertex).
          */
         template<typename T>
-        const T*& AuxData() const { return reinterpret_cast<const T*>(auxData); }
+        const T* AuxData() const { return reinterpret_cast<const T*>(auxData); }
 
         /**
          * @brief Pointer to auxiliary data allowing graph algorithms to store (most probably - temporarily) arbitrary data (depending on a particular algorithm).
          * For example, Dijkstra's shortest path algorithm may store there the Dijkstra's greedy score and a pointer to previous vertex).
          */
         template<typename T>
-        T*& AuxData() { return reinterpret_cast<T*>(auxData); }
+        T*& AuxData() { return *reinterpret_cast<T**>(&auxData); }
     };
 
     template<typename TId, typename TLen>

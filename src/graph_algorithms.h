@@ -386,7 +386,7 @@ namespace cs
         Graph<TId, TLen>& graph,
         TId from_id,
         TId to_id,
-        std::function<void(Vertex<TId, TLen>& /*vertex*/, TLen /*shortestPath*/)> visitShortestPath,
+        std::function<void(Vertex<TId, TLen>& /*vertex*/, TLen /*shortestPathLength*/)> visitShortestPath,
         bool clearDijkstraData = true)
     {
         using vertex_type = Vertex<TId, TLen>;
@@ -485,7 +485,7 @@ namespace cs
         Graph<TId, TLen>& graph,
         TId from_id,
         TId to_id,
-        std::function<void(Vertex<TId, TLen>& /*vertex*/, TLen /*shortestPath*/)> visitShortestPath,
+        std::function<void(Vertex<TId, TLen>& /*vertex*/, TLen /*shortestPathLength*/)> visitShortestPath,
         bool clearDijkstraData = true)
     {
         using vertex_type = Vertex<TId, TLen>;

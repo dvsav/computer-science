@@ -314,3 +314,43 @@ TEST_CASE("Graph input-output", "[graph]")
     REQUIRE(graph_adjacency_list.VerticesNumber() == graph_vertex_edge_list.VerticesNumber());
     REQUIRE(graph_adjacency_list.EdgesNumber() == graph_vertex_edge_list.EdgesNumber());
 }
+
+TEST_CASE("Dijkstra's shortest path algorithm", "[graph]")
+{
+    using graph_type = cs::Graph<>;
+    using vertex_type = graph_type::vertex_type;
+    using id_type = graph_type::id_type;
+    using length_type = graph_type::length_type;
+
+    const char* graph_file_path = "./dijkstra/vertex_edge_list.txt";
+    const char* shortest_path_file_ethalon = "./dijkstra/shortest_path_from_1_to_4.txt";
+
+    graph_type graph;
+    {
+        std::ifstream ifs(graph_file_path);
+        REQUIRE(ifs);
+
+        cs::read_vertex_edge_list(ifs, graph);
+    }
+
+    std::vector<id_type> shortest_path_ethalon;
+    {
+        std::ifstream ifs(shortest_path_file_ethalon);
+        REQUIRE(ifs);
+
+        ifs >> shortest_path_ethalon;
+    }
+
+    std::vector<id_type> shortest_path;
+    cs::DijkstraShortestPath_Directed<id_type, length_type>(
+        /*graph*/ graph,
+        /*from*/ 1,
+        /*to*/ 4,
+        /*visitShortestPath*/
+        [&shortest_path](vertex_type& vertex, length_type /*shortestPathLength*/)
+        {
+            shortest_path.push_back(vertex.Id());
+        });
+
+    REQUIRE(shortest_path == shortest_path_ethalon);
+}
