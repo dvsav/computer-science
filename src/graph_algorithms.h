@@ -478,4 +478,104 @@ namespace cs
                 });
         }
     }
+
+
+    template<typename TId, typename TLen>
+    void DijkstraShortestPath_Undirected(
+        Graph<TId, TLen>& graph,
+        TId from_id,
+        TId to_id,
+        std::function<void(Vertex<TId, TLen>& /*vertex*/, TLen /*shortestPath*/)> visitShortestPath,
+        bool clearDijkstraData = true)
+    {
+        using vertex_type = Vertex<TId, TLen>;
+        using edge_type = typename vertex_type::edge_type;
+        using data_type = DijkstraShortestPath_Data<TId, TLen>;
+
+        vertex_type& from = graph.GetVertexById(from_id);
+        vertex_type& to = graph.GetVertexById(to_id);
+
+        from.template AuxData<data_type>() = new data_type;
+
+        DijkstraShortestPath_VertexMinHeap<TId, TLen> frontier;
+        frontier.insert(&from);
+
+        // Score each vertex in the graph
+        while (!frontier.empty())
+        {
+            vertex_type* current_node = frontier.popClosestVertex();
+            if (current_node->Discovered()) continue;
+            current_node->Discovered() = true;
+
+            VisitEdges(
+                /*vertex*/ *current_node,
+                /*visitor*/
+                [current_node, &frontier](edge_type& edge)
+                {
+                    auto& frontier_node = edge.To();
+
+                    if (frontier_node.Discovered())
+                        return;
+
+                    TLen newLen = current_node->template AuxData<data_type>()->shortestPathLength + edge.Length();
+
+                    if (frontier_node.template AuxData<data_type>())
+                    {
+                        // frontier_node has been scored before
+                        if (newLen < frontier_node.template AuxData<data_type>()->shortestPathLength)
+                        {
+                            // update frontier_node's score
+                            frontier_node.template AuxData<data_type>()->shortestPathLength = newLen;
+                            frontier_node.template AuxData<data_type>()->previousVertex = current_node;
+
+                            frontier.insert(&frontier_node);
+                        }
+                    }
+                    else
+                    {
+                        // frontier_node hasn't been scored before
+                        frontier_node.template AuxData<data_type>() = new data_type(
+                            /*shortestPathLength*/ newLen,
+                            /*previousVertex*/ current_node);
+
+                        frontier.insert(&frontier_node);
+                    }
+                });
+        }
+
+        // visit the shortest path
+        if (visitShortestPath && to.template AuxData<data_type>())
+        {
+            std::stack<vertex_type*> shortestPath;
+            shortestPath.push(&to);
+            while (true)
+            {
+                vertex_type* top = shortestPath.top();
+                if (top == &from)
+                    break;
+                shortestPath.push(top->template AuxData<data_type>()->previousVertex);
+            }
+
+            while (!shortestPath.empty())
+            {
+                vertex_type* top = shortestPath.top();
+                visitShortestPath(*top, top->template AuxData<data_type>()->shortestPathLength);
+                shortestPath.pop();
+            }
+        }
+
+        // clear Dijkstra's shortest path data
+        if (clearDijkstraData)
+        {
+            graph.VisitVertices(
+                [](vertex_type& v)
+                {
+                    if (v.template AuxData<data_type>())
+                    {
+                        delete v.template AuxData<data_type>();
+                        v.template AuxData<data_type>() = nullptr;
+                    }
+                });
+        }
+    }
 }
