@@ -646,13 +646,47 @@ namespace cs
         g.VisitEdges(
             [&os](const edge_type& e)
             {
-                os << e.From().Id() << ' ' << e.To().Id() << std::endl;
+                os << e.From().Id() << ' ' << e.To().Id() << ' ' << e.Length() << std::endl;
             }
         );
 
         os << '}' << std::endl;
 
         return os;
+    }
+
+    template<typename TId, typename TLen>
+    std::istream& read_edge(std::istream& is, TId& from, TId& to, TLen& length)
+    {
+        // Skip all whitespace characters and check that the first
+        // non-whitespace one is a digit
+        skip_whitespace(is);
+        if (!std::isdigit(is.peek()))
+        {
+            is.clear(std::ios_base::failbit);
+            return is;
+        }
+
+        // Read the entire line until newline
+        std::string line;
+        std::getline(is, line);
+        if (!is)
+            return is;
+
+        std::istringstream iss(line);
+
+        // Read space separated vertex ids
+        if (!(iss >> from) || !(iss >> to))
+        {
+            is.clear(std::ios_base::failbit);
+            return is;
+        }
+
+        // The length is optional
+        if (!(iss >> length))
+            length = TLen{};
+
+        return is;
     }
 
     template<typename TId, typename TLen>
@@ -686,9 +720,11 @@ namespace cs
 
         while (true)
         {
-            std::vector<TId> edge;
-            edge.reserve(2);
-            is >> edge;
+            TId from{};
+            TId to{};
+            TLen length{};
+
+            read_edge(is, from, to, length);
 
             if (is.fail())
             {
@@ -704,13 +740,7 @@ namespace cs
                 return is;
             }
 
-            if (edge.size() != 2)
-            {
-                is.clear(std::ios_base::failbit);
-                return is;
-            }
-
-            g.AddEdge(edge[0], edge[1]);
+            g.AddEdge(from, to, length);
         }
 
         return is;
