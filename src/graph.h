@@ -316,6 +316,17 @@ namespace cs
     }
 
     template<typename TId, typename TLen>
+    void VisitInNeighbors(
+        const Vertex<TId, TLen>& vertex,
+        std::function<void(const Vertex<TId, TLen>&)> visitor)
+    {
+        using vertex_type = Vertex<TId, TLen>;
+        using edge_type = Edge<vertex_type, TLen>;
+
+        vertex.VisitIncomingEdges([visitor](const edge_type& edge) -> void { return visitor(edge.From()); });
+    }
+
+    template<typename TId, typename TLen>
     void VisitOutNeighbors(
         Vertex<TId, TLen>& vertex,
         std::function<void(Vertex<TId, TLen>&)> visitor)
@@ -347,12 +358,62 @@ namespace cs
     }
 
     template<typename TId, typename TLen>
+    void VisitNeighbors(
+        const Vertex<TId, TLen>& vertex,
+        std::function<void(const Vertex<TId, TLen>&)> visitor)
+    {
+        VisitInNeighbors<TId, TLen>(vertex, visitor);
+        VisitOutNeighbors<TId, TLen>(vertex, visitor);
+    }
+
+    template<typename TId, typename TLen>
     void VisitEdges(
         Vertex<TId, TLen>& vertex,
-        std::function<void(Edge<Vertex<TId, TLen>, TLen>&)> visitor)
+        std::function<void(Vertex<TId, TLen>& /*neighbor*/, TLen /*length*/)> visitor)
     {
-        vertex.VisitIncomingEdges(visitor);
-        vertex.VisitOutgoingEdges(visitor);
+        using vertex_type = Vertex<TId, TLen>;
+        using edge_type = typename vertex_type::edge_type;
+
+        vertex.VisitIncomingEdges(
+            /*visitor*/
+            [visitor](edge_type& edge)
+            {
+                visitor(edge.From(), edge.Length());
+            }
+        );
+
+        vertex.VisitOutgoingEdges(
+            /*visitor*/
+            [visitor](edge_type& edge)
+            {
+                visitor(edge.To(), edge.Length());
+            }
+        );
+    }
+
+    template<typename TId, typename TLen>
+    void VisitEdges(
+        const Vertex<TId, TLen>& vertex,
+        std::function<void(const Vertex<TId, TLen>& /*neighbor*/, TLen /*length*/)> visitor)
+    {
+        using vertex_type = Vertex<TId, TLen>;
+        using edge_type = typename vertex_type::edge_type;
+
+        vertex.VisitIncomingEdges(
+            /*visitor*/
+            [visitor](const edge_type& edge)
+            {
+                visitor(edge.From(), edge.Length());
+            }
+        );
+
+        vertex.VisitOutgoingEdges(
+            /*visitor*/
+            [visitor](const edge_type& edge)
+            {
+                visitor(edge.To(), edge.Length());
+            }
+        );
     }
 
     template<typename TId, typename TLen>

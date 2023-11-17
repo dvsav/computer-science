@@ -479,7 +479,6 @@ namespace cs
         }
     }
 
-
     template<typename TId, typename TLen>
     void DijkstraShortestPath_Undirected(
         Graph<TId, TLen>& graph,
@@ -489,7 +488,6 @@ namespace cs
         bool clearDijkstraData = true)
     {
         using vertex_type = Vertex<TId, TLen>;
-        using edge_type = typename vertex_type::edge_type;
         using data_type = DijkstraShortestPath_Data<TId, TLen>;
 
         vertex_type& from = graph.GetVertexById(from_id);
@@ -507,17 +505,15 @@ namespace cs
             if (current_node->Discovered()) continue;
             current_node->Discovered() = true;
 
-            VisitEdges(
+            VisitEdges<TId, TLen>(
                 /*vertex*/ *current_node,
                 /*visitor*/
-                [current_node, &frontier](edge_type& edge)
+                [current_node, &frontier](vertex_type& frontier_node, TLen length)
                 {
-                    auto& frontier_node = edge.To();
-
                     if (frontier_node.Discovered())
                         return;
 
-                    TLen newLen = current_node->template AuxData<data_type>()->shortestPathLength + edge.Length();
+                    TLen newLen = current_node->template AuxData<data_type>()->shortestPathLength + length;
 
                     if (frontier_node.template AuxData<data_type>())
                     {
