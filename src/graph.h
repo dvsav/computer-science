@@ -104,7 +104,7 @@ namespace cs
      * The class stores a collection of incoming and outgoing edges.
      * It also includes 'discovered' boolean flag used in many graph algorithms.
      *
-     * @tparam TId The data type of Id.
+     * @tparam TId The data type of vertex Id.
      * @tparam TLen The data type of edge length.
      */
     template<typename TId, typename TLen>
@@ -304,6 +304,16 @@ namespace cs
         T*& AuxData() { return *reinterpret_cast<T**>(&auxData); }
     };
 
+    /**
+     * @brief Calls @p visitor functor for all in-neighbors of @p vertex.
+     * @p vertex is connected with an in-neighbor by an incoming edge.
+     * 
+     * @param vertex
+     * @param visitor - functor called for each in-neghbor
+     * 
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitInNeighbors(
         Vertex<TId, TLen>& vertex,
@@ -315,6 +325,16 @@ namespace cs
         vertex.VisitIncomingEdges([visitor](edge_type& edge) -> void { return visitor(edge.From()); });
     }
 
+    /**
+     * @brief Calls @p visitor functor for all in-neighbors of @p vertex.
+     * @p vertex is connected with an in-neighbor by an incoming edge.
+     *
+     * @param vertex
+     * @param visitor - functor called for each in-neghbor
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitInNeighbors(
         const Vertex<TId, TLen>& vertex,
@@ -326,6 +346,16 @@ namespace cs
         vertex.VisitIncomingEdges([visitor](const edge_type& edge) -> void { return visitor(edge.From()); });
     }
 
+    /**
+     * @brief Calls @p visitor functor for all out-neighbors of @p vertex.
+     * @p vertex is connected with an out-neighbor by an outgoing edge.
+     *
+     * @param vertex
+     * @param visitor - functor called for each out-neghbor
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitOutNeighbors(
         Vertex<TId, TLen>& vertex,
@@ -337,6 +367,16 @@ namespace cs
         vertex.VisitOutgoingEdges([visitor](edge_type& edge) -> void { return visitor(edge.To()); });
     }
 
+    /**
+     * @brief Calls @p visitor functor for all out-neighbors of @p vertex.
+     * @p vertex is connected with an out-neighbor by an outgoing edge.
+     *
+     * @param vertex
+     * @param visitor - functor called for each out-neghbor
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitOutNeighbors(
         const Vertex<TId, TLen>& vertex,
@@ -348,6 +388,16 @@ namespace cs
         vertex.VisitOutgoingEdges([visitor](const edge_type& edge) -> void { return visitor(edge.To()); });
     }
 
+    /**
+     * @brief Calls @p visitor functor for all neighbors of @p vertex.
+     * @p vertex is connected with a neighbor by an edge.
+     *
+     * @param vertex
+     * @param visitor - functor called for each neghbor
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitNeighbors(
         Vertex<TId, TLen>& vertex,
@@ -357,6 +407,16 @@ namespace cs
         VisitOutNeighbors<TId, TLen>(vertex, visitor);
     }
 
+    /**
+     * @brief Calls @p visitor functor for all neighbors of @p vertex.
+     * @p vertex is connected with a neighbor by an edge.
+     *
+     * @param vertex
+     * @param visitor - functor called for each neghbor
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitNeighbors(
         const Vertex<TId, TLen>& vertex,
@@ -366,6 +426,16 @@ namespace cs
         VisitOutNeighbors<TId, TLen>(vertex, visitor);
     }
 
+    /**
+     * @brief Calls @p visitor functor for all edges of @p vertex.
+     *
+     * @param vertex
+     * @param visitor - functor called for each edge; accepts a reference to
+     * a @p vertex's neighbor and the length of the edge.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitEdges(
         Vertex<TId, TLen>& vertex,
@@ -391,6 +461,16 @@ namespace cs
         );
     }
 
+    /**
+     * @brief Calls @p visitor functor for all edges of @p vertex.
+     *
+     * @param vertex
+     * @param visitor - functor called for each edge; accepts a reference to
+     * a @p vertex's neighbor and the length of the edge.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitEdges(
         const Vertex<TId, TLen>& vertex,
@@ -416,12 +496,33 @@ namespace cs
         );
     }
 
+    /**
+     * @brief Returns the total number of edges for a given @p vertex.
+     *
+     * @param vertex
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     * 
+     * @return number of edges
+     */
     template<typename TId, typename TLen>
     size_t NumberOfEdges(Vertex<TId, TLen>& vertex)
     {
         return vertex.NumberOfIncomingEdges() + vertex.NumberOfOutgoingEdges();
     }
 
+    /**
+     * @brief Returns true if there's a directed edge going from vertex @p from to vertex @p to.
+     *
+     * @param from - tail vertex
+     * @param to - head vertex
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     *
+     * @return true if an edge exists, false otherwise
+     */
     template<typename TId, typename TLen>
     bool DirectedEdgeExists(
         const Vertex<TId, TLen>& from,
@@ -435,6 +536,17 @@ namespace cs
             to.FindIncomingEdge([&from](const edge_type& edge) { return &edge.From() == &from; });
     }
 
+    /**
+     * @brief Returns true if there's an undirected edge between vertices @p a and @p b.
+     *
+     * @param a - a vertex
+     * @param b - a vertex
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     *
+     * @return true if an edge exists, false otherwise
+     */
     template<typename TId, typename TLen>
     bool UndirectedEdgeExists(
         const Vertex<TId, TLen>& a,
@@ -596,6 +708,14 @@ namespace cs
         }
     };
 
+    /**
+     * @brief Resets to false the 'Discovered' flags of all vertices of a @p graph.
+     *
+     * @param graph
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void ClearDiscovered(Graph<TId, TLen>& graph)
     {
@@ -609,13 +729,25 @@ namespace cs
             });
     }
 
+    /**
+     * @brief Writes @p graph to an output stream @p os in 'adjacency list' format
+     * meaning that each vertex is written along with its out-neighbors (edge length information is not written).
+     *
+     * @param os - output stream
+     * @param graph
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     * 
+     * @return reference to @p os
+     */
     template<typename TId, typename TLen>
-    std::ostream& write_adjacency_list(std::ostream& os, const cs::Graph<TId, TLen>& g)
+    std::ostream& write_adjacency_list(std::ostream& os, const cs::Graph<TId, TLen>& graph)
     {
         using vertex_type = cs::Vertex<TId, TLen>;
 
         os << '{' << std::endl;
-        g.VisitVertices(
+        graph.VisitVertices(
             [&os](const vertex_type& v)
             {
                 os << v.Id();
@@ -634,10 +766,23 @@ namespace cs
         return os;
     }
 
+    /**
+     * @brief Reads @p graph from an input stream @p is in 'adjacency list' format
+     * meaning that each vertex is read along with its out-neighbors (edge length information is not read,
+     * so all edges get the default length value).
+     *
+     * @param is - input stream
+     * @param graph
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     *
+     * @return reference to @p is
+     */
     template<typename TId, typename TLen>
-    std::istream& read_adjacency_list(std::istream& is, cs::Graph<TId, TLen>& g)
+    std::istream& read_adjacency_list(std::istream& is, cs::Graph<TId, TLen>& graph)
     {
-        g.Clear();
+        graph.Clear();
 
         while (skip_comment(is, "#")) {};
 
@@ -674,18 +819,30 @@ namespace cs
             }
 
             TId vertex_id = adjacency_list[0];
-            g.AddVertex(vertex_id);
+            graph.AddVertex(vertex_id);
             for (auto i = adjacency_list.begin() + 1; i != adjacency_list.end(); i++)
             {
                 TId neighbor_id = *i;
-                g.AddVertex(neighbor_id);
-                g.AddEdge(/*from_id*/ vertex_id, /*to_id*/ neighbor_id);
+                graph.AddVertex(neighbor_id);
+                graph.AddEdge(/*from_id*/ vertex_id, /*to_id*/ neighbor_id);
             }
         }
 
         return is;
     }
 
+    /**
+     * @brief Writes @p graph to an output stream @p os in 'vertex list, edge list' format
+     * meaning that the list of all edges is written first and then it's followed by the list of edges.
+     *
+     * @param os - output stream
+     * @param graph
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     *
+     * @return reference to @p os
+     */
     template<typename TId, typename TLen>
     std::ostream& write_vertex_edge_list(std::ostream& os, const cs::Graph<TId, TLen>& g)
     {
@@ -716,6 +873,21 @@ namespace cs
         return os;
     }
 
+    /**
+     * @brief Reads an edge from an input stream @p is in the form of
+     * three variables: from (id of edge tail), to (id of edge head) and edge length.
+     * The latter one is optional: if not present in the input stream it receives the default value.
+     *
+     * @param is - input stream
+     * @param from - edge tail
+     * @param to - edge head
+     * @param length - edge length
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     *
+     * @return reference to @p is
+     */
     template<typename TId, typename TLen>
     std::istream& read_edge(std::istream& is, TId& from, TId& to, TLen& length)
     {
@@ -750,10 +922,22 @@ namespace cs
         return is;
     }
 
+    /**
+     * @brief Reads @p graph from an input stream @p is in 'vertex list, edge list' format
+     * meaning that the list of all edges is read first and then it's followed by the list of edges.
+     *
+     * @param is - input stream
+     * @param graph
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     *
+     * @return reference to @p os
+     */
     template<typename TId, typename TLen>
-    std::istream& read_vertex_edge_list(std::istream& is, cs::Graph<TId, TLen>& g)
+    std::istream& read_vertex_edge_list(std::istream& is, cs::Graph<TId, TLen>& graph)
     {
-        g.Clear();
+        graph.Clear();
 
         while (skip_comment(is, "#")) {};
 
@@ -777,7 +961,7 @@ namespace cs
             return is;
 
         for (auto v : vertex_list)
-            g.AddVertex(v);
+            graph.AddVertex(v);
 
         while (true)
         {
@@ -801,7 +985,7 @@ namespace cs
                 return is;
             }
 
-            g.AddEdge(from, to, length);
+            graph.AddEdge(from, to, length);
         }
 
         return is;
