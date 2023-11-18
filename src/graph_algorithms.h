@@ -9,6 +9,19 @@
 
 namespace cs
 {
+    /**
+     * @brief Performs breadth-first search in directed @p graph starting from
+     * vertex with identifier @p root_id calling functor @p visitor for each visited vertex.
+     * Sets 'Discovered' flag to true for each visited vertex.
+     *
+     * @param graph
+     * @param root_id - identifier of the vertex from which the search begins.
+     * @param visit - functor accepting reference to a vertex.
+     * @param clearDiscovered - if true resets 'Discovered' flag to false for all vertices in the graph.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void BreadthFirstSearch_Directed(
         Graph<TId, TLen>& graph,
@@ -53,6 +66,19 @@ namespace cs
             ClearDiscovered(graph);
     }
 
+    /**
+     * @brief Performs breadth-first search in undirected @p graph starting from
+     * vertex with identifier @p root_id calling functor @p visitor for each visited vertex.
+     * Sets 'Discovered' flag to true for each visited vertex.
+     *
+     * @param graph
+     * @param root_id - identifier of the vertex from which the search begins.
+     * @param visit - functor accepting reference to a vertex.
+     * @param clearDiscovered - if true resets 'Discovered' flag to false for all vertices in the graph.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void BreadthFirstSearch_Undirected(
         Graph<TId, TLen>& graph,
@@ -97,6 +123,19 @@ namespace cs
             ClearDiscovered(graph);
     }
 
+    /**
+     * @brief Performs depth-first search in directed @p graph starting from
+     * vertex with identifier @p root_id calling functor @p visitor for each visited vertex.
+     * Sets 'Discovered' flag to true for each visited vertex.
+     *
+     * @param graph
+     * @param root_id - identifier of the vertex from which the search begins.
+     * @param visit - functor accepting reference to a vertex.
+     * @param clearDiscovered - if true resets 'Discovered' flag to false for all vertices in the graph.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void DepthFirstSearch_Directed(
         Graph<TId, TLen>& graph,
@@ -138,6 +177,19 @@ namespace cs
             ClearDiscovered(graph);
     }
 
+    /**
+     * @brief Performs depth-first search in undirected @p graph starting from
+     * vertex with identifier @p root_id calling functor @p visitor for each visited vertex.
+     * Sets 'Discovered' flag to true for each visited vertex.
+     *
+     * @param graph
+     * @param root_id - identifier of the vertex from which the search begins.
+     * @param visit - functor accepting reference to a vertex.
+     * @param clearDiscovered - if true resets 'Discovered' flag to false for all vertices in the graph.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void DepthFirstSearch_Undirected(
         Graph<TId, TLen>& graph,
@@ -182,6 +234,22 @@ namespace cs
             ClearDiscovered(graph);
     }
 
+    /**
+     * @brief Performs depth-first search in inverse-topological order in directed @p graph starting from
+     * vertex with identifier @p root_id calling functor @p visitor for each visited vertex.
+     * Sets 'Discovered' flag to true for each visited vertex. 'Inverse-topological order' assumes that
+     * every time a vertex is visited that doesn't have any undiscovered out-neighbors,
+     * beginning from the 'sink' vertex (the one that doesn't have any outgoing edges) all the way to the
+     * root vertex.
+     *
+     * @param graph
+     * @param root_id - identifier of the vertex from which the search begins.
+     * @param visit - functor accepting reference to a vertex.
+     * @param clearDiscovered - if true resets 'Discovered' flag to false for all vertices in the graph.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void DepthFirstSearch_Directed_InverseTopological(
         Graph<TId, TLen>& graph,
@@ -228,6 +296,25 @@ namespace cs
             ClearDiscovered(graph);
     }
 
+    /**
+     * @brief Calls functor @p visit for the vertices of @p graph in
+     * topologically sorted order (or in reverse topologically sorted order
+     * if @p visit_in_reverse_order is true). 'Topologically sorted order'
+     * (suppose the sorted vertices go from left to right) assumes
+     * that for each vertex v all v's incoming edges come from the left of v and
+     * all v's outgoing edges go to the right of v. Note that this is true for
+     * directed acyclic graphs only; however this sort is also used in graphs
+     * having loops in Kosaraju's algorithm.
+     * 
+     * @see VisitStronglyConnectedComponents_Kosaraju.
+     *
+     * @param graph
+     * @param visit - functor accepting reference to a vertex.
+     * @param visit_in_reverse_order - if true, visits the vertices in reverse topologically sorted order.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void TopologicalSort(
         Graph<TId, TLen>& graph,
@@ -273,6 +360,21 @@ namespace cs
         }
     }
 
+    /**
+     * @brief Checks that vertices in a collection specified by a pair of
+     * iterators @p begin and @p end are sorted in topological order.
+     * 
+     * @see TopologicalSort
+     *
+     * @param begin
+     * @param end
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     * @tparam TIterator - iterator dereferencing to a pointer to vertex.
+     * 
+     * @return true if vertices are in topological order, false otherwise.
+     */
     template<typename TId, typename TLen, typename TIterator>
     bool IsTopologicalOrder(
         TIterator begin,
@@ -300,6 +402,19 @@ namespace cs
         return true;
     }
 
+    /**
+     * @brief Performs the Kosaraju's algorithm of finding strongly connected components (SCC).
+     * Calls functor @p visit for each vertex passing it an identifier of SCC this vertex belongs to.
+     * SCC is a subgraph such that for each vertex v in that SCC there exists a path to all other
+     * vertices of that SCC.
+     *
+     * @param graph
+     * @param visit - functor accepting a reference to vertex and the identifier of
+     * the strongly connected component (SCC) this vertex belongs to.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void VisitStronglyConnectedComponents_Kosaraju(
         Graph<TId, TLen>& graph,
@@ -327,7 +442,6 @@ namespace cs
         ClearDiscovered(graph);
     }
 
-    template <typename TId, typename TLen>
     struct DijkstraShortestPath_Data
     {
         using vertex_type = Vertex<TId, TLen>;
@@ -383,6 +497,29 @@ namespace cs
         }
     };
 
+    /**
+     * @brief Finds the minimum-length path in directed @p graph
+     * from a vertex with identifier @p from_id to every other vertex in the @p graph.
+     * For each vertex in the @p graph creates a structure DijkstraShortestPath_Data (containng
+     * the shortest length to this vertex and the pointer to its predecessor in the shortest path)
+     * and puts a pointer to that structure to the AuxData() attribute of the vertex - this structure
+     * can be accessed afterwards if you've passed false as @p clearDijkstraData, but in that case
+     * you are responsible for deallocating memory pointed to by AuxData() in each vertex.
+     * Calls functor @p visitShortestPath (unless it is null) for each vertex in the path
+     * from the vertex with identifier @p from_id to a vertex with identifier @p to_id.
+     *
+     * @see DijkstraShortestPath_Data
+     * 
+     * @param graph
+     * @param from_id - identifier of a vertex which is the beginning of all shortest paths to be found.
+     * @param to_id - identifier of a vertex which is the destination of the shortest path visited with @p visitShortestPath functor.
+     * @param visitShortestPath - functor accepting a reference to vertex an the length of the shortest path from the
+     * vertex with identifier @p @from_id.
+     * @param clearDijkstraData - if true, clears all DijkstraShortestPath_Data structures created during the algorithm.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void DijkstraShortestPath_Directed(
         Graph<TId, TLen>& graph,
@@ -481,6 +618,29 @@ namespace cs
         }
     }
 
+    /**
+     * @brief Finds the minimum-length path in undirected @p graph
+     * from a vertex with identifier @p from_id to every other vertex in the @p graph.
+     * For each vertex in the @p graph creates a structure DijkstraShortestPath_Data (containng
+     * the shortest length to this vertex and the pointer to its predecessor in the shortest path)
+     * and puts a pointer to that structure to the AuxData() attribute of the vertex - this structure
+     * can be accessed afterwards if you've passed false as @p clearDijkstraData, but in that case
+     * you are responsible for deallocating memory pointed to by AuxData() in each vertex.
+     * Calls functor @p visitShortestPath (unless it is null) for each vertex in the path
+     * from the vertex with identifier @p from_id to a vertex with identifier @p to_id.
+     *
+     * @see DijkstraShortestPath_Data
+     *
+     * @param graph
+     * @param from_id - identifier of a vertex which is the beginning of all shortest paths to be found.
+     * @param to_id - identifier of a vertex which is the destination of the shortest path visited with @p visitShortestPath functor.
+     * @param visitShortestPath - functor accepting a reference to vertex an the length of the shortest path from the
+     * vertex with identifier @p @from_id.
+     * @param clearDijkstraData - if true, clears all DijkstraShortestPath_Data structures created during the algorithm.
+     *
+     * @tparam TId The data type of vertex Id.
+     * @tparam TLen The data type of edge length.
+     */
     template<typename TId, typename TLen>
     void DijkstraShortestPath_Undirected(
         Graph<TId, TLen>& graph,
