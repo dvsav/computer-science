@@ -274,7 +274,9 @@ namespace cs
     }
 
     template<typename TId, typename TLen, typename TIterator>
-    bool IsTopologicalOrder(TIterator begin, TIterator end)
+    bool IsTopologicalOrder(
+        TIterator begin,
+        TIterator end)
     {
         // Check that TIterator contains pointer to Vertex<TId, TLen>
         static_assert(
@@ -291,7 +293,7 @@ namespace cs
         {
             for (TIterator j = begin; j != i; j++)
             {
-                if (DirectedEdgeExists<TId, TLen>(/*from*/ **i, /*to*/ **j))
+                if (FindDirectedEdge<TId, TLen>(/*from*/ **i, /*to*/ **j))
                     return false;
             }
         }

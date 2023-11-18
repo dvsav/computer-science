@@ -513,7 +513,8 @@ namespace cs
     }
 
     /**
-     * @brief Returns true if there's a directed edge going from vertex @p from to vertex @p to.
+     * @brief Returns a pointer to a directed edge going from
+     * vertex @p from to vertex @p to if it exists and nullptr otherwise.
      *
      * @param from - tail vertex
      * @param to - head vertex
@@ -521,23 +522,53 @@ namespace cs
      * @tparam TId The data type of vertex Id.
      * @tparam TLen The data type of edge length.
      *
-     * @return true if an edge exists, false otherwise
+     * @return Pointer to edge if the edge exists, nullptr otherwise.
      */
     template<typename TId, typename TLen>
-    bool DirectedEdgeExists(
+    const Edge<Vertex<TId, TLen>, TLen>* FindDirectedEdge(
         const Vertex<TId, TLen>& from,
         const Vertex<TId, TLen>& to)
     {
         using vertex_type = Vertex<TId, TLen>;
         using edge_type = Edge<vertex_type, TLen>;
 
-        return
-            from.FindOutgoingEdge([&to](const edge_type& edge) { return &edge.To() == &to; }) &&
-            to.FindIncomingEdge([&from](const edge_type& edge) { return &edge.From() == &from; });
+        const edge_type* result = nullptr;
+
+        if (from.NumberOfOutgoingEdges() < to.NumberOfIncomingEdges())
+        {
+            from.FindOutgoingEdge(
+                [&to, &result](const edge_type& edge)
+                {
+                    if (&edge.To() == &to)
+                    {
+                        result = &edge;
+                        return true;
+                    }
+                    return false;
+                }
+            );
+        }
+        else
+        {
+            to.FindIncomingEdge(
+                [&from, &result](const edge_type& edge)
+                {
+                    if (&edge.From() == &from)
+                    {
+                        result = &edge;
+                        return true;
+                    }
+                    return false;
+                }
+            );
+        }
+
+        return result;
     }
 
     /**
-     * @brief Returns true if there's an undirected edge between vertices @p a and @p b.
+     * @brief Returns a pointer to an undirected edge between
+     * vertices @p a and @p b if it exists and nullptr otherwise.
      *
      * @param a - a vertex
      * @param b - a vertex
@@ -545,14 +576,16 @@ namespace cs
      * @tparam TId The data type of vertex Id.
      * @tparam TLen The data type of edge length.
      *
-     * @return true if an edge exists, false otherwise
+     * @return Pointer to edge if the edge exists, nullptr otherwise.
      */
     template<typename TId, typename TLen>
-    bool UndirectedEdgeExists(
+    const Edge<Vertex<TId, TLen>, TLen>* FindUndirectedEdge(
         const Vertex<TId, TLen>& a,
         const Vertex<TId, TLen>& b)
     {
-        return DirectedEdgeExists(a, b) || DirectedEdgeExists(b, a);
+        const Edge<Vertex<TId, TLen>, TLen>* edge = FindDirectedEdge(a, b);
+        if (edge) return edge;
+        return FindDirectedEdge(b, a);
     }
 
     /**
@@ -583,12 +616,18 @@ namespace cs
         bool is_disposed;
 
     public:
+        /**
+         * @brief Creates an empty graph
+         */
         Graph() :
             vertices(),
             edges(),
             is_disposed(false)
         {}
 
+        /**
+         * @brief Move constructor
+         */
         Graph(Graph&& rvalue) :
             vertices(std::move(rvalue.vertices)),
             edges(std::move(rvalue.edges)),
@@ -611,10 +650,21 @@ namespace cs
     public:
         Graph& operator=(const Graph&) = delete;
 
+        /**
+         * @brief Returns the number of vertices in the graph.
+         */
         size_t VerticesNumber() const { return vertices.size(); }
 
+        /**
+         * @brief Returns the number of edges in the graph.
+         */
         size_t EdgesNumber() const { return edges.size(); }
 
+        /**
+         * @brief Adds a new vertex with Id = @p id to the graph.
+         * @param id - vertex identifier.
+         * @return Pointer to the newly created vertex.
+         */
         vertex_type* AddVertex(TId id)
         {
             vertex_type* vertex = new vertex_type(id);
@@ -623,6 +673,10 @@ namespace cs
             return result.first->second;
         }
 
+        /**
+         * @brief Removes a vertex with specified @p id from the graph.
+         * @param id - vertex identifier.
+         */
         void RemoveVertex(TId id)
         {
             vertex_type* vertex = vertices.at(id);
@@ -650,6 +704,13 @@ namespace cs
             delete vertex;
         }
 
+        /**
+         * @brief Adds an edge between two vertices in the graph.
+         * @param from_id - identifier of a vertex which is going to be the tail of the edge.
+         * @param to_id - identifier of a vertex which is going to be the head of the edge.
+         * @param length - edge length
+         * @return Pointer to the newly created edge.
+         */
         edge_type* AddEdge(TId from_id, TId to_id, TLen length = TLen())
         {
             vertex_type& from = GetVertexById(from_id);
@@ -661,6 +722,10 @@ namespace cs
             return edge;
         }
 
+        /**
+         * @brief Removes specified @p edge from the graph.
+         * @param edge - reference to the edge to be removed.
+         */
         void RemoveEdge(edge_type& edge)
         {
             edge.From().RemoveOutgoingEdge(&edge);
@@ -668,34 +733,63 @@ namespace cs
             edges.remove(&edge);
         }
 
+        /**
+         * @brief Calls functor @p visitor for each vertex of the graph.
+         * @param visitor - functor accepting a reference to vertex.
+         */
         void VisitVertices(std::function<void(vertex_type&)> visitor)
         {
             for (auto key_value : vertices)
                 visitor(*key_value.second);
         }
 
+        /**
+         * @brief Calls functor @p visitor for each vertex of the graph.
+         * @param visitor - functor accepting a reference to vertex.
+         */
         void VisitVertices(std::function<void(const vertex_type&)> visitor) const
         {
             for (auto key_value : vertices)
                 visitor(*key_value.second);
         }
 
+        /**
+         * @brief Calls functor @p visitor for each edge in the graph.
+         * @param visitor - functor accepting a reference to edge.
+         */
         void VisitEdges(std::function<void(edge_type&)> visitor)
         {
             for (edge_type* edge : edges)
                 visitor(*edge);
         }
 
+        /**
+         * @brief Calls functor @p visitor for each edge in the graph.
+         * @param visitor - functor accepting a reference to edge.
+         */
         void VisitEdges(std::function<void(const edge_type&)> visitor) const
         {
             for (const edge_type* edge : edges)
                 visitor(*edge);
         }
 
+        /**
+         * @brief Returns reference to a vertex with specified identifier @p id.
+         * @param id - vertex identifier.
+         * @return Reference to vertex.
+         */
         vertex_type& GetVertexById(TId id) { return *vertices.at(id); }
 
+        /**
+         * @brief Returns reference to a vertex with specified identifier @p id.
+         * @param id - vertex identifier.
+         * @return Reference to vertex.
+         */
         const vertex_type& GetVertexById(TId id) const { return *vertices.at(id); }
 
+        /**
+         * @brief Removes all edges and vertices from the graph.
+         */
         void Clear()
         {
             for (auto key_value : vertices)
