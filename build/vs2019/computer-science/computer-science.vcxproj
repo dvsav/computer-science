@@ -145,6 +145,7 @@
     <ClInclude Include="..\..\..\src\graph_dijkstra.h" />
     <ClInclude Include="..\..\..\src\graph_search.h" />
     <ClInclude Include="..\..\..\src\graph_topology.h" />
+    <ClInclude Include="..\..\..\src\heap.h" />
     <ClInclude Include="..\..\..\src\merge_sort.h" />
     <ClInclude Include="..\..\..\src\quick_sort.h" />
     <ClInclude Include="..\..\..\src\requires.h" />

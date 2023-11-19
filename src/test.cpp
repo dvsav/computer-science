@@ -1,5 +1,6 @@
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
+#include "heap.h"             // for cs::Heap
 #include "merge_sort.h"       // for cs::merge_sort
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
 #include "simple_sorts.h"     // for cs::selection_sort, cs::insertion_sort, cs::bubble_sort
@@ -415,4 +416,20 @@ TEST_CASE("Dijkstra's shortest path algorithm", "[graph]")
 
         REQUIRE(shortest_path == shortest_path_ethalon);
     }
+}
+
+TEST_CASE("Heap", "[heap]")
+{
+    cs::MinHeap<int> minHeap{ 5, 2, 8, 15, 48, 1 };
+
+    for (auto i = minHeap.begin(); i != minHeap.end(); ++i)
+        std::cout << *i << ' ';
+    std::cout << std::endl;
+
+    while (minHeap.Size() > 0)
+    {
+        std::cout << minHeap.Top() << ' ';
+        minHeap.Pop();
+    }
+    std::cout << std::endl;
 }
