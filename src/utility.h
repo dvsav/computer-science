@@ -8,30 +8,27 @@
 #include <string>   // for std::string
 #include <vector>   // for std::vector
 
-namespace cs
+template <typename T>
+class DefaultComparator
 {
-    template <typename T>
-    class DefaultComparator
-    {
-    public:
-        static bool LessThan(const T& a, const T& b) { return a < b; }
-        static bool EqualTo(const T& a, const T& b) { return a == b; }
-        static bool LessThanOrEqualTo(const T& a, const T& b) { return a <= b; }
-        static bool GreaterThan(const T& a, const T& b) { return a > b; }
-        static bool GreaterThanOrEqualTo(const T& a, const T& b) { return a >= b; }
-    };
+public:
+    static bool LessThan(const T& a, const T& b) { return a < b; }
+    static bool EqualTo(const T& a, const T& b) { return a == b; }
+    static bool LessThanOrEqualTo(const T& a, const T& b) { return a <= b; }
+    static bool GreaterThan(const T& a, const T& b) { return a > b; }
+    static bool GreaterThanOrEqualTo(const T& a, const T& b) { return a >= b; }
+};
 
-    template <typename T>
-    class ReverseComparator
-    {
-    public:
-        static bool LessThan(const T& a, const T& b) { return a > b; }
-        static bool EqualTo(const T& a, const T& b) { return a == b; }
-        static bool LessThanOrEqualTo(const T& a, const T& b) { return a >= b; }
-        static bool GreaterThan(const T& a, const T& b) { return a < b; }
-        static bool GreaterThanOrEqualTo(const T& a, const T& b) { return a <= b; }
-    };
-} // namespace cs
+template <typename T>
+class ReverseComparator
+{
+public:
+    static bool LessThan(const T& a, const T& b) { return a > b; }
+    static bool EqualTo(const T& a, const T& b) { return a == b; }
+    static bool LessThanOrEqualTo(const T& a, const T& b) { return a >= b; }
+    static bool GreaterThan(const T& a, const T& b) { return a < b; }
+    static bool GreaterThanOrEqualTo(const T& a, const T& b) { return a <= b; }
+};
 
 /**
  * @brief Returns true if files named @p fileNameA and @p fileNameB
@@ -77,7 +74,9 @@ bool skip_comment(
  * The reading stops when a newline character is encountered.
  */
 template<typename T>
-std::istream& operator>>(std::istream& is, std::vector<T>& vec)
+std::istream& operator>>(
+    std::istream& is,
+    std::vector<T>& vec)
 {
     // Clear the vector to ensure it's empty before reading
     vec.clear();
@@ -109,4 +108,24 @@ std::istream& operator>>(std::istream& is, std::vector<T>& vec)
         is.clear(std::ios_base::failbit);
 
     return is;
+}
+
+template <typename TIterator>
+void print(
+    std::ostream& os,
+    TIterator begin,
+    TIterator end,
+    const std::string& delimeter)
+{
+    for (auto i = begin; i != end; i++)
+        os << *i << delimeter;
+}
+
+template <typename TIterator>
+void print(
+    TIterator begin,
+    TIterator end,
+    const std::string& delimeter)
+{
+    print(std::cout, begin, end, delimeter);
 }

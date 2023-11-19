@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utility.h"
+#include "utility.h" // for DefaultComparator
 
 #include <algorithm> // for std::copy
 #include <iterator>  // for std::iterator_traits

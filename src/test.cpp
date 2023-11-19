@@ -1,9 +1,8 @@
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
 #include "merge_sort.h"       // for cs::merge_sort
-#include "print.h"            // for cs::print
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
-#include "utility.h"          // for cs::ReverseComparator, cs::files_textually_equal
+#include "utility.h"          // for ReverseComparator, cs::files_textually_equal
 
 #include <algorithm>          // for std::find
 #include <array>              // for std::array
@@ -30,7 +29,7 @@ TEST_CASE("Vectors are sorted", "[sort]")
 
     SECTION("merge_sort in descending order")
     {
-        cs::merge_sort<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
+        cs::merge_sort<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
     }
 
@@ -42,7 +41,7 @@ TEST_CASE("Vectors are sorted", "[sort]")
 
     SECTION("quick_sort_lomuto_partition in descending order")
     {
-        cs::quick_sort_lomuto_partition<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
+        cs::quick_sort_lomuto_partition<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
     }
 
@@ -54,7 +53,7 @@ TEST_CASE("Vectors are sorted", "[sort]")
 
     SECTION("quick_sort_randomized_partition in descending order")
     {
-        cs::quick_sort_randomized_partition<std::vector<int>::iterator, cs::ReverseComparator<int> >(vec.begin(), vec.end());
+        cs::quick_sort_randomized_partition<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
     }
 }

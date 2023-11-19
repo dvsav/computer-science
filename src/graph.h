@@ -148,6 +148,7 @@ namespace cs
 
         void AddIncomingEdge(edge_type* edge) { incomingEdges.push_back(edge); }
         void AddOutgoingEdge(edge_type* edge) { outgoingEdges.push_back(edge); }
+
         void RemoveIncomingEdge(edge_type* edge) { incomingEdges.remove(edge); }
         void RemoveOutgoingEdge(edge_type* edge) { outgoingEdges.remove(edge); }
 
