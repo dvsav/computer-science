@@ -148,6 +148,7 @@
     <ClInclude Include="..\..\..\src\merge_sort.h" />
     <ClInclude Include="..\..\..\src\quick_sort.h" />
     <ClInclude Include="..\..\..\src\requires.h" />
+    <ClInclude Include="..\..\..\src\simple_sorts.h" />
     <ClInclude Include="..\..\..\src\utility.h" />
   </ItemGroup>
   <ItemGroup>

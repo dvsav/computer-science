@@ -2,6 +2,7 @@
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
 #include "merge_sort.h"       // for cs::merge_sort
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
+#include "simple_sorts.h"     // for cs::selection_sort, cs::insertion_sort, cs::bubble_sort
 #include "utility.h"          // for ReverseComparator, cs::files_textually_equal
 
 #include <algorithm>          // for std::find
@@ -54,6 +55,42 @@ TEST_CASE("Vectors are sorted", "[sort]")
     SECTION("quick_sort_randomized_partition in descending order")
     {
         cs::quick_sort_randomized_partition<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
+        REQUIRE(vec == descen_vec);
+    }
+
+    SECTION("selection_sort in ascending order")
+    {
+        cs::selection_sort(vec.begin(), vec.end());
+        REQUIRE(vec == ascend_vec);
+    }
+
+    SECTION("selection_sort in descending order")
+    {
+        cs::selection_sort<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
+        REQUIRE(vec == descen_vec);
+    }
+
+    SECTION("insertion_sort in ascending order")
+    {
+        cs::insertion_sort(vec.begin(), vec.end());
+        REQUIRE(vec == ascend_vec);
+    }
+
+    SECTION("insertion_sort in descending order")
+    {
+        cs::insertion_sort<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
+        REQUIRE(vec == descen_vec);
+    }
+
+    SECTION("bubble_sort in ascending order")
+    {
+        cs::bubble_sort(vec.begin(), vec.end());
+        REQUIRE(vec == ascend_vec);
+    }
+
+    SECTION("bubble_sort in descending order")
+    {
+        cs::bubble_sort<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
     }
 }
