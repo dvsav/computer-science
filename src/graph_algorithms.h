@@ -531,12 +531,12 @@ namespace cs
     {
         using vertex_type = Vertex<TId, TLen>;
         using edge_type = typename vertex_type::edge_type;
-        using data_type = DijkstraShortestPath_Data<TId, TLen>;
+        using dijkstra_type = DijkstraShortestPath_Data<TId, TLen>;
 
         vertex_type& from = graph.GetVertexById(from_id);
         vertex_type& to = graph.GetVertexById(to_id);
 
-        from.template AuxData<data_type>() = new data_type;
+        from.template AuxData<dijkstra_type>() = new dijkstra_type;
 
         DijkstraShortestPath_VertexMinHeap<TId, TLen> frontier;
         frontier.insert(&from);
@@ -557,16 +557,16 @@ namespace cs
                     if (frontier_node.Discovered())
                         return;
 
-                    TLen newLen = current_node->template AuxData<data_type>()->shortestPathLength + edge.Length();
+                    TLen newLen = current_node->template AuxData<dijkstra_type>()->shortestPathLength + edge.Length();
 
-                    if (frontier_node.template AuxData<data_type>())
+                    if (frontier_node.template AuxData<dijkstra_type>())
                     {
                         // frontier_node has been scored before
-                        if (newLen < frontier_node.template AuxData<data_type>()->shortestPathLength)
+                        if (newLen < frontier_node.template AuxData<dijkstra_type>()->shortestPathLength)
                         {
                             // update frontier_node's score
-                            frontier_node.template AuxData<data_type>()->shortestPathLength = newLen;
-                            frontier_node.template AuxData<data_type>()->previousVertex = current_node;
+                            frontier_node.template AuxData<dijkstra_type>()->shortestPathLength = newLen;
+                            frontier_node.template AuxData<dijkstra_type>()->previousVertex = current_node;
 
                             frontier.insert(&frontier_node);
                         }
@@ -574,7 +574,7 @@ namespace cs
                     else
                     {
                         // frontier_node hasn't been scored before
-                        frontier_node.template AuxData<data_type>() = new data_type(
+                        frontier_node.template AuxData<dijkstra_type>() = new dijkstra_type(
                             /*shortestPathLength*/ newLen,
                             /*previousVertex*/ current_node);
 
@@ -584,7 +584,7 @@ namespace cs
         }
 
         // visit the shortest path
-        if (visitShortestPath && to.template AuxData<data_type>())
+        if (visitShortestPath && to.template AuxData<dijkstra_type>())
         {
             std::stack<vertex_type*> shortestPath;
             shortestPath.push(&to);
@@ -593,13 +593,13 @@ namespace cs
                 vertex_type* top = shortestPath.top();
                 if (top == &from)
                     break;
-                shortestPath.push(top->template AuxData<data_type>()->previousVertex);
+                shortestPath.push(top->template AuxData<dijkstra_type>()->previousVertex);
             }
 
             while (!shortestPath.empty())
             {
                 vertex_type* top = shortestPath.top();
-                visitShortestPath(*top, top->template AuxData<data_type>()->shortestPathLength);
+                visitShortestPath(*top, top->template AuxData<dijkstra_type>()->shortestPathLength);
                 shortestPath.pop();
             }
         }
@@ -610,10 +610,10 @@ namespace cs
             graph.VisitVertices(
                 [](vertex_type& v)
                 {
-                    if (v.template AuxData<data_type>())
+                    if (v.template AuxData<dijkstra_type>())
                     {
-                        delete v.template AuxData<data_type>();
-                        v.template AuxData<data_type>() = nullptr;
+                        delete v.template AuxData<dijkstra_type>();
+                        v.template AuxData<dijkstra_type>() = nullptr;
                     }
                 });
         }
@@ -651,12 +651,12 @@ namespace cs
         bool clearDijkstraData = true)
     {
         using vertex_type = Vertex<TId, TLen>;
-        using data_type = DijkstraShortestPath_Data<TId, TLen>;
+        using dijkstra_type = DijkstraShortestPath_Data<TId, TLen>;
 
         vertex_type& from = graph.GetVertexById(from_id);
         vertex_type& to = graph.GetVertexById(to_id);
 
-        from.template AuxData<data_type>() = new data_type;
+        from.template AuxData<dijkstra_type>() = new dijkstra_type;
 
         DijkstraShortestPath_VertexMinHeap<TId, TLen> frontier;
         frontier.insert(&from);
@@ -676,16 +676,16 @@ namespace cs
                     if (frontier_node.Discovered())
                         return;
 
-                    TLen newLen = current_node->template AuxData<data_type>()->shortestPathLength + length;
+                    TLen newLen = current_node->template AuxData<dijkstra_type>()->shortestPathLength + length;
 
-                    if (frontier_node.template AuxData<data_type>())
+                    if (frontier_node.template AuxData<dijkstra_type>())
                     {
                         // frontier_node has been scored before
-                        if (newLen < frontier_node.template AuxData<data_type>()->shortestPathLength)
+                        if (newLen < frontier_node.template AuxData<dijkstra_type>()->shortestPathLength)
                         {
                             // update frontier_node's score
-                            frontier_node.template AuxData<data_type>()->shortestPathLength = newLen;
-                            frontier_node.template AuxData<data_type>()->previousVertex = current_node;
+                            frontier_node.template AuxData<dijkstra_type>()->shortestPathLength = newLen;
+                            frontier_node.template AuxData<dijkstra_type>()->previousVertex = current_node;
 
                             frontier.insert(&frontier_node);
                         }
@@ -693,7 +693,7 @@ namespace cs
                     else
                     {
                         // frontier_node hasn't been scored before
-                        frontier_node.template AuxData<data_type>() = new data_type(
+                        frontier_node.template AuxData<dijkstra_type>() = new dijkstra_type(
                             /*shortestPathLength*/ newLen,
                             /*previousVertex*/ current_node);
 
@@ -703,7 +703,7 @@ namespace cs
         }
 
         // visit the shortest path
-        if (visitShortestPath && to.template AuxData<data_type>())
+        if (visitShortestPath && to.template AuxData<dijkstra_type>())
         {
             std::stack<vertex_type*> shortestPath;
             shortestPath.push(&to);
@@ -712,13 +712,13 @@ namespace cs
                 vertex_type* top = shortestPath.top();
                 if (top == &from)
                     break;
-                shortestPath.push(top->template AuxData<data_type>()->previousVertex);
+                shortestPath.push(top->template AuxData<dijkstra_type>()->previousVertex);
             }
 
             while (!shortestPath.empty())
             {
                 vertex_type* top = shortestPath.top();
-                visitShortestPath(*top, top->template AuxData<data_type>()->shortestPathLength);
+                visitShortestPath(*top, top->template AuxData<dijkstra_type>()->shortestPathLength);
                 shortestPath.pop();
             }
         }
@@ -729,10 +729,10 @@ namespace cs
             graph.VisitVertices(
                 [](vertex_type& v)
                 {
-                    if (v.template AuxData<data_type>())
+                    if (v.template AuxData<dijkstra_type>())
                     {
-                        delete v.template AuxData<data_type>();
-                        v.template AuxData<data_type>() = nullptr;
+                        delete v.template AuxData<dijkstra_type>();
+                        v.template AuxData<dijkstra_type>() = nullptr;
                     }
                 });
         }
