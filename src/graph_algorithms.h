@@ -442,6 +442,7 @@ namespace cs
         ClearDiscovered(graph);
     }
 
+    template <typename TId, typename TLen>
     struct DijkstraShortestPath_Data
     {
         using vertex_type = Vertex<TId, TLen>;
