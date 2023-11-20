@@ -237,7 +237,7 @@ namespace cs
     template <typename TIterator, typename TComparator = DefaultComparator<typename TIterator::value_type> >
     void heap_sort(TIterator begin, TIterator end)
     {
-        Heap<TIterator::value_type, TComparator> heap(begin, end);
+        Heap<typename TIterator::value_type, TComparator> heap(begin, end);
         for (auto i = begin; i != end; i++)
         {
             *i = heap.top();
