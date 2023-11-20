@@ -12,7 +12,25 @@
 
 namespace cs
 {
-    template <typename T, typename TComparator, template <typename, typename> class TContainer = std::vector>
+    /**
+     * @class Heap
+     * @brief Class representing a heap (pyramid) data structure - a complete binary tree of elements.
+     * Binary tree: every node has either 0, 1 or two children.
+     * Complete tree: the tree is perfect (see below) up until the last level and all the leaves on the last level
+     * are pushed to the left (completeness allows to store the tree in any indexed collection because
+     * you can calculate the indices of children and parent of any node).
+     * Perfect tree: all interior nodes have two children and all leaves are on the same level.
+     * Heap always maintains either "min heap property" (children of any node are greater than their parent)
+     * or "max heap property" (children of any node are less than their parent).
+     * 
+     * @tparam T type of tree element
+     * @tparam TComparator Comparator type to compare tree elements
+     * (must have a static member function bool LessThanOrEqualTo(const T& a, const T& b).
+     * @tparam TContainer type of internal indexed collection.
+     */
+    template <typename T,
+              typename TComparator,
+              template <typename /*T*/, typename /*TAllocator*/> class TContainer = std::vector>
     class Heap
     {
         using container_type = TContainer<T, std::allocator<T> >;
@@ -31,27 +49,43 @@ namespace cs
             "LessThanOrEqualTo function is missing in TComparator");
 
     public:
-        using iterator = typename container_type::const_iterator;
+        using value_type = T;
+        using const_iterator = typename container_type::const_iterator;
 
     private:
         container_type collection;
 
     public:
+        /**
+         * @brief Creates an empty heap.
+         */
         Heap() :
             collection()
         {}
 
+        /**
+         * @brief Creates a heap filling it with values from list @p init_list.
+         * @param init_list - initializer list of values.
+         */
         Heap(std::initializer_list<T> init_list) :
             collection(init_list)
         {
-            BuildHeap();
+            buildHeap();
         }
 
+        /**
+         * @brief Creates a heap filling it from a range of iterators.
+         * 
+         * @param begin - beginning of the range.
+         * @param end - end of the range.
+         * 
+         * @tparam TIterator iterator type.
+         */
         template <typename TIterator>
         Heap(TIterator begin, TIterator end) :
             collection(begin, end)
         {
-            BuildHeap();
+            buildHeap();
         }
 
         Heap(const Heap&) = default;
@@ -61,40 +95,67 @@ namespace cs
         Heap& operator=(const Heap&) = default;
         Heap& operator=(Heap&&) = default;
 
-        void Insert(const T& value)
+        /**
+         * @brief Clears the heap.
+         */
+        void clear() { collection.clear(); }
+
+        /**
+         * @brief Returns true if the heap is empty and false otherwise.
+         */
+        bool empty() const { return collection.empty(); }
+
+        /**
+         * @brief Inserts a new element in the heap.
+         * @param value - the new element.
+         */
+        void insert(const T& value)
         {
             collection.push_back(value);
             HeapifyUp(std::prev(collection.end()));
         }
 
-        size_t Size() const { return collection.size(); }
+        /**
+         * @brief Returns the number of element in the heap.
+         */
+        size_t size() const { return collection.size(); }
 
-        const T& Top() const
+        /**
+         * @brief Returns the top (root) element of the heap.
+         * For a min heap it's always the smallest element in the entire heap,
+         * for a max heap it's always the greatest element in the entire heap.
+         */
+        const T& top() const
         {
-            Requires::That(Size() > 0, "Collection size is zero", FUNCTION_INFO);
+            Requires::That(collection.size() > 0, "Collection size is zero", FUNCTION_INFO);
             return *collection.cbegin();
         }
 
-        void Pop()
+        /**
+         * @brief Removes the top element from the heap and reestablishes the heap property.
+         */
+        void pop()
         {
-            Requires::That(Size() > 0, "Collection size is zero", FUNCTION_INFO);
+            Requires::That(collection.size() > 0, "Collection size is zero", FUNCTION_INFO);
             *collection.begin() = *std::prev(collection.end());
             collection.erase(std::prev(collection.end()));
-            HeapifyDown(collection.begin());
+            heapifyDown(collection.begin());
         }
 
-        iterator begin() const { return collection.cbegin(); }
+        const_iterator begin() const { return collection.cbegin(); }
 
-        iterator end() const { return collection.cend(); }
+        const_iterator end() const { return collection.cend(); }
 
     private:
-        iterator_type Parent(iterator_type i)
+        // Returns the parent of specified element.
+        iterator_type parent(iterator_type i)
         {
             auto dist = std::distance(collection.begin(), i);
             return collection.begin() + ((dist + 1) / 2 - 1);
         }
 
-        iterator_type LeftChild(iterator_type i)
+        // Returns the left child of specified element.
+        iterator_type leftChild(iterator_type i)
         {
             auto dist = std::distance(collection.begin(), i);
             auto childDist = (dist + 1) * 2 - 1;
@@ -103,7 +164,8 @@ namespace cs
                 collection.end();
         }
 
-        iterator_type RightChild(iterator_type i)
+        // Returns the right child of specified element.
+        iterator_type rightChild(iterator_type i)
         {
             auto dist = std::distance(collection.begin(), i);
             auto childDist = (dist + 1) * 2;
@@ -112,21 +174,23 @@ namespace cs
                 collection.end();
         }
 
-        void HeapifyUp(iterator_type i)
+        // Bubbles up an element until it gets to its correct position in the heap.
+        void heapifyUp(iterator_type i)
         {
-            if (i != collection.begin() && TComparator::LessThan(*i, *Parent(i)))
+            if (i != collection.begin() && TComparator::LessThan(*i, *parent(i)))
             {
-                std::swap(*i, *Parent(i));
-                HeapifyUp(Parent(i));
+                std::swap(*i, *parent(i));
+                heapifyUp(parent(i));
             }
         }
 
-        void HeapifyDown(iterator_type i)
+        // Sink down the element until it gets to its correct position in the heap.
+        void heapifyDown(iterator_type i)
         {
-            iterator_type lChild = LeftChild(i);
+            iterator_type lChild = leftChild(i);
             if (lChild == collection.end()) return;
 
-            iterator_type rChild = RightChild(i);
+            iterator_type rChild = rightChild(i);
 
             iterator_type minChildIndex =
                 (rChild != collection.end()) ?
@@ -136,17 +200,20 @@ namespace cs
             if (TComparator::LessThan(*minChildIndex, *i))
             {
                 std::swap(*i, *minChildIndex);
-                HeapifyDown(minChildIndex);
+                heapifyDown(minChildIndex);
             }
         }
 
-        void BuildHeap()
+        // Move the elements of collection around so to establish the heap property.
+        void buildHeap()
         {
+            // Begin from the leaves and go to the root, heapifying every element down.
+            // Complexity: O(N).
             if (collection.size() > 0)
             {
                 for (auto i = std::prev(collection.end()); i != collection.begin(); --i)
-                    HeapifyDown(i);
-                HeapifyDown(collection.begin());
+                    heapifyDown(i);
+                heapifyDown(collection.begin());
             }
         }
     };
@@ -156,4 +223,25 @@ namespace cs
 
     template <typename T, template <typename, typename> class TContainer = std::vector>
     using MaxHeap = Heap<T, ReverseComparator<T>, TContainer>;
+
+    /**
+     * @brief Sort specified range of values using heap data structure.
+     *
+     * @tparam TIterator Iterator type (must be a random access iterator).
+     * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)
+     * where T is the value type of container being sorted). For example @see DefaultComparator, @see ReverseComparator.
+     *
+     * @param begin - Iterator specifying the beginning of a range to be sorted.
+     * @param end - Iterator specifying the end of a range to be sorted.
+     */
+    template <typename TIterator, typename TComparator = DefaultComparator<typename TIterator::value_type> >
+    void heap_sort(TIterator begin, TIterator end)
+    {
+        Heap<TIterator::value_type, TComparator> heap(begin, end);
+        for (auto i = begin; i != end; i++)
+        {
+            *i = heap.top();
+            heap.pop();
+        }
+    }
 } // namespace cs
