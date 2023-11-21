@@ -1,5 +1,6 @@
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
+#include "heap.h"             // for cs::Heap
 #include "merge_sort.h"       // for cs::merge_sort
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
 #include "simple_sorts.h"     // for cs::selection_sort, cs::insertion_sort, cs::bubble_sort
@@ -91,6 +92,18 @@ TEST_CASE("Vectors are sorted", "[sort]")
     SECTION("bubble_sort in descending order")
     {
         cs::bubble_sort<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
+        REQUIRE(vec == descen_vec);
+    }
+
+    SECTION("heap_sort in ascending order")
+    {
+        cs::heap_sort(vec.begin(), vec.end());
+        REQUIRE(vec == ascend_vec);
+    }
+
+    SECTION("heap_sort in descending order")
+    {
+        cs::heap_sort<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
     }
 }
@@ -414,5 +427,21 @@ TEST_CASE("Dijkstra's shortest path algorithm", "[graph]")
             });
 
         REQUIRE(shortest_path == shortest_path_ethalon);
+    }
+}
+
+TEST_CASE("Heap", "[heap]")
+{
+    std::vector<int> vec{ 5, 2, 8, 15, 48, 1, -6, 7, 3, 8, -10 };
+    std::vector<int> ascend_vec{ -10, -6, 1, 2, 3, 5, 7, 8, 8, 15, 48 };
+
+    cs::MinHeap<int> heap;
+    for (auto x : vec)
+        heap.insert(x);
+
+    for (auto x : ascend_vec)
+    {
+        REQUIRE(x == heap.top());
+        heap.pop();
     }
 }

@@ -54,6 +54,10 @@ namespace cs
 
     /**
      * @brief Sort specified range of values using merge sort algorithm.
+     * Idea: divide an array into two halves (need to allocate space for them),
+     * sort each half separately using merge sort (recursion) and merge them again into the full array.
+     * Complexity: O(NlgN).
+     * Space complexity: O(N).
      *
      * @tparam TIterator Iterator type (must be a random access iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)

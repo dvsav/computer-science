@@ -57,6 +57,9 @@ namespace cs
 
     /**
      * @brief Sort specified range of values using quick sort algorithm with Lomuto partitioning scheme.
+     * Idea: pick an arbitrary element and divide the array into two halves: left half - elements < pivot, right half - elements >= pivot.
+     * Sort each half separately using quick sort (recursion). Quick sort sorts an array inplace, so space complexity is O(1).
+     * Complexity: best case (pivot element is always the median of array) - O(NlgN); worst case (already sorted array) - O(N^2).
      *
      * @tparam TIterator Iterator type (must be a random access iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThanOrEqualTo(const T& a, const T& b)
