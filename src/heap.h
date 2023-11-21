@@ -65,6 +65,8 @@ namespace cs
 
         /**
          * @brief Creates a heap filling it with values from list @p init_list.
+         * Complexity: O(N) where N - number of elements in the heap.
+         * 
          * @param init_list - initializer list of values.
          */
         Heap(std::initializer_list<T> init_list) :
@@ -75,7 +77,8 @@ namespace cs
 
         /**
          * @brief Creates a heap filling it from a range of iterators.
-         * 
+         * Complexity: O(N) where N is the number of elements in the heap.
+         *
          * @param begin - beginning of the range.
          * @param end - end of the range.
          * 
@@ -107,12 +110,14 @@ namespace cs
 
         /**
          * @brief Inserts a new element in the heap.
+         * Complexity: O(lgN) where N is the number of elements in the heap.
+         * 
          * @param value - the new element.
          */
         void insert(const T& value)
         {
             collection.push_back(value);
-            HeapifyUp(std::prev(collection.end()));
+            heapifyUp(std::prev(collection.end()));
         }
 
         /**
@@ -133,11 +138,12 @@ namespace cs
 
         /**
          * @brief Removes the top element from the heap and reestablishes the heap property.
+         * Complexity: O(lgN) where N is the number of elements in the heap.
          */
         void pop()
         {
             Requires::That(collection.size() > 0, "Collection size is zero", FUNCTION_INFO);
-            *collection.begin() = *std::prev(collection.end());
+            *collection.begin() = std::move(*std::prev(collection.end()));
             collection.erase(std::prev(collection.end()));
             heapifyDown(collection.begin());
         }
@@ -175,6 +181,7 @@ namespace cs
         }
 
         // Bubbles up an element until it gets to its correct position in the heap.
+        // Complexity: O(lgN) where N is the number of elements in the heap.s
         void heapifyUp(iterator_type i)
         {
             if (i != collection.begin() && TComparator::LessThan(*i, *parent(i)))
@@ -185,6 +192,7 @@ namespace cs
         }
 
         // Sink down the element until it gets to its correct position in the heap.
+        // Complexity: O(lgN) where N is the number of elements in the heap.s
         void heapifyDown(iterator_type i)
         {
             iterator_type lChild = leftChild(i);
@@ -208,7 +216,7 @@ namespace cs
         void buildHeap()
         {
             // Begin from the leaves and go to the root, heapifying every element down.
-            // Complexity: O(N).
+            // Complexity: O(N) where N is the number of elements in the heap.
             if (collection.size() > 0)
             {
                 for (auto i = std::prev(collection.end()); i != collection.begin(); --i)
@@ -226,6 +234,8 @@ namespace cs
 
     /**
      * @brief Sort specified range of values using heap data structure.
+     * Idea: create a heap out of an array, extract top element (which is always minimal in a min heap) iteratively.
+     * Complexity: O(NlgN).
      *
      * @tparam TIterator Iterator type (must be a random access iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)

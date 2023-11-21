@@ -9,7 +9,7 @@ namespace cs
      * @brief Sort specified range of values using selection sort algorithm.
      * Idea: Find the minimal value and put it at the beginning of collection (N elements).
      * Then do the same for the rest of collection (N - 1 elements).
-     * Runtime: O(N^2).
+     * Complexity: O(N^2).
      *
      * @tparam TIterator Iterator type (enough to be a forward iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)
@@ -47,7 +47,7 @@ namespace cs
      * and unsorted array on the right. Sorted part is initially contains just one element.
      * Pick the 1st element from the unsorted part, insert it to the right place in the sorted part.
      * Repeat until the unsorted part becomes empty.
-     * Runtime: best case (already sorted array) - O(N); worst case (reversely sorted array) - O(N^2).
+     * Complexity: best case (already sorted array) - O(N); worst case (reversely sorted array) - O(N^2).
      *
      * @tparam TIterator Iterator type (must be compatible with a bidirectional iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)
@@ -90,7 +90,7 @@ namespace cs
      * @brief Sort specified range of values using bubble sort algorithm.
      * Idea: Iterate from the beginning to the end of collection swapping adjacent elements if they are in the wrong order.
      * As a result max element bubbles up to the end of collection. Start over from the beginning until no swaps happen.
-     * Runtime: best case (already sorted array) - O(N); worst case (reversely sorted array) - O(N^2).
+     * Complexity: best case (already sorted array) - O(N); worst case (reversely sorted array) - O(N^2).
      *
      * @tparam TIterator Iterator type (must be compatible with a bidirectional iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)

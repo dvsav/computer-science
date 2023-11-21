@@ -429,3 +429,19 @@ TEST_CASE("Dijkstra's shortest path algorithm", "[graph]")
         REQUIRE(shortest_path == shortest_path_ethalon);
     }
 }
+
+TEST_CASE("Heap", "[heap]")
+{
+    std::vector<int> vec{ 5, 2, 8, 15, 48, 1, -6, 7, 3, 8, -10 };
+    std::vector<int> ascend_vec{ -10, -6, 1, 2, 3, 5, 7, 8, 8, 15, 48 };
+
+    cs::MinHeap<int> heap;
+    for (auto x : vec)
+        heap.insert(x);
+
+    for (auto x : ascend_vec)
+    {
+        REQUIRE(x == heap.top());
+        heap.pop();
+    }
+}
