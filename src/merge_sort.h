@@ -1,8 +1,9 @@
 #pragma once
 
-#include "utility.h"
+#include "utility.h" // for DefaultComparator
 
 #include <algorithm> // for std::copy
+#include <iterator>  // for std::iterator_traits
 #include <vector>    // for std::vector
 
 namespace cs
@@ -36,7 +37,7 @@ namespace cs
     template <typename TIterator, typename TComparator = DefaultComparator<typename TIterator::value_type> >
     static std::vector<typename TIterator::value_type> merge_sort_internal(TIterator begin, TIterator end)
     {
-        auto size = end - begin;
+        auto size = std::distance(begin, end);
 
         if (size == 0)
             return std::vector<typename TIterator::value_type>();

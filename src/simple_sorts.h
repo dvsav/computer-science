@@ -3,9 +3,13 @@
 #include <algorithm> // for std::swap, std::min_element
 #include <iterator>  // for std::next, std::prev
 
-namespace cs {
+namespace cs
+{
     /**
      * @brief Sort specified range of values using selection sort algorithm.
+     * Idea: Find the minimal value and put it at the beginning of collection (N elements).
+     * Then do the same for the rest of collection (N - 1 elements).
+     * Runtime: O(N^2).
      *
      * @tparam TIterator Iterator type (enough to be a forward iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)
@@ -39,6 +43,11 @@ namespace cs {
 
     /**
      * @brief Sort specified range of values using insertion sort algorithm.
+     * Idea: Divide the collection into two parts: sorted array on the left
+     * and unsorted array on the right. Sorted part is initially contains just one element.
+     * Pick the 1st element from the unsorted part, insert it to the right place in the sorted part.
+     * Repeat until the unsorted part becomes empty.
+     * Runtime: best case (already sorted array) - O(N); worst case (reversely sorted array) - O(N^2).
      *
      * @tparam TIterator Iterator type (must be compatible with a bidirectional iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)
@@ -65,22 +74,23 @@ namespace cs {
         if (begin == end)
             return;
 
-        for (auto it = std::next(begin); it != end; ++it) 
+        // 'it' is the 'end' of the sorted part and the 'begin' of the unsorted part
+        for (auto unsorted_begin = std::next(begin); unsorted_begin != end; ++unsorted_begin)
         {
-            auto key = *it;
-            auto pos = it;
-
-            while (pos != begin && TComparator::LessThan(key, *std::prev(pos))) 
-            {
+            auto key = *unsorted_begin; // value of the 1st element in the unsorted part
+            auto pos = unsorted_begin;  // position of an element in the sorted part
+            // position of the element is shofted to the left until the element gets to its legal place
+            for (; pos != begin && TComparator::LessThan(key, *std::prev(pos)); pos = std::prev(pos))
                 *pos = *std::prev(pos);
-                pos = std::prev(pos);
-            }
             *pos = key;
         }
     }
 
     /**
      * @brief Sort specified range of values using bubble sort algorithm.
+     * Idea: Iterate from the beginning to the end of collection swapping adjacent elements if they are in the wrong order.
+     * As a result max element bubbles up to the end of collection. Start over from the beginning until no swaps happen.
+     * Runtime: best case (already sorted array) - O(N); worst case (reversely sorted array) - O(N^2).
      *
      * @tparam TIterator Iterator type (must be compatible with a bidirectional iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)
@@ -104,15 +114,20 @@ namespace cs {
                          bool (*)(const typename TIterator::value_type&, const typename TIterator::value_type&)>::value,
             "LessThan function is missing in TComparator");
 
-        for (auto sorted_part = end; sorted_part != begin; --sorted_part)
+        for (auto sorted_part_begin = end; sorted_part_begin != begin; --sorted_part_begin)
         {
-            for (auto it = begin; it != std::prev(sorted_part); ++it)
+            bool sorted = true;
+            for (auto it = begin; it != std::prev(sorted_part_begin); ++it)
             {
                 if (TComparator::LessThan(*std::next(it), *it))
                 {
                     std::swap(*std::next(it), *it);
+                    sorted = false;
                 }
             }
+            // quit if no swaps happened
+            if (sorted)
+                break;
         }
     }
-}
+} // namespace cs
