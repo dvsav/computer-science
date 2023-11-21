@@ -30,6 +30,7 @@ project(computer-science
 # the repository's root is two folders higher than this CMakeLists file
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}/../..")
 set(SRC_DIR "${ROOT_DIR}/src")
+set(TEST_DIR "${ROOT_DIR}/test")
 
 # collect the source and header files
 file(GLOB SOURCE_FILES CONFIGURE_DEPENDS
@@ -90,7 +91,8 @@ enable_testing()
 # define tests
 add_test(
     NAME ${PROJECT_NAME}
-    COMMAND $<TARGET_FILE:${PROJECT_NAME}>)
+    COMMAND $<TARGET_FILE:${PROJECT_NAME}>
+	WORKING_DIRECTORY ${TEST_DIR})
 
 print_message("-------------------- INSTALLATION --------------------")
 
