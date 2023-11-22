@@ -143,4 +143,4 @@ namespace cs
             quick_sort_randomized_partition_internal<TIterator, TComparator>(begin, end, prng);
         }
     }
-}
+} // namespace cs

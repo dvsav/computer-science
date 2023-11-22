@@ -1,3 +1,4 @@
+#include "binary_tree.h"      // for cs::TreeNode
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
 #include "heap.h"             // for cs::Heap
@@ -11,6 +12,7 @@
 #include <cstdio>             // for std::remove
 #include <fstream>            // for std::ifstream, std::ofstream
 #include <iostream>           // for std:::cout
+#include <string>             // for std::string
 #include <vector>             // for std::vector
 
 // Catch2 - a single header unit test framework
@@ -444,4 +446,33 @@ TEST_CASE("Heap", "[heap]")
         REQUIRE(x == heap.top());
         heap.pop();
     }
+}
+
+TEST_CASE("Binray tree", "[btree]")
+{
+    using tree_node = cs::TreeNode<std::string>;
+
+    tree_node* root = new tree_node(
+        /*value*/ "root",
+        /*left*/ new tree_node(
+            "left1",
+            new tree_node(
+                "left2",
+                nullptr,
+                nullptr),
+            nullptr
+        ),
+        /*right*/ new tree_node(
+            "right1",
+            nullptr,
+            new tree_node(
+                "right2",
+                nullptr,
+                nullptr)
+        )
+    );
+
+    cs::PrintTree<typename tree_node::value_type>(std::cout, root);
+
+    cs::DeleteTree(root);
 }
