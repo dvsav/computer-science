@@ -34,7 +34,7 @@ namespace cs
     template<typename TVertex, typename TLen = int>
     class Edge
     {
-        template<typename, typename>
+        template <typename, typename>
         friend class Graph;
 
     private:
@@ -110,7 +110,7 @@ namespace cs
     template<typename TId, typename TLen>
     class Vertex
     {
-        template<typename, typename>
+        template <typename, typename>
         friend class Graph;
 
     public:

@@ -45,7 +45,7 @@ namespace cs
         // Check for the existence of a member function "LessThanOrEqualTo" in TComparator type
         static_assert(
             std::is_same<decltype(&TComparator::LessThanOrEqualTo),
-            bool (*)(const typename container_type::value_type&, const typename container_type::value_type&)>::value,
+                         bool (*)(const typename container_type::value_type&, const typename container_type::value_type&)>::value,
             "LessThanOrEqualTo function is missing in TComparator");
 
     public:

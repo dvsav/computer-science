@@ -1,15 +1,22 @@
 #pragma once
 
-#include <functional> // for std::function
-#include <iostream>   // for std::ostream
-#include <stack>      // for std::stack
-#include <string>     // for std::string
+#include "utility.h"
+
+#include <functional>  // for std::function
+#include <iostream>    // for std::ostream
+#include <stack>       // for std::stack
+#include <string>      // for std::string
+#include <type_traits> // for std::is_same
+#include <utility>     // for std:::pair
 
 namespace cs
 {
     template <typename T>
     class TreeNode
     {
+        template <typename, typename>
+        friend class BinarySearchTree;
+
     private:
         TreeNode* parent;
         TreeNode* left;
@@ -22,8 +29,8 @@ namespace cs
     public:
         TreeNode(
             const T& value,
-            TreeNode* left,
-            TreeNode* right) :
+            TreeNode* left = nullptr,
+            TreeNode* right = nullptr) :
             parent(nullptr),
             left(left),
             right(right),
@@ -42,6 +49,17 @@ namespace cs
     public:
         const TreeNode* Left() const { return left; }
         TreeNode* Left() { return left; }
+
+        const TreeNode* Right() const { return right; }
+        TreeNode* Right() { return right; }
+
+        const TreeNode* Parent() const { return parent; }
+        TreeNode* Parent() { return parent; }
+
+        const T& Value() const { return value; }
+        T& Value() { return value; }
+
+    private:
         TreeNode* setLeft(TreeNode* node)
         {
             if (left)
@@ -55,8 +73,6 @@ namespace cs
             return node;
         }
 
-        const TreeNode* Right() const { return right; }
-        TreeNode* Right() { return right; }
         TreeNode* setRight(TreeNode* node)
         {
             if (right)
@@ -70,16 +86,11 @@ namespace cs
             return node;
         }
 
-        const TreeNode* Parent() const { return parent; }
-        TreeNode* Parent() { return parent; }
         TreeNode* setParent(TreeNode* node)
         {
             parent = node;
             return node;
         }
-
-        const T& Value() const { return value; }
-        T& Value() { return value; }
     };
 
     template <typename T>
@@ -182,4 +193,81 @@ namespace cs
         PrintTree<T, false, true>(os, root->Left(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
         PrintTree<T, false, false>(os, root->Right(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
     }
+
+    template <typename T, typename TComparator = DefaultComparator<T> >
+    class BinarySearchTree
+    {
+        // Check for the existence of a member function "LessThan" in TComparator type
+        static_assert(
+            std::is_same<decltype(&TComparator::LessThan),
+                         bool (*)(const T&, const T&)>::value,
+            "LessThan function is missing in TComparator");
+
+        // Check for the existence of a member function "EqualTo" in TComparator type
+        static_assert(
+            std::is_same<decltype(&TComparator::EqualTo),
+                         bool (*)(const T&, const T&)>::value,
+            "EqualTo function is missing in TComparator");
+
+    public:
+        using value_type = T;
+        using tree_node = TreeNode<T>;
+
+    private:
+        tree_node* root;
+
+    public:
+        BinarySearchTree() :
+            root(nullptr)
+        {}
+
+    public:
+        const tree_node* Root() const { return root; }
+
+        std::pair<tree_node*, bool> insert(const T& value)
+        {
+            if (!root)
+                return (root = new tree_node(value));
+
+            tree_node* current_node = root;
+            while (true)
+            {
+                if (TComparator::EqualTo(value, current_node->Value()))
+                {
+                    return std::make_pair(current_node, false);
+                }
+                else if (TComparator::LessThan(value, current_node->Value()))
+                {
+                    if (current_node->Left())
+                        current_node = current_node->Left();
+                    else
+                        return std::make_pair(current_node->setLeft(new tree_node(value)), true);
+                }
+                else
+                {
+                    if (current_node->Right())
+                        current_node = current_node->Right();
+                    else
+                        return std::make_pair(current_node->setRight(new tree_node(value)), true);
+                }
+            }
+        }
+
+        tree_node* find(const T& value)
+        {
+            tree_node* current_node = root;
+            while (true)
+            {
+                if (!current_node)
+                    return nullptr;
+
+                if (TComparator::EqualTo(value, current_node->Value()))
+                    return current_node;
+                else if (TComparator::LessThan(value, current_node->Value()))
+                    current_node = current_node->Left();
+                else
+                    current_node = current_node->Right();
+            }
+        }
+    };
 } // namespace cs
