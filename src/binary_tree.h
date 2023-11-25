@@ -1,7 +1,9 @@
 #pragma once
 
+#include "requires.h"  // for Requires
 #include "utility.h"   // for DefaultComparator
 
+#include <cmath>       // for std::abs
 #include <algorithm>   // for std::max
 #include <functional>  // for std::function
 #include <iostream>    // for std::ostream
@@ -64,37 +66,11 @@ namespace cs
         K& Key() { return key; }
 
     private:
-        TreeNode* setLeft(TreeNode* node)
-        {
-            if (left)
-                left->setParent(nullptr);
+        void setLeft(TreeNode* node) { left = node; }
 
-            left = node;
+        void setRight(TreeNode* node) { right = node; }
 
-            if (node)
-                left->setParent(this);
-
-            return node;
-        }
-
-        TreeNode* setRight(TreeNode* node)
-        {
-            if (right)
-                right->setParent(nullptr);
-
-            right = node;
-
-            if (node)
-                right->setParent(this);
-
-            return node;
-        }
-
-        TreeNode* setParent(TreeNode* node)
-        {
-            parent = node;
-            return node;
-        }
+        void setParent(TreeNode* node) { parent = node; }
     };
 
     template <typename K>
@@ -171,13 +147,34 @@ namespace cs
             if (node->Right())
                 level.push(node->Right());
 
-            // visit after we are done with node's children
+            // Visit after we are done with node's children
             visitor(node);
         }
     }
 
+    template <typename K>
+    TreeNode<K>* FindAncestor(
+        TreeNode<K>* child,
+        std::function<bool(const TreeNode<K>*)> predicate)
+    {
+        using tree_node = TreeNode<K>;
+
+        if (!child)
+            return nullptr;
+
+        tree_node* current_node = child;
+        do
+        {
+            current_node = current_node->Parent();
+        } while (current_node && !predicate(current_node));
+        return current_node;
+    }
+
     template <typename K, bool IsRoot = true, bool IsLeft = false>
-    void PrintTree(std::ostream& os, const TreeNode<K>* root, const std::string& prefix = "")
+    void PrintTree(
+        std::ostream& os,
+        const TreeNode<K>* root,
+        const std::string& prefix = "")
     {
         os << prefix;
         if (!IsRoot)
@@ -217,11 +214,8 @@ namespace cs
     }
 
     template <typename K>
-    int Height(TreeNode<K>* root)
+    int Height(const TreeNode<K>* root)
     {
-        if (!root)
-            return 0;
-
         return std::max(
             root->Left() ? 1 + Height(root->Left()) : 0,
             root->Right() ? 1 + Height(root->Right()) : 0);
@@ -230,7 +224,9 @@ namespace cs
     template <typename K>
     int BalanceFactor(const TreeNode<K>* node)
     {
-        return Height(node->Right()) - Height(node->Left());
+        return
+            (node->Right() ? 1 + Height(node->Right()) : 0) -
+            (node->Left() ? 1 + Height(node->Left()) : 0);
     }
 
     template <typename K, typename TComparator = DefaultComparator<K> >
@@ -267,6 +263,7 @@ namespace cs
         }
 
     public:
+        tree_node* Root() { return root; }
         const tree_node* Root() const { return root; }
 
         tree_node* find(const K& key)
@@ -288,32 +285,49 @@ namespace cs
 
         virtual std::pair<tree_node*, bool> insert(const K& key)
         {
+            // If the tree is empty, inserted node is going to be the root
             if (!root)
             {
                 root = new tree_node(key);
                 return std::make_pair(root, true);
             }
 
+            // Find the right place to put the new node to (similar to find function)
             tree_node* current_node = root;
             while (true)
             {
                 if (TComparator::EqualTo(key, current_node->Key()))
                 {
+                    // A node with such key already exists, return it
                     return std::make_pair(current_node, false);
                 }
                 else if (TComparator::LessThan(key, current_node->Key()))
                 {
                     if (current_node->Left())
+                    {
                         current_node = current_node->Left();
+                    }
                     else
-                        return std::make_pair(current_node->setLeft(new tree_node(key)), true);
+                    {
+                        tree_node* new_node = new tree_node(key);
+                        current_node->setLeft(new_node);
+                        new_node->setParent(current_node);
+                        return std::make_pair(new_node, true);
+                    }
                 }
                 else
                 {
                     if (current_node->Right())
+                    {
                         current_node = current_node->Right();
+                    }
                     else
-                        return std::make_pair(current_node->setRight(new tree_node(key)), true);
+                    {
+                        tree_node* new_node = new tree_node(key);
+                        current_node->setRight(new_node);
+                        new_node->setParent(current_node);
+                        return std::make_pair(new_node, true);
+                    }
                 }
             }
         }
@@ -328,29 +342,45 @@ namespace cs
             tree_node* right = node_removed->Right();
             tree_node* parent = node_removed->Parent();
 
-            // the node to replace the node being removed is either its in-order predecessor or its right child
+            // The node to replace the node being removed is either its in-order predecessor or its right child
             tree_node* in_order_predecessor = InORderPredecessor<K>(node_removed);
             tree_node* replacement = in_order_predecessor ? in_order_predecessor : node_removed->Right();
 
+            // If replacement != nullptr, this means that we are trying to delete a non-leaf node
             if (replacement)
             {
-                // update replacement's parent's child pointer
+                // Update replacement's parent's child pointer
                 replacement->Parent()->setRight(nullptr);
+                replacement->setParent(nullptr);
 
                 // update replacement's children pointers
                 if (replacement != left)
+                {
                     replacement->setLeft(left);
+                    if (left)
+                        left->setParent(replacement);
+                }
+
                 if (replacement != right)
+                {
                     replacement->setRight(right);
+                    if (right)
+                        right->setParent(replacement);
+                }
             }
 
-            // update parent's child pointer
+            // Update parent's child pointer
             if (parent)
             {
                 if (parent->Left() == node_removed)
                     parent->setLeft(replacement);
                 else if (parent->Right() == node_removed)
                     parent->setRight(replacement);
+                else
+                    Requires::That(false, FUNCTION_INFO);
+
+                if (replacement)
+                    replacement->setParent(parent);
             }
             else
                 root = replacement;
@@ -378,12 +408,118 @@ namespace cs
             if (node_inserted.second)
             {
                 tree_node* new_node = node_inserted.first;
-                // find the deepest node out of balance
-                // find the node in the direction of imbalance
-                // perform the appropriate rotation
+
+                // Find the deepest node out of balance
+                tree_node* deepest_unbalanced = FindAncestor<K>(
+                    new_node,
+                    [](const tree_node* ancestor) -> bool
+                    {
+                        int balance_factor = BalanceFactor(ancestor);
+                        return std::abs(balance_factor) > 1;
+                    });
+
+                if (!deepest_unbalanced)
+                    return node_inserted;
+
+                // Find the node in the direction of imbalance
+                // (making use of the binary search tree property: less --> left, greater --> right)
+                tree_node* in_direction_of_imbalance =
+                    TComparator::LessThan(key, deepest_unbalanced->Key()) ?
+                    deepest_unbalanced->Left() :
+                    deepest_unbalanced->Right();
+
+                // Rebalance by performing an appropriate rotation
+                Rebalance(
+                    deepest_unbalanced,
+                    in_direction_of_imbalance);
+            }
+            return node_inserted;
+        }
+
+    private:
+        void Rebalance(
+            tree_node* deepest_unbalanced,
+            tree_node* in_direction_of_imbalance)
+        {
+            int deepest_balance_factor = BalanceFactor(deepest_unbalanced);
+            int in_direction_balance_factor = BalanceFactor(in_direction_of_imbalance);
+
+            if (deepest_balance_factor == 2 && in_direction_balance_factor == 1)
+            {
+                LeftRotate(in_direction_of_imbalance);
+            }
+            else if (deepest_balance_factor == -2 && in_direction_balance_factor == -1)
+            {
+                RightRotate(in_direction_of_imbalance);
+            }
+            else if (deepest_balance_factor == 2 && in_direction_balance_factor == -1)
+            {
+                RightRotate(in_direction_of_imbalance);
+                LeftRotate(in_direction_of_imbalance);
+            }
+            else if (deepest_balance_factor == -2 && in_direction_balance_factor == 1)
+            {
+                LeftRotate(in_direction_of_imbalance);
+                RightRotate(in_direction_of_imbalance);
             }
             else
-                return node_inserted;
+            {
+                Requires::That(false, FUNCTION_INFO);
+            }
+        }
+
+        void LeftRotate(
+            tree_node* node)
+        {
+            tree_node* parent = node->Parent();
+            tree_node* grandparent = parent->Parent();
+            tree_node* node_left = node->Left();
+
+            if (grandparent)
+            {
+                if (TComparator::LessThan(node->Key(), grandparent->Key()))
+                    grandparent->setLeft(node);
+                else
+                    grandparent->setRight(node);
+            }
+            else
+                this->root = node;
+
+            node->setParent(grandparent);
+
+            parent->setRight(node_left);
+            if(node_left)
+                node_left->setParent(parent);
+
+            node->setLeft(parent);
+            parent->setParent(node);
+        }
+
+        void RightRotate(
+            tree_node* node)
+        {
+            tree_node* parent = node->Parent();
+            tree_node* grandparent = parent->Parent();
+            tree_node* node_right = node->Right();
+
+            if (grandparent)
+            {
+                if (TComparator::LessThan(node->Key(), grandparent->Key()))
+                    grandparent->setLeft(node);
+                else
+                    grandparent->setRight(node);
+            }
+            else
+                this->root = node;
+
+            node->setParent(grandparent);
+
+            parent->setLeft(node_right);
+            if(node_right)
+                node_right->setParent(parent);
+
+            node->setRight(parent);
+            parent->setParent(node);
         }
     };
 } // namespace cs

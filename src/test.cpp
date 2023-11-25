@@ -472,12 +472,18 @@ TEST_CASE("TreeNode", "[btree]")
         )
     );
 
+    REQUIRE(root->Parent() == nullptr);
+    REQUIRE(root->Left()->Parent() == root);
+    REQUIRE(root->Right()->Parent() == root);
+    REQUIRE(root->Left()->Left()->Parent() == root->Left());
+    REQUIRE(root->Right()->Right()->Parent() == root->Right());
+
     REQUIRE(root->Left()->Key() == "left1");
     REQUIRE(root->Right()->Key() == "right1");
     REQUIRE(root->Left()->Left()->Key() == "left2");
     REQUIRE(root->Right()->Right()->Key() == "right2");
 
-    //cs::PrintTree<typename tree_node::value_type>(std::cout, root);
+    //cs::PrintTree<typename tree_node::key_type>(std::cout, root);
 
     cs::DeleteTree(root);
 }
@@ -496,7 +502,7 @@ TEST_CASE("BinarySearchTree", "[btree]")
     bst.insert(5);
     bst.insert(7);
 
-    //cs::PrintTree<typename bst_type::value_type>(std::cout, bst.Root());
+    //cs::PrintTree<typename bst_type::key_type>(std::cout, bst.Root());
     /*
                4
               / \
@@ -515,6 +521,22 @@ TEST_CASE("BinarySearchTree", "[btree]")
         REQUIRE(bst.Root()->Left()->Right()->Key() == 3);
         REQUIRE(bst.Root()->Right()->Left()->Key() == 5);
         REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
+
+        REQUIRE(bst.Root()->Parent() == nullptr);
+        REQUIRE(bst.Root()->Left()->Parent() == bst.Root());
+        REQUIRE(bst.Root()->Right()->Parent() == bst.Root());
+        REQUIRE(bst.Root()->Left()->Left()->Parent() == bst.Root()->Left());
+        REQUIRE(bst.Root()->Left()->Right()->Parent() == bst.Root()->Left());
+        REQUIRE(bst.Root()->Right()->Left()->Parent() == bst.Root()->Right());
+        REQUIRE(bst.Root()->Right()->Right()->Parent() == bst.Root()->Right());
+
+        REQUIRE(cs::Height(bst.find(1)) == 0);
+        REQUIRE(cs::Height(bst.find(3)) == 0);
+        REQUIRE(cs::Height(bst.find(5)) == 0);
+        REQUIRE(cs::Height(bst.find(7)) == 0);
+        REQUIRE(cs::Height(bst.find(2)) == 1);
+        REQUIRE(cs::Height(bst.find(6)) == 1);
+        REQUIRE(cs::Height(bst.find(4)) == 2);
     }
 
     SECTION("remove root")
@@ -555,4 +577,32 @@ TEST_CASE("BinarySearchTree", "[btree]")
         REQUIRE(bst.Root()->Right()->Left()->Key() == 5);
         REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
     }
+}
+
+TEST_CASE("AvlTree", "[btree]")
+{
+    using bst_type = cs::AvlTree<int>;
+
+    bst_type bst;
+
+    bst.insert(1);
+    bst.insert(2);
+    bst.insert(3);
+    bst.insert(4);
+    bst.insert(5);
+    bst.insert(6);
+    bst.insert(7);
+
+    //cs::PrintTree<typename bst_type::key_type>(std::cout, bst.Root());
+
+    bst_type::tree_node* unbalanced_node = nullptr;
+    cs::LevelOrderTraverse<bst_type::key_type>(
+        bst.Root(),
+        [&unbalanced_node](bst_type::tree_node* node) -> void
+        {
+            if (std::abs(cs::BalanceFactor(node)) > 1)
+                unbalanced_node = node;
+        }
+    );
+    REQUIRE(unbalanced_node == nullptr);
 }
