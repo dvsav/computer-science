@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utility.h"
+#include "utility.h"   // for DefaultComparator
 
 #include <algorithm>   // for std::max
 #include <functional>  // for std::function
@@ -12,7 +12,7 @@
 
 namespace cs
 {
-    template <typename T>
+    template <typename K>
     class TreeNode
     {
         template <typename, typename>
@@ -25,20 +25,20 @@ namespace cs
         TreeNode* parent;
         TreeNode* left;
         TreeNode* right;
-        T value;
+        K key;
 
     public:
-        using value_type = T;
+        using key_type = K;
 
     public:
         TreeNode(
-            const T& value,
+            const K& key,
             TreeNode* left = nullptr,
             TreeNode* right = nullptr) :
             parent(nullptr),
             left(left),
             right(right),
-            value(value)
+            key(key)
         {
             if (left)
                 left->setParent(this);
@@ -60,8 +60,8 @@ namespace cs
         const TreeNode* Parent() const { return parent; }
         TreeNode* Parent() { return parent; }
 
-        const T& Value() const { return value; }
-        T& Value() { return value; }
+        const K& Key() const { return key; }
+        K& Key() { return key; }
 
     private:
         TreeNode* setLeft(TreeNode* node)
@@ -97,63 +97,63 @@ namespace cs
         }
     };
 
-    template <typename T>
+    template <typename K>
     void PreOrderTraverse(
-        TreeNode<T>* root,
-        std::function<void(TreeNode<T>*)> visitor)
+        TreeNode<K>* root,
+        std::function<void(TreeNode<K>*)> visitor)
     {
         if (root)
         {
             visitor(root);
-            PreOrderTraverse<T>(root->Left(), visitor);
-            PreOrderTraverse<T>(root->Right(), visitor);
+            PreOrderTraverse<K>(root->Left(), visitor);
+            PreOrderTraverse<K>(root->Right(), visitor);
         }
     }
 
-    template <typename T>
+    template <typename K>
     void InOrderTraverse(
-        TreeNode<T>* root,
-        std::function<void(TreeNode<T>*)> visitor)
+        TreeNode<K>* root,
+        std::function<void(TreeNode<K>*)> visitor)
     {
         if (root)
         {
-            InOrderTraverse<T>(root->Left(), visitor);
+            InOrderTraverse<K>(root->Left(), visitor);
             visitor(root);
-            InOrderTraverse<T>(root->Right(), visitor);
+            InOrderTraverse<K>(root->Right(), visitor);
         }
     }
 
-    template <typename T>
+    template <typename K>
     void PostOrderTraverse(
-        TreeNode<T>* root,
-        std::function<void(TreeNode<T>*)> visitor)
+        TreeNode<K>* root,
+        std::function<void(TreeNode<K>*)> visitor)
     {
         if (root)
         {
-            PostOrderTraverse<T>(root->Left(), visitor);
-            PostOrderTraverse<T>(root->Right(), visitor);
+            PostOrderTraverse<K>(root->Left(), visitor);
+            PostOrderTraverse<K>(root->Right(), visitor);
             visitor(root);
         }
     }
 
-    template <typename T>
+    template <typename K>
     void DeleteTree(
-        TreeNode<T>* root)
+        TreeNode<K>* root)
     {
-        PostOrderTraverse<T>(
+        PostOrderTraverse<K>(
             root,
-            [](TreeNode<T>* node) -> void
+            [](TreeNode<K>* node) -> void
             {
                 delete node;
             });
     }
 
-    template <typename T>
+    template <typename K>
     void LevelOrderTraverse(
-        TreeNode<T>* root,
-        std::function<void(TreeNode<T>*)> visitor)
+        TreeNode<K>* root,
+        std::function<void(TreeNode<K>*)> visitor)
     {
-        using tree_node = TreeNode<T>;
+        using tree_node = TreeNode<K>;
 
         if (!root)
             return;
@@ -176,8 +176,8 @@ namespace cs
         }
     }
 
-    template <typename T, bool IsRoot = true, bool IsLeft = false>
-    void PrintTree(std::ostream& os, const TreeNode<T>* root, const std::string& prefix = "")
+    template <typename K, bool IsRoot = true, bool IsLeft = false>
+    void PrintTree(std::ostream& os, const TreeNode<K>* root, const std::string& prefix = "")
     {
         os << prefix;
         if (!IsRoot)
@@ -189,19 +189,19 @@ namespace cs
             return;
         }
 
-        os << root->Value() << std::endl;
+        os << root->Key() << std::endl;
 
         if (!root->Left() && !root->Right())
             return;
 
-        PrintTree<T, false, true>(os, root->Left(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
-        PrintTree<T, false, false>(os, root->Right(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
+        PrintTree<K, false, true>(os, root->Left(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
+        PrintTree<K, false, false>(os, root->Right(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
     }
 
-    template <typename T>
-    TreeNode<T>* InORderPredecessor(TreeNode<T>* root)
+    template <typename K>
+    TreeNode<K>* InORderPredecessor(TreeNode<K>* root)
     {
-        using tree_node = TreeNode<T>;
+        using tree_node = TreeNode<K>;
 
         if (!root)
             return nullptr;
@@ -216,8 +216,8 @@ namespace cs
         return predecessor;
     }
 
-    template <typename T>
-    int Height(TreeNode<T>* root)
+    template <typename K>
+    int Height(TreeNode<K>* root)
     {
         if (!root)
             return 0;
@@ -227,30 +227,30 @@ namespace cs
             root->Right() ? 1 + Height(root->Right()) : 0);
     }
 
-    template <typename T>
-    int BalanceFactor(const TreeNode<T>* node)
+    template <typename K>
+    int BalanceFactor(const TreeNode<K>* node)
     {
         return Height(node->Right()) - Height(node->Left());
     }
 
-    template <typename T, typename TComparator = DefaultComparator<T> >
+    template <typename K, typename TComparator = DefaultComparator<K> >
     class BinarySearchTree
     {
         // Check for the existence of a member function "LessThan" in TComparator type
         static_assert(
             std::is_same<decltype(&TComparator::LessThan),
-                         bool (*)(const T&, const T&)>::value,
+                         bool (*)(const K&, const K&)>::value,
             "LessThan function is missing in TComparator");
 
         // Check for the existence of a member function "EqualTo" in TComparator type
         static_assert(
             std::is_same<decltype(&TComparator::EqualTo),
-                         bool (*)(const T&, const T&)>::value,
+                         bool (*)(const K&, const K&)>::value,
             "EqualTo function is missing in TComparator");
 
     public:
-        using value_type = T;
-        using tree_node = TreeNode<T>;
+        using key_type = K;
+        using tree_node = TreeNode<K>;
 
     protected:
         tree_node* root;
@@ -269,7 +269,7 @@ namespace cs
     public:
         const tree_node* Root() const { return root; }
 
-        tree_node* find(const T& value)
+        tree_node* find(const K& key)
         {
             tree_node* current_node = root;
             while (true)
@@ -277,50 +277,50 @@ namespace cs
                 if (!current_node)
                     return nullptr;
 
-                if (TComparator::EqualTo(value, current_node->Value()))
+                if (TComparator::EqualTo(key, current_node->Key()))
                     return current_node;
-                else if (TComparator::LessThan(value, current_node->Value()))
+                else if (TComparator::LessThan(key, current_node->Key()))
                     current_node = current_node->Left();
                 else
                     current_node = current_node->Right();
             }
         }
 
-        virtual std::pair<tree_node*, bool> insert(const T& value)
+        virtual std::pair<tree_node*, bool> insert(const K& key)
         {
             if (!root)
             {
-                root = new tree_node(value);
+                root = new tree_node(key);
                 return std::make_pair(root, true);
             }
 
             tree_node* current_node = root;
             while (true)
             {
-                if (TComparator::EqualTo(value, current_node->Value()))
+                if (TComparator::EqualTo(key, current_node->Key()))
                 {
                     return std::make_pair(current_node, false);
                 }
-                else if (TComparator::LessThan(value, current_node->Value()))
+                else if (TComparator::LessThan(key, current_node->Key()))
                 {
                     if (current_node->Left())
                         current_node = current_node->Left();
                     else
-                        return std::make_pair(current_node->setLeft(new tree_node(value)), true);
+                        return std::make_pair(current_node->setLeft(new tree_node(key)), true);
                 }
                 else
                 {
                     if (current_node->Right())
                         current_node = current_node->Right();
                     else
-                        return std::make_pair(current_node->setRight(new tree_node(value)), true);
+                        return std::make_pair(current_node->setRight(new tree_node(key)), true);
                 }
             }
         }
 
-        virtual bool remove(const T& value)
+        virtual bool remove(const K& key)
         {
-            tree_node* node_removed = find(value);
+            tree_node* node_removed = find(key);
             if (!node_removed)
                 return false;
 
@@ -329,7 +329,7 @@ namespace cs
             tree_node* parent = node_removed->Parent();
 
             // the node to replace the node being removed is either its in-order predecessor or its right child
-            tree_node* in_order_predecessor = InORderPredecessor<T>(node_removed);
+            tree_node* in_order_predecessor = InORderPredecessor<K>(node_removed);
             tree_node* replacement = in_order_predecessor ? in_order_predecessor : node_removed->Right();
 
             if (replacement)
@@ -360,21 +360,21 @@ namespace cs
         }
     };
 
-    template <typename T, typename TComparator = DefaultComparator<T> >
-    class AvlTree : public BinarySearchTree<T, typename TComparator>
+    template <typename K, typename TComparator = DefaultComparator<K> >
+    class AvlTree : public BinarySearchTree<K, TComparator>
     {
     public:
-        using base = BinarySearchTree<T, typename TComparator>;
-        using value_type = base::value_type;
-        using tree_node = base::tree_node;
+        using base = BinarySearchTree<K, TComparator>;
+        using key_type = typename base::key_type;
+        using tree_node = typename base::tree_node;
 
     public:
         using base::BinarySearchTree;
 
     public:
-        std::pair<tree_node*, bool> insert(const T& value) override
+        std::pair<tree_node*, bool> insert(const K& key) override
         {
-            auto node_inserted = base::insert(value);
+            auto node_inserted = base::insert(key);
             if (node_inserted.second)
             {
                 tree_node* new_node = node_inserted.first;

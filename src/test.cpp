@@ -472,10 +472,10 @@ TEST_CASE("TreeNode", "[btree]")
         )
     );
 
-    REQUIRE(root->Left()->Value() == "left1");
-    REQUIRE(root->Right()->Value() == "right1");
-    REQUIRE(root->Left()->Left()->Value() == "left2");
-    REQUIRE(root->Right()->Right()->Value() == "right2");
+    REQUIRE(root->Left()->Key() == "left1");
+    REQUIRE(root->Right()->Key() == "right1");
+    REQUIRE(root->Left()->Left()->Key() == "left2");
+    REQUIRE(root->Right()->Right()->Key() == "right2");
 
     //cs::PrintTree<typename tree_node::value_type>(std::cout, root);
 
@@ -508,51 +508,51 @@ TEST_CASE("BinarySearchTree", "[btree]")
 
     SECTION("tree structure")
     {
-        REQUIRE(bst.Root()->Value() == 4);
-        REQUIRE(bst.Root()->Left()->Value() == 2);
-        REQUIRE(bst.Root()->Right()->Value() == 6);
-        REQUIRE(bst.Root()->Left()->Left()->Value() == 1);
-        REQUIRE(bst.Root()->Left()->Right()->Value() == 3);
-        REQUIRE(bst.Root()->Right()->Left()->Value() == 5);
-        REQUIRE(bst.Root()->Right()->Right()->Value() == 7);
+        REQUIRE(bst.Root()->Key() == 4);
+        REQUIRE(bst.Root()->Left()->Key() == 2);
+        REQUIRE(bst.Root()->Right()->Key() == 6);
+        REQUIRE(bst.Root()->Left()->Left()->Key() == 1);
+        REQUIRE(bst.Root()->Left()->Right()->Key() == 3);
+        REQUIRE(bst.Root()->Right()->Left()->Key() == 5);
+        REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
     }
 
     SECTION("remove root")
     {
         bst.remove(4);
 
-        REQUIRE(bst.Root()->Value() == 3);
-        REQUIRE(bst.Root()->Left()->Value() == 2);
-        REQUIRE(bst.Root()->Right()->Value() == 6);
-        REQUIRE(bst.Root()->Left()->Left()->Value() == 1);
+        REQUIRE(bst.Root()->Key() == 3);
+        REQUIRE(bst.Root()->Left()->Key() == 2);
+        REQUIRE(bst.Root()->Right()->Key() == 6);
+        REQUIRE(bst.Root()->Left()->Left()->Key() == 1);
         REQUIRE(bst.Root()->Left()->Right() == nullptr);
-        REQUIRE(bst.Root()->Right()->Left()->Value() == 5);
-        REQUIRE(bst.Root()->Right()->Right()->Value() == 7);
+        REQUIRE(bst.Root()->Right()->Left()->Key() == 5);
+        REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
     }
 
     SECTION("remove inner node")
     {
         bst.remove(6);
 
-        REQUIRE(bst.Root()->Value() == 4);
-        REQUIRE(bst.Root()->Left()->Value() == 2);
-        REQUIRE(bst.Root()->Right()->Value() == 5);
-        REQUIRE(bst.Root()->Left()->Left()->Value() == 1);
-        REQUIRE(bst.Root()->Left()->Right()->Value() == 3);
+        REQUIRE(bst.Root()->Key() == 4);
+        REQUIRE(bst.Root()->Left()->Key() == 2);
+        REQUIRE(bst.Root()->Right()->Key() == 5);
+        REQUIRE(bst.Root()->Left()->Left()->Key() == 1);
+        REQUIRE(bst.Root()->Left()->Right()->Key() == 3);
         REQUIRE(bst.Root()->Right()->Left() == nullptr);
-        REQUIRE(bst.Root()->Right()->Right()->Value() == 7);
+        REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
     }
 
     SECTION("remove leaf")
     {
         bst.remove(3);
 
-        REQUIRE(bst.Root()->Value() == 4);
-        REQUIRE(bst.Root()->Left()->Value() == 2);
-        REQUIRE(bst.Root()->Right()->Value() == 6);
-        REQUIRE(bst.Root()->Left()->Left()->Value() == 1);
+        REQUIRE(bst.Root()->Key() == 4);
+        REQUIRE(bst.Root()->Left()->Key() == 2);
+        REQUIRE(bst.Root()->Right()->Key() == 6);
+        REQUIRE(bst.Root()->Left()->Left()->Key() == 1);
         REQUIRE(bst.Root()->Left()->Right() == nullptr);
-        REQUIRE(bst.Root()->Right()->Left()->Value() == 5);
-        REQUIRE(bst.Root()->Right()->Right()->Value() == 7);
+        REQUIRE(bst.Root()->Right()->Left()->Key() == 5);
+        REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
     }
 }
