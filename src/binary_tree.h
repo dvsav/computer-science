@@ -28,6 +28,7 @@ namespace cs
         TreeNode* left;
         TreeNode* right;
         K key;
+        int height; // cached height of the tree for which 'this' is the root
 
     public:
         using key_type = K;
@@ -40,7 +41,8 @@ namespace cs
             parent(nullptr),
             left(left),
             right(right),
-            key(key)
+            key(key),
+            height(0)
         {
             if (left)
                 left->setParent(this);
@@ -71,6 +73,15 @@ namespace cs
         void setRight(TreeNode* node) { right = node; }
 
         void setParent(TreeNode* node) { parent = node; }
+
+        int Height() const { return height; }
+
+        int BalanceFactor() const
+        {
+            return
+                (this->Right() ? 1 + this->Right()->Height() : 0) -
+                (this->Left() ? 1 + this->Left()->Height() : 0);
+        }
     };
 
     template <typename K>
@@ -214,11 +225,11 @@ namespace cs
     }
 
     template <typename K>
-    int Height(const TreeNode<K>* root)
+    int Height(const TreeNode<K>* node)
     {
         return std::max(
-            root->Left() ? 1 + Height(root->Left()) : 0,
-            root->Right() ? 1 + Height(root->Right()) : 0);
+            node->Right() ? 1 + Height(node->Right()) : 0,
+            node->Left() ? 1 + Height(node->Left()) : 0);
     }
 
     template <typename K>
@@ -227,6 +238,23 @@ namespace cs
         return
             (node->Right() ? 1 + Height(node->Right()) : 0) -
             (node->Left() ? 1 + Height(node->Left()) : 0);
+    }
+
+    template <typename K>
+    bool IsBalanced(const TreeNode<K>* root)
+    {
+        using tree_node = TreeNode<K>;
+
+        tree_node* unbalanced_node = nullptr;
+        LevelOrderTraverse<K>(
+            const_cast<tree_node*>(root),
+            [&unbalanced_node](tree_node* node) -> void
+            {
+                if (std::abs(cs::BalanceFactor(node)) > 1)
+                    unbalanced_node = node;
+            }
+        );
+        return (unbalanced_node == nullptr);
     }
 
     template <typename K, typename TComparator = DefaultComparator<K> >
@@ -312,6 +340,7 @@ namespace cs
                         tree_node* new_node = new tree_node(key);
                         current_node->setLeft(new_node);
                         new_node->setParent(current_node);
+                        refreshHeightUp(current_node);
                         return std::make_pair(new_node, true);
                     }
                 }
@@ -326,6 +355,7 @@ namespace cs
                         tree_node* new_node = new tree_node(key);
                         current_node->setRight(new_node);
                         new_node->setParent(current_node);
+                        refreshHeightUp(current_node);
                         return std::make_pair(new_node, true);
                     }
                 }
@@ -349,11 +379,31 @@ namespace cs
         }
 
     protected:
-        void remove(
+        // Returns potential imbalance node
+        tree_node* remove(
             tree_node* node_removed,
             tree_node* replacement)
         {
             tree_node* parent = node_removed->Parent();
+
+            tree_node* potential_imbalance_node = nullptr;
+            if (replacement)
+            {
+                // Imbalance may occur either in the left subtree of 'node_removed' (if there's an in-order predecessor)
+                // or in the 'replacement' node itself after it takes place of 'node_removed'
+                potential_imbalance_node =
+                    replacement->Parent() != node_removed ?
+                    replacement->Parent() : replacement;
+            }
+            else
+            {
+                // Or if the 'node_removed' is a leaf, imbalance may occur in the grandparent of 'node_removed'.
+                if (node_removed->Parent() && node_removed->Parent()->Parent())
+                    potential_imbalance_node = node_removed->Parent()->Parent();
+            }
+
+            // Update 'height' all the way from 'potential_imbalance_node' to the root
+            refreshHeightUp(potential_imbalance_node);
 
             // If replacement != nullptr, this means that we are trying to delete a non-leaf node
             if (replacement)
@@ -398,6 +448,27 @@ namespace cs
                 root = replacement;
 
             delete node_removed;
+
+            return potential_imbalance_node;
+        }
+
+        // Updates 'height' for specified node only
+        static void refreshHeight(TreeNode<K>* node)
+        {
+            node->height = std::max(
+                node->Left() ? 1 + node->Left()->Height() : 0,
+                node->Right() ? 1 + node->Right()->Height() : 0);
+        }
+
+        // Updates 'height' beginning from the specified node and all the way up to the root
+        static void refreshHeightUp(TreeNode<K>* node)
+        {
+            tree_node* current_node = node;
+            while (current_node)
+            {
+                refreshHeight(current_node);
+                current_node = current_node->Parent();
+            }
         }
     };
 
@@ -425,7 +496,7 @@ namespace cs
                     new_node,
                     [](const tree_node* ancestor) -> bool
                     {
-                        int balance_factor = BalanceFactor(ancestor);
+                        int balance_factor = ancestor->BalanceFactor();
                         return std::abs(balance_factor) > 1;
                     });
 
@@ -456,36 +527,20 @@ namespace cs
                 tree_node* in_order_predecessor = InOrderPredecessor<K>(node_removed);
                 tree_node* replacement = in_order_predecessor ? in_order_predecessor : node_removed->Right();
 
-                tree_node* potential_imbalance_node = nullptr;
-                if (replacement)
-                {
-                    // Imbalance may occur either in the left subtree of 'node_removed' (if there's an in-order predecessor)
-                    // or in the 'replacement' node itself after it takes place of 'node_removed'
-                    potential_imbalance_node =
-                        replacement->Parent() != node_removed ?
-                        replacement->Parent() : replacement;
-                }
-                else
-                {
-                    // Or if the 'node_removed' is a leaf, imbalance may occur in the grandparent of 'node_removed'.
-                    if (node_removed->Parent() && node_removed->Parent()->Parent())
-                        potential_imbalance_node = node_removed->Parent()->Parent();
-                }
-
-                base::remove(node_removed, replacement);
+                tree_node* potential_imbalance_node = base::remove(node_removed, replacement);
 
                 // If there might be an imbalance
                 if (potential_imbalance_node)
                 {
                     // Find the deepest node out of balance (search starts from 'potential_imbalance_node' inclusive)
                     tree_node* deepest_unbalanced =
-                        std::abs(BalanceFactor(potential_imbalance_node)) > 1 ?
+                        std::abs(potential_imbalance_node->BalanceFactor()) > 1 ?
                         potential_imbalance_node :
                         FindAncestor<K>(
                             potential_imbalance_node,
                             [](const tree_node* ancestor) -> bool
                             {
-                                int balance_factor = BalanceFactor(ancestor);
+                                int balance_factor = ancestor->BalanceFactor();
                                 return std::abs(balance_factor) > 1;
                             });
 
@@ -516,29 +571,36 @@ namespace cs
             tree_node* deepest_unbalanced,
             tree_node* in_direction_of_imbalance)
         {
-            int deepest_balance_factor = BalanceFactor(deepest_unbalanced);
-            int in_direction_balance_factor = BalanceFactor(in_direction_of_imbalance);
+            int deepest_balance_factor = deepest_unbalanced->BalanceFactor();
+            int in_direction_balance_factor = in_direction_of_imbalance->BalanceFactor();
 
             if (deepest_balance_factor == 2 && in_direction_balance_factor == 1)
             {
                 LeftRotate(in_direction_of_imbalance);
+                this->refreshHeightUp(deepest_unbalanced);
             }
             else if (deepest_balance_factor == -2 && in_direction_balance_factor == -1)
             {
                 RightRotate(in_direction_of_imbalance);
+                this->refreshHeightUp(deepest_unbalanced);
             }
             else if (deepest_balance_factor == 2 && in_direction_balance_factor == -1)
             {
-                RightRotate(in_direction_of_imbalance);
+                RightRotate(in_direction_of_imbalance->Left());
                 LeftRotate(in_direction_of_imbalance);
+                this->refreshHeight(deepest_unbalanced);
+                this->refreshHeightUp(in_direction_of_imbalance);
             }
             else if (deepest_balance_factor == -2 && in_direction_balance_factor == 1)
             {
-                LeftRotate(in_direction_of_imbalance);
+                LeftRotate(in_direction_of_imbalance->Right());
                 RightRotate(in_direction_of_imbalance);
+                this->refreshHeight(deepest_unbalanced);
+                this->refreshHeightUp(in_direction_of_imbalance);
             }
             else
             {
+                // We shall never get here
                 Requires::That(false, FUNCTION_INFO);
             }
         }
