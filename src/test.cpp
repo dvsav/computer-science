@@ -595,14 +595,28 @@ TEST_CASE("AvlTree", "[btree]")
 
     //cs::PrintTree<typename bst_type::key_type>(std::cout, bst.Root());
 
-    bst_type::tree_node* unbalanced_node = nullptr;
-    cs::LevelOrderTraverse<bst_type::key_type>(
-        bst.Root(),
-        [&unbalanced_node](bst_type::tree_node* node) -> void
-        {
-            if (std::abs(cs::BalanceFactor(node)) > 1)
-                unbalanced_node = node;
-        }
-    );
-    REQUIRE(unbalanced_node == nullptr);
+    SECTION("check tree balanced")
+    {
+        bst_type::tree_node* unbalanced_node = nullptr;
+        cs::LevelOrderTraverse<bst_type::key_type>(
+            bst.Root(),
+            [&unbalanced_node](bst_type::tree_node* node) -> void
+            {
+                if (std::abs(cs::BalanceFactor(node)) > 1)
+                    unbalanced_node = node;
+            }
+        );
+        REQUIRE(unbalanced_node == nullptr);
+    }
+
+    SECTION("remove still balanced")
+    {
+        bst.remove(4);
+        bst.remove(1);
+        bst.remove(6);
+        bst.remove(5);
+        bst.remove(2);
+        bst.remove(7);
+        bst.remove(3);
+    }
 }

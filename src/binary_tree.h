@@ -196,7 +196,7 @@ namespace cs
     }
 
     template <typename K>
-    TreeNode<K>* InORderPredecessor(TreeNode<K>* root)
+    TreeNode<K>* InOrderPredecessor(TreeNode<K>* root)
     {
         using tree_node = TreeNode<K>;
 
@@ -335,20 +335,32 @@ namespace cs
         virtual bool remove(const K& key)
         {
             tree_node* node_removed = find(key);
-            if (!node_removed)
+            if (node_removed)
+            {
+                // The node to replace the node being removed is either its in-order predecessor or its right child
+                tree_node* in_order_predecessor = InOrderPredecessor<K>(node_removed);
+                tree_node* replacement = in_order_predecessor ? in_order_predecessor : node_removed->Right();
+
+                remove(node_removed, replacement);
+                return true;
+            }
+            else
                 return false;
+        }
 
-            tree_node* left = node_removed->Left();
-            tree_node* right = node_removed->Right();
+    protected:
+        void remove(
+            tree_node* node_removed,
+            tree_node* replacement)
+        {
             tree_node* parent = node_removed->Parent();
-
-            // The node to replace the node being removed is either its in-order predecessor or its right child
-            tree_node* in_order_predecessor = InORderPredecessor<K>(node_removed);
-            tree_node* replacement = in_order_predecessor ? in_order_predecessor : node_removed->Right();
 
             // If replacement != nullptr, this means that we are trying to delete a non-leaf node
             if (replacement)
             {
+                tree_node* left = node_removed->Left();
+                tree_node* right = node_removed->Right();
+
                 // Update replacement's parent's child pointer
                 replacement->Parent()->setRight(nullptr);
                 replacement->setParent(nullptr);
@@ -386,7 +398,6 @@ namespace cs
                 root = replacement;
 
             delete node_removed;
-            return true;
         }
     };
 
@@ -418,22 +429,86 @@ namespace cs
                         return std::abs(balance_factor) > 1;
                     });
 
-                if (!deepest_unbalanced)
-                    return node_inserted;
+                if (deepest_unbalanced)
+                {
+                    // Find the node in the direction of imbalance
+                    // (making use of the binary search tree property: less --> left, greater --> right)
+                    tree_node* in_direction_of_imbalance =
+                        TComparator::LessThan(key, deepest_unbalanced->Key()) ?
+                        deepest_unbalanced->Left() :
+                        deepest_unbalanced->Right();
 
-                // Find the node in the direction of imbalance
-                // (making use of the binary search tree property: less --> left, greater --> right)
-                tree_node* in_direction_of_imbalance =
-                    TComparator::LessThan(key, deepest_unbalanced->Key()) ?
-                    deepest_unbalanced->Left() :
-                    deepest_unbalanced->Right();
-
-                // Rebalance by performing an appropriate rotation
-                Rebalance(
-                    deepest_unbalanced,
-                    in_direction_of_imbalance);
+                    // Rebalance by performing an appropriate rotation
+                    Rebalance(
+                        deepest_unbalanced,
+                        in_direction_of_imbalance);
+                }
             }
             return node_inserted;
+        }
+
+        bool remove(const K& key) override
+        {
+            tree_node* node_removed = this->find(key);
+            if (node_removed)
+            {
+                // The node to replace the node being removed is either its in-order predecessor or its right child
+                tree_node* in_order_predecessor = InOrderPredecessor<K>(node_removed);
+                tree_node* replacement = in_order_predecessor ? in_order_predecessor : node_removed->Right();
+
+                tree_node* potential_imbalance_node = nullptr;
+                if (replacement)
+                {
+                    // Imbalance may occur either in the left subtree of 'node_removed' (if there's an in-order predecessor)
+                    // or in the 'replacement' node itself after it takes place of 'node_removed'
+                    potential_imbalance_node =
+                        replacement->Parent() != node_removed ?
+                        replacement->Parent() : replacement;
+                }
+                else
+                {
+                    // Or if the 'node_removed' is a leaf, imbalance may occur in the grandparent of 'node_removed'.
+                    if (node_removed->Parent() && node_removed->Parent()->Parent())
+                        potential_imbalance_node = node_removed->Parent()->Parent();
+                }
+
+                base::remove(node_removed, replacement);
+
+                // If there might be an imbalance
+                if (potential_imbalance_node)
+                {
+                    // Find the deepest node out of balance (search starts from 'potential_imbalance_node' inclusive)
+                    tree_node* deepest_unbalanced =
+                        std::abs(BalanceFactor(potential_imbalance_node)) > 1 ?
+                        potential_imbalance_node :
+                        FindAncestor<K>(
+                            potential_imbalance_node,
+                            [](const tree_node* ancestor) -> bool
+                            {
+                                int balance_factor = BalanceFactor(ancestor);
+                                return std::abs(balance_factor) > 1;
+                            });
+
+                    if (deepest_unbalanced)
+                    {
+                        // Find the node in the direction of imbalance
+                        // (making use of the binary search tree property: less --> left, greater --> right)
+                        tree_node* in_direction_of_imbalance =
+                            TComparator::LessThan(key, deepest_unbalanced->Key()) ?
+                            deepest_unbalanced->Left() :
+                            deepest_unbalanced->Right();
+
+                        // Rebalance by performing an appropriate rotation
+                        Rebalance(
+                            deepest_unbalanced,
+                            in_direction_of_imbalance);
+                    }
+                }
+
+                return true;
+            }
+            else
+                return false;
         }
 
     private:
