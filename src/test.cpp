@@ -1,3 +1,4 @@
+#include "binary_tree.h"      // for cs::TreeNode
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
 #include "heap.h"             // for cs::Heap
@@ -11,6 +12,7 @@
 #include <cstdio>             // for std::remove
 #include <fstream>            // for std::ifstream, std::ofstream
 #include <iostream>           // for std:::cout
+#include <string>             // for std::string
 #include <vector>             // for std::vector
 
 // Catch2 - a single header unit test framework
@@ -444,4 +446,224 @@ TEST_CASE("Heap", "[heap]")
         REQUIRE(x == heap.top());
         heap.pop();
     }
+}
+
+TEST_CASE("TreeNode", "[btree]")
+{
+    using tree_node = cs::TreeNode<std::string, int>;
+
+    tree_node* root = new tree_node(
+        /*value*/ "root",
+        /*left*/ new tree_node(
+            "left1",
+            new tree_node(
+                "left2",
+                nullptr,
+                nullptr),
+            nullptr
+        ),
+        /*right*/ new tree_node(
+            "right1",
+            nullptr,
+            new tree_node(
+                "right2",
+                nullptr,
+                nullptr)
+        )
+    );
+
+    REQUIRE(root->Parent() == nullptr);
+    REQUIRE(root->Left()->Parent() == root);
+    REQUIRE(root->Right()->Parent() == root);
+    REQUIRE(root->Left()->Left()->Parent() == root->Left());
+    REQUIRE(root->Right()->Right()->Parent() == root->Right());
+
+    REQUIRE(root->Left()->Key() == "left1");
+    REQUIRE(root->Right()->Key() == "right1");
+    REQUIRE(root->Left()->Left()->Key() == "left2");
+    REQUIRE(root->Right()->Right()->Key() == "right2");
+
+    //cs::PrintTree<typename tree_node>(std::cout, root);
+
+    cs::DeleteTree(root);
+}
+
+TEST_CASE("BinarySearchTree", "[btree]")
+{
+    using bst_type = cs::BinarySearchTree<int, std::string>;
+
+    bst_type bst;
+
+    bst.insert(4, "four");
+    bst.insert(2, "two");
+    bst.insert(6, "six");
+    bst.insert(1, "one");
+    bst.insert(3, "three");
+    bst.insert(5, "five");
+    bst.insert(7, "seven");
+
+    //cs::PrintTree<typename bst_type::tree_node>(std::cout, bst.Root());
+    /*
+               4
+              / \
+             /   \
+            2     6
+           / \   / \
+          1   3 5   7
+    */
+
+    SECTION("tree structure")
+    {
+        REQUIRE(bst.Root()->Key() == 4);
+        REQUIRE(bst.Root()->Left()->Key() == 2);
+        REQUIRE(bst.Root()->Right()->Key() == 6);
+        REQUIRE(bst.Root()->Left()->Left()->Key() == 1);
+        REQUIRE(bst.Root()->Left()->Right()->Key() == 3);
+        REQUIRE(bst.Root()->Right()->Left()->Key() == 5);
+        REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
+
+        REQUIRE(bst.Root()->Parent() == nullptr);
+        REQUIRE(bst.Root()->Left()->Parent() == bst.Root());
+        REQUIRE(bst.Root()->Right()->Parent() == bst.Root());
+        REQUIRE(bst.Root()->Left()->Left()->Parent() == bst.Root()->Left());
+        REQUIRE(bst.Root()->Left()->Right()->Parent() == bst.Root()->Left());
+        REQUIRE(bst.Root()->Right()->Left()->Parent() == bst.Root()->Right());
+        REQUIRE(bst.Root()->Right()->Right()->Parent() == bst.Root()->Right());
+
+        REQUIRE(cs::Height(bst.find(1)) == 0);
+        REQUIRE(cs::Height(bst.find(3)) == 0);
+        REQUIRE(cs::Height(bst.find(5)) == 0);
+        REQUIRE(cs::Height(bst.find(7)) == 0);
+        REQUIRE(cs::Height(bst.find(2)) == 1);
+        REQUIRE(cs::Height(bst.find(6)) == 1);
+        REQUIRE(cs::Height(bst.find(4)) == 2);
+    }
+
+    SECTION("change values")
+    {
+        REQUIRE(bst[1] == "one");
+        REQUIRE(bst[2] == "two");
+        REQUIRE(bst[3] == "three");
+        REQUIRE(bst[4] == "four");
+        REQUIRE(bst[5] == "five");
+        REQUIRE(bst[6] == "six");
+        REQUIRE(bst[7] == "seven");
+
+        bst[1] = "1st";
+        REQUIRE(bst[1] == "1st");
+
+        bst[2] = "2nd";
+        REQUIRE(bst[2] == "2nd");
+
+        bst[3] = "3rd";
+        REQUIRE(bst[3] == "3rd");
+
+        bst[4] = "4th";
+        REQUIRE(bst[4] == "4th");
+
+        bst[5] = "5th";
+        REQUIRE(bst[5] == "5th");
+
+        bst[6] = "6th";
+        REQUIRE(bst[6] == "6th");
+
+        bst[7] = "7th";
+        REQUIRE(bst[7] == "7th");
+
+        bst[0] = "zero";
+        REQUIRE(bst[0] == "zero");
+
+        bst[8] = "8th";
+        REQUIRE(bst[8] == "8th");
+    }
+
+    SECTION("remove root")
+    {
+        bst.remove(4);
+
+        REQUIRE(bst.Root()->Key() == 3);
+        REQUIRE(bst.Root()->Left()->Key() == 2);
+        REQUIRE(bst.Root()->Right()->Key() == 6);
+        REQUIRE(bst.Root()->Left()->Left()->Key() == 1);
+        REQUIRE(bst.Root()->Left()->Right() == nullptr);
+        REQUIRE(bst.Root()->Right()->Left()->Key() == 5);
+        REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
+    }
+
+    SECTION("remove inner node")
+    {
+        bst.remove(6);
+
+        REQUIRE(bst.Root()->Key() == 4);
+        REQUIRE(bst.Root()->Left()->Key() == 2);
+        REQUIRE(bst.Root()->Right()->Key() == 5);
+        REQUIRE(bst.Root()->Left()->Left()->Key() == 1);
+        REQUIRE(bst.Root()->Left()->Right()->Key() == 3);
+        REQUIRE(bst.Root()->Right()->Left() == nullptr);
+        REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
+    }
+
+    SECTION("remove leaf")
+    {
+        bst.remove(3);
+
+        REQUIRE(bst.Root()->Key() == 4);
+        REQUIRE(bst.Root()->Left()->Key() == 2);
+        REQUIRE(bst.Root()->Right()->Key() == 6);
+        REQUIRE(bst.Root()->Left()->Left()->Key() == 1);
+        REQUIRE(bst.Root()->Left()->Right() == nullptr);
+        REQUIRE(bst.Root()->Right()->Left()->Key() == 5);
+        REQUIRE(bst.Root()->Right()->Right()->Key() == 7);
+    }
+}
+
+TEST_CASE("AvlTree", "[btree]")
+{
+    using bst_type = cs::AvlTree<int, std::string>;
+
+    bst_type bst;
+
+    bst.insert(1, "one");
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.insert(2, "two");
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.insert(3, "three");
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.insert(4, "four");
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.insert(5, "five");
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.insert(6, "six");
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.insert(7, "seven");
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    //cs::PrintTree<typename bst_type::tree_node>(std::cout, bst.Root());
+
+    bst.remove(4);
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.remove(1);
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.remove(6);
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.remove(5);
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.remove(2);
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.remove(7);
+    REQUIRE(cs::IsBalanced(bst.Root()));
+
+    bst.remove(3);
+    REQUIRE(cs::IsBalanced(bst.Root()));
 }
