@@ -14,24 +14,26 @@
 
 namespace cs
 {
-    template <typename K>
+    template <typename K, typename V>
     class TreeNode
     {
-        template <typename, typename>
+        template <typename, typename, typename>
         friend class BinarySearchTree;
 
-        template <typename, typename>
+        template <typename, typename, typename>
         friend class AvlTree;
+
+    public:
+        using key_type = K;
+        using value_type = V;
 
     private:
         TreeNode* parent;
         TreeNode* left;
         TreeNode* right;
         K key;
+        V value;
         int height; // cached height of the tree for which 'this' is the root
-
-    public:
-        using key_type = K;
 
     public:
         TreeNode(
@@ -42,13 +44,25 @@ namespace cs
             left(left),
             right(right),
             key(key),
+            value(),
             height(0)
         {
-            if (left)
-                left->setParent(this);
+            init();
+        }
 
-            if (right)
-                right->setParent(this);
+        TreeNode(
+            const K& key,
+            const V& value,
+            TreeNode* left = nullptr,
+            TreeNode* right = nullptr) :
+            parent(nullptr),
+            left(left),
+            right(right),
+            key(key),
+            value(value),
+            height(0)
+        {
+            init();
         }
 
         TreeNode(const TreeNode&) = delete;
@@ -65,9 +79,20 @@ namespace cs
         TreeNode* Parent() { return parent; }
 
         const K& Key() const { return key; }
-        K& Key() { return key; }
+
+        const V& Value() const { return value; }
+        V& Value() { return value; }
 
     private:
+        void init()
+        {
+            if (left)
+                left->setParent(this);
+
+            if (right)
+                right->setParent(this);
+        }
+
         void setLeft(TreeNode* node) { left = node; }
 
         void setRight(TreeNode* node) { right = node; }
@@ -84,73 +109,71 @@ namespace cs
         }
     };
 
-    template <typename K>
+    template <typename TTreeNode>
     void PreOrderTraverse(
-        TreeNode<K>* root,
-        std::function<void(TreeNode<K>*)> visitor)
+        TTreeNode* root,
+        std::function<void(TTreeNode*)> visitor)
     {
         if (root)
         {
             visitor(root);
-            PreOrderTraverse<K>(root->Left(), visitor);
-            PreOrderTraverse<K>(root->Right(), visitor);
+            PreOrderTraverse<TTreeNode>(root->Left(), visitor);
+            PreOrderTraverse<TTreeNode>(root->Right(), visitor);
         }
     }
 
-    template <typename K>
+    template <typename TTreeNode>
     void InOrderTraverse(
-        TreeNode<K>* root,
-        std::function<void(TreeNode<K>*)> visitor)
+        TTreeNode* root,
+        std::function<void(TTreeNode*)> visitor)
     {
         if (root)
         {
-            InOrderTraverse<K>(root->Left(), visitor);
+            InOrderTraverse<TTreeNode>(root->Left(), visitor);
             visitor(root);
-            InOrderTraverse<K>(root->Right(), visitor);
+            InOrderTraverse<TTreeNode>(root->Right(), visitor);
         }
     }
 
-    template <typename K>
+    template <typename TTreeNode>
     void PostOrderTraverse(
-        TreeNode<K>* root,
-        std::function<void(TreeNode<K>*)> visitor)
+        TTreeNode* root,
+        std::function<void(TTreeNode*)> visitor)
     {
         if (root)
         {
-            PostOrderTraverse<K>(root->Left(), visitor);
-            PostOrderTraverse<K>(root->Right(), visitor);
+            PostOrderTraverse<TTreeNode>(root->Left(), visitor);
+            PostOrderTraverse<TTreeNode>(root->Right(), visitor);
             visitor(root);
         }
     }
 
-    template <typename K>
+    template <typename TTreeNode>
     void DeleteTree(
-        TreeNode<K>* root)
+        TTreeNode* root)
     {
-        PostOrderTraverse<K>(
+        PostOrderTraverse<TTreeNode>(
             root,
-            [](TreeNode<K>* node) -> void
+            [](TTreeNode* node) -> void
             {
                 delete node;
             });
     }
 
-    template <typename K>
+    template <typename TTreeNode>
     void LevelOrderTraverse(
-        TreeNode<K>* root,
-        std::function<void(TreeNode<K>*)> visitor)
+        TTreeNode* root,
+        std::function<void(TTreeNode*)> visitor)
     {
-        using tree_node = TreeNode<K>;
-
         if (!root)
             return;
 
-        std::stack<tree_node*> level;
+        std::stack<TTreeNode*> level;
         level.push(root);
 
         while (!level.empty())
         {
-            tree_node* node = level.top();
+            TTreeNode* node = level.top();
             level.pop();
 
             if (node->Left())
@@ -163,17 +186,15 @@ namespace cs
         }
     }
 
-    template <typename K>
-    TreeNode<K>* FindAncestor(
-        TreeNode<K>* child,
-        std::function<bool(const TreeNode<K>*)> predicate)
+    template <typename TTreeNode>
+    TTreeNode* FindAncestor(
+        TTreeNode* child,
+        std::function<bool(const TTreeNode*)> predicate)
     {
-        using tree_node = TreeNode<K>;
-
         if (!child)
             return nullptr;
 
-        tree_node* current_node = child;
+        TTreeNode* current_node = child;
         do
         {
             current_node = current_node->Parent();
@@ -181,10 +202,10 @@ namespace cs
         return current_node;
     }
 
-    template <typename K, bool IsRoot = true, bool IsLeft = false>
+    template <typename TTreeNode, bool IsRoot = true, bool IsLeft = false>
     void PrintTree(
         std::ostream& os,
-        const TreeNode<K>* root,
+        const TTreeNode* root,
         const std::string& prefix = "")
     {
         os << prefix;
@@ -197,24 +218,22 @@ namespace cs
             return;
         }
 
-        os << root->Key() << std::endl;
+        os << '(' << root->Key() << ", " << root->Value() << ')' << std::endl;
 
         if (!root->Left() && !root->Right())
             return;
 
-        PrintTree<K, false, true>(os, root->Left(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
-        PrintTree<K, false, false>(os, root->Right(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
+        PrintTree<TTreeNode, false, true>(os, root->Left(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
+        PrintTree<TTreeNode, false, false>(os, root->Right(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
     }
 
-    template <typename K>
-    TreeNode<K>* InOrderPredecessor(TreeNode<K>* root)
+    template <typename TTreeNode>
+    TTreeNode* InOrderPredecessor(TTreeNode* root)
     {
-        using tree_node = TreeNode<K>;
-
         if (!root)
             return nullptr;
 
-        tree_node* predecessor = root->Left();
+        TTreeNode* predecessor = root->Left();
         if (!predecessor)
             return nullptr;
 
@@ -224,31 +243,29 @@ namespace cs
         return predecessor;
     }
 
-    template <typename K>
-    int Height(const TreeNode<K>* node)
+    template <typename TTreeNode>
+    int Height(const TTreeNode* node)
     {
         return std::max(
             node->Right() ? 1 + Height(node->Right()) : 0,
             node->Left() ? 1 + Height(node->Left()) : 0);
     }
 
-    template <typename K>
-    int BalanceFactor(const TreeNode<K>* node)
+    template <typename TTreeNode>
+    int BalanceFactor(const TTreeNode* node)
     {
         return
             (node->Right() ? 1 + Height(node->Right()) : 0) -
             (node->Left() ? 1 + Height(node->Left()) : 0);
     }
 
-    template <typename K>
-    bool IsBalanced(const TreeNode<K>* root)
+    template <typename TTreeNode>
+    bool IsBalanced(const TTreeNode* root)
     {
-        using tree_node = TreeNode<K>;
-
-        tree_node* unbalanced_node = nullptr;
-        LevelOrderTraverse<K>(
-            const_cast<tree_node*>(root),
-            [&unbalanced_node](tree_node* node) -> void
+        TTreeNode* unbalanced_node = nullptr;
+        LevelOrderTraverse<TTreeNode>(
+            const_cast<TTreeNode*>(root),
+            [&unbalanced_node](TTreeNode* node) -> void
             {
                 if (std::abs(cs::BalanceFactor(node)) > 1)
                     unbalanced_node = node;
@@ -257,7 +274,7 @@ namespace cs
         return (unbalanced_node == nullptr);
     }
 
-    template <typename K, typename TComparator = DefaultComparator<K> >
+    template <typename K, typename V, typename TComparator = DefaultComparator<K> >
     class BinarySearchTree
     {
         // Check for the existence of a member function "LessThan" in TComparator type
@@ -274,7 +291,8 @@ namespace cs
 
     public:
         using key_type = K;
-        using tree_node = TreeNode<K>;
+        using value_type = V;
+        using tree_node = TreeNode<K, V>;
 
     protected:
         tree_node* root;
@@ -311,12 +329,32 @@ namespace cs
             }
         }
 
-        virtual std::pair<tree_node*, bool> insert(const K& key)
+        V& operator[](const K& key)
+        {
+            tree_node* node = find(key);
+            if (node)
+                return node->Value();
+            else
+                return insert(key, V()).first->Value();
+        }
+
+        const V& operator[](const K& key) const
+        {
+            tree_node* node = find(key);
+            if (node)
+                return node->Value();
+            else
+                return insert(key, V()).first->Value();
+        }
+
+        virtual std::pair<tree_node*, bool> insert(
+            const K& key,
+            const V& value)
         {
             // If the tree is empty, inserted node is going to be the root
             if (!root)
             {
-                root = new tree_node(key);
+                root = new tree_node(key, value);
                 return std::make_pair(root, true);
             }
 
@@ -337,7 +375,7 @@ namespace cs
                     }
                     else
                     {
-                        tree_node* new_node = new tree_node(key);
+                        tree_node* new_node = new tree_node(key, value);
                         current_node->setLeft(new_node);
                         new_node->setParent(current_node);
                         refreshHeightUp(current_node);
@@ -352,7 +390,7 @@ namespace cs
                     }
                     else
                     {
-                        tree_node* new_node = new tree_node(key);
+                        tree_node* new_node = new tree_node(key, value);
                         current_node->setRight(new_node);
                         new_node->setParent(current_node);
                         refreshHeightUp(current_node);
@@ -368,7 +406,7 @@ namespace cs
             if (node_removed)
             {
                 // The node to replace the node being removed is either its in-order predecessor or its right child
-                tree_node* in_order_predecessor = InOrderPredecessor<K>(node_removed);
+                tree_node* in_order_predecessor = InOrderPredecessor<tree_node>(node_removed);
                 tree_node* replacement = in_order_predecessor ? in_order_predecessor : node_removed->Right();
 
                 remove(node_removed, replacement);
@@ -453,7 +491,7 @@ namespace cs
         }
 
         // Updates 'height' for specified node only
-        static void refreshHeight(TreeNode<K>* node)
+        static void refreshHeight(TreeNode<K, V>* node)
         {
             node->height = std::max(
                 node->Left() ? 1 + node->Left()->Height() : 0,
@@ -461,7 +499,7 @@ namespace cs
         }
 
         // Updates 'height' beginning from the specified node and all the way up to the root
-        static void refreshHeightUp(TreeNode<K>* node)
+        static void refreshHeightUp(TreeNode<K, V>* node)
         {
             tree_node* current_node = node;
             while (current_node)
@@ -472,27 +510,30 @@ namespace cs
         }
     };
 
-    template <typename K, typename TComparator = DefaultComparator<K> >
-    class AvlTree : public BinarySearchTree<K, TComparator>
+    template <typename K, typename V, typename TComparator = DefaultComparator<K> >
+    class AvlTree : public BinarySearchTree<K, V, TComparator>
     {
     public:
-        using base = BinarySearchTree<K, TComparator>;
+        using base = BinarySearchTree<K, V, TComparator>;
         using key_type = typename base::key_type;
+        using value_type = typename base::value_type;
         using tree_node = typename base::tree_node;
 
     public:
         using base::BinarySearchTree;
 
     public:
-        std::pair<tree_node*, bool> insert(const K& key) override
+        std::pair<tree_node*, bool> insert(
+            const K& key,
+            const V& value) override
         {
-            auto node_inserted = base::insert(key);
+            auto node_inserted = base::insert(key, value);
             if (node_inserted.second)
             {
                 tree_node* new_node = node_inserted.first;
 
                 // Find the deepest node out of balance
-                tree_node* deepest_unbalanced = FindAncestor<K>(
+                tree_node* deepest_unbalanced = FindAncestor<tree_node>(
                     new_node,
                     [](const tree_node* ancestor) -> bool
                     {
@@ -524,7 +565,7 @@ namespace cs
             if (node_removed)
             {
                 // The node to replace the node being removed is either its in-order predecessor or its right child
-                tree_node* in_order_predecessor = InOrderPredecessor<K>(node_removed);
+                tree_node* in_order_predecessor = InOrderPredecessor<tree_node>(node_removed);
                 tree_node* replacement = in_order_predecessor ? in_order_predecessor : node_removed->Right();
 
                 tree_node* potential_imbalance_node = base::remove(node_removed, replacement);
@@ -536,7 +577,7 @@ namespace cs
                     tree_node* deepest_unbalanced =
                         std::abs(potential_imbalance_node->BalanceFactor()) > 1 ?
                         potential_imbalance_node :
-                        FindAncestor<K>(
+                        FindAncestor<tree_node>(
                             potential_imbalance_node,
                             [](const tree_node* ancestor) -> bool
                             {
