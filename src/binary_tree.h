@@ -14,6 +14,13 @@
 
 namespace cs
 {
+    /**
+     * @class TreeNode
+     * @brief Class representing a node in a tree (e.g. binary search tree).
+     * Has 'key' and 'value' fields. 'key' is supposed to be used for binary search.
+     * @tparam K key type.
+     * @tparam V value type.
+     */
     template <typename K, typename V>
     class TreeNode
     {
@@ -33,9 +40,19 @@ namespace cs
         TreeNode* right;
         K key;
         V value;
-        int height; // cached height of the tree for which 'this' is the root
+
+        // Cached value of the height of the tree rooted in this node.
+        // This field is supposed to be used by the friend classes (trees).
+        int height;
 
     public:
+        /**
+         * @brief Creates a tree node.
+         * 
+         * @param key
+         * @param left - left child
+         * @param right - right child
+         */
         TreeNode(
             const K& key,
             TreeNode* left = nullptr,
@@ -50,6 +67,14 @@ namespace cs
             init();
         }
 
+        /**
+         * @brief Creates a tree node.
+         *
+         * @param key
+         * @param value
+         * @param left - left child
+         * @param right - right child
+         */
         TreeNode(
             const K& key,
             const V& value,
@@ -69,21 +94,58 @@ namespace cs
         TreeNode& operator=(const TreeNode&) = delete;
 
     public:
+        /**
+         * @brief Returns a pointer to the left child of this node.
+         * @return a pointer to the left child of this node.
+         */
         const TreeNode* Left() const { return left; }
+        /**
+         * @brief Returns a pointer to the left child of this node.
+         * @return a pointer to the left child of this node.
+         */
         TreeNode* Left() { return left; }
 
+        /**
+         * @brief Returns a pointer to the right child of this node.
+         * @return a pointer to the right child of this node.
+         */
         const TreeNode* Right() const { return right; }
+        /**
+         * @brief Returns a pointer to the right child of this node.
+         * @return a pointer to the right child of this node.
+         */
         TreeNode* Right() { return right; }
 
+        /**
+         * @brief Returns a pointer to the parent of this node.
+         * @return a pointer to the parent of this node.
+         */
         const TreeNode* Parent() const { return parent; }
+        /**
+         * @brief Returns a pointer to the parent of this node.
+         * @return a pointer to the parent of this node.
+         */
         TreeNode* Parent() { return parent; }
 
+        /**
+         * @brief Returns a reference to the key of this node.
+         * @return a reference to the key of this node.
+         */
         const K& Key() const { return key; }
 
+        /**
+         * @brief Returns a reference to the value of this node.
+         * @return a reference to the value of this node.
+         */
         const V& Value() const { return value; }
+        /**
+         * @brief Returns a reference to the value of this node.
+         * @return a reference to the value of this node.
+         */
         V& Value() { return value; }
 
     private:
+        // This method is called by constructors (to avoid code duplication).
         void init()
         {
             if (left)
@@ -93,14 +155,25 @@ namespace cs
                 right->setParent(this);
         }
 
+        // Sets the left child of this node.
+        // This method is supposed to be called by the friend classes (trees).
         void setLeft(TreeNode* node) { left = node; }
 
+        // Sets the right child of this node.
+        // This method is supposed to be called by the friend classes (trees).
         void setRight(TreeNode* node) { right = node; }
 
+        // Sets the parent of this node.
+        // This method is supposed to be called by the friend classes (trees).
         void setParent(TreeNode* node) { parent = node; }
 
+        // Returns the cached value of the height of the tree rooted in this node.
+        // This method is supposed to be called by the friend classes (trees).
         int Height() const { return height; }
 
+        // Returns the balance factor of this node.
+        // Balance factor of a node is the difference between its right and the left subtrees.
+        // This method is supposed to be called by the friend classes (trees).
         int BalanceFactor() const
         {
             return
@@ -109,6 +182,15 @@ namespace cs
         }
     };
 
+    /**
+     * @brief Visits (calls @p visitor functor)
+     * nodes of a tree in a pre-order fashion.
+     * 
+     * @param root - tree root.
+     * @param visitor - functor called for each visited node.
+     * 
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
     void PreOrderTraverse(
         TTreeNode* root,
@@ -122,6 +204,15 @@ namespace cs
         }
     }
 
+    /**
+     * @brief Visits (calls @p visitor functor)
+     * nodes of a tree in a in-order fashion.
+     *
+     * @param root - tree root.
+     * @param visitor - functor called for each visited node.
+     *
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
     void InOrderTraverse(
         TTreeNode* root,
@@ -135,6 +226,15 @@ namespace cs
         }
     }
 
+    /**
+     * @brief Visits (calls @p visitor functor)
+     * nodes of a tree in a post-order fashion.
+     *
+     * @param root - tree root.
+     * @param visitor - functor called for each visited node.
+     *
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
     void PostOrderTraverse(
         TTreeNode* root,
@@ -148,6 +248,11 @@ namespace cs
         }
     }
 
+    /**
+     * @brief Deteles every node of specified tree.
+     * @param root - tree root.
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
     void DeleteTree(
         TTreeNode* root)
@@ -302,6 +407,14 @@ namespace cs
             root(nullptr)
         {}
 
+        BinarySearchTree(BinarySearchTree&& rvalue) :
+            root(rvalue.root)
+        {
+            rvalue.root = nullptr;
+        }
+
+        BinarySearchTree(const BinarySearchTree&) = delete;
+
         virtual ~BinarySearchTree()
         {
             DeleteTree(root);
@@ -309,6 +422,8 @@ namespace cs
         }
 
     public:
+        BinarySearchTree& operator=(const BinarySearchTree&) = delete;
+        
         tree_node* Root() { return root; }
         const tree_node* Root() const { return root; }
 

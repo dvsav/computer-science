@@ -68,24 +68,24 @@ namespace cs
         Edge& operator=(const Edge&) = default;
 
         /**
-         * @brief Returns a pointer to the tail of the edge.
-         * @return Pointer to the tail of the edge.
+         * @brief Returns a reference to the tail of the edge.
+         * @return Reference to the tail of the edge.
          */
         TVertex& From() { return *from; }
         /**
-         * @brief Returns a pointer to the tail of the edge.
-         * @return Pointer to the tail of the edge.
+         * @brief Returns a reference to the tail of the edge.
+         * @return Reference to the tail of the edge.
          */
         const TVertex& From() const { return *from; }
 
         /**
-         * @brief Returns a pointer to the head of the edge.
-         * @return Pointer to the head of the edge.
+         * @brief Returns a reference to the head of the edge.
+         * @return Reference to the head of the edge.
          */
         TVertex& To() { return *to; }
         /**
-         * @brief Returns a pointer to the head of the edge.
-         * @return Pointer to the head of the edge.
+         * @brief Returns a reference to the head of the edge.
+         * @return Reference to the head of the edge.
          */
         const TVertex& To() const { return *to; }
 
