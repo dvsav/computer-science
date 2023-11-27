@@ -16,8 +16,10 @@ namespace cs
 {
     /**
      * @class TreeNode
+     * 
      * @brief Class representing a node in a tree (e.g. binary search tree).
      * Has 'key' and 'value' fields. 'key' is supposed to be used for binary search.
+     * 
      * @tparam K key type.
      * @tparam V value type.
      */
@@ -249,22 +251,14 @@ namespace cs
     }
 
     /**
-     * @brief Deteles every node of specified tree.
+     * @brief Visits (calls @p visitor functor)
+     * nodes of a tree in a level-order fashion.
+     *
      * @param root - tree root.
+     * @param visitor - functor called for each visited node.
+     *
      * @tparam TTreeNode node type.
      */
-    template <typename TTreeNode>
-    void DeleteTree(
-        TTreeNode* root)
-    {
-        PostOrderTraverse<TTreeNode>(
-            root,
-            [](TTreeNode* node) -> void
-            {
-                delete node;
-            });
-    }
-
     template <typename TTreeNode>
     void LevelOrderTraverse(
         TTreeNode* root,
@@ -291,22 +285,66 @@ namespace cs
         }
     }
 
+    /**
+     * @brief Deteles every node of specified tree.
+     * @param root - tree root.
+     * @tparam TTreeNode node type.
+     */
+    template <typename TTreeNode>
+    void DeleteTree(
+        TTreeNode* root)
+    {
+        // We've chosen post-order traverse because it
+        // visits leaves first and goes towards the root.
+        PostOrderTraverse<TTreeNode>(
+            root,
+            [](TTreeNode* node) -> void
+            {
+                delete node;
+            });
+    }
+
+    /**
+     * @brief Passes through all ancestors (parent, parent's parent, etc.)
+     * of @p child (bottom-up) until either there are no more ancestors or @p predicate
+     * is satisfied. Returns either the first ancestor satisfying @p predicate
+     * or nullptr if there are no such ancestors.
+     * 
+     * @param child - node of a tree whose ancestors are looked through.
+     * @param predicate - predicate to be satisfied.
+     * @param inclusive - if true, includes @p node itself in the search.
+     * 
+     * @return either the first ancestor satisfying @p predicate or nullptr
+     * if there are no such ancestors.
+     * 
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
     TTreeNode* FindAncestor(
         TTreeNode* child,
-        std::function<bool(const TTreeNode*)> predicate)
+        std::function<bool(const TTreeNode*)> predicate,
+        bool inclusive)
     {
         if (!child)
             return nullptr;
 
-        TTreeNode* current_node = child;
-        do
-        {
+        TTreeNode* current_node = inclusive ? child : child->Parent();
+        while (current_node && !predicate(current_node))
             current_node = current_node->Parent();
-        } while (current_node && !predicate(current_node));
         return current_node;
     }
 
+    /**
+     * @brief Prints out specified tree in a pretty form.
+     *
+     * @param os - output stream.
+     * @param root - tree root.
+     * @param prefix
+     * 
+     * @tparam TTreeNode node type.
+     * @tparam IsRoot
+     * @tparam IsLeft
+     */
     template <typename TTreeNode, bool IsRoot = true, bool IsLeft = false>
     void PrintTree(
         std::ostream& os,
@@ -332,6 +370,17 @@ namespace cs
         PrintTree<TTreeNode, false, false>(os, root->Right(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
     }
 
+    /**
+     * @brief Returns in-order predecessor of @p root node.
+     * In-order predecessor of a tree node is the rightmost
+     * element in its left subtree.
+     * 
+     * @param root - tree root.
+     * 
+     * @return in-order predecessor of @p root node.
+     * 
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
     TTreeNode* InOrderPredecessor(TTreeNode* root)
     {
@@ -348,22 +397,56 @@ namespace cs
         return predecessor;
     }
 
+    /**
+     * @brief Calculates the height of a tree rooted in @p root node.
+     * Height of a tree is the maximal number of edges in a path from
+     * its root to any of its leaves.
+     *
+     * @param root - tree root.
+     *
+     * @return height of a tree rooted in @p root node.
+     *
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
-    int Height(const TTreeNode* node)
+    int Height(const TTreeNode* root)
     {
         return std::max(
-            node->Right() ? 1 + Height(node->Right()) : 0,
-            node->Left() ? 1 + Height(node->Left()) : 0);
+            root->Right() ? 1 + Height(root->Right()) : 0,
+            root->Left() ? 1 + Height(root->Left()) : 0);
     }
 
+    /**
+     * @brief Calculates the balance factor of a tree rooted in @p root node.
+     * Balance factor of a tree is the difference of the right height of the tree
+     * and the left height of the tree.
+     *
+     * @param root - tree root.
+     *
+     * @return balance factor of a tree rooted in @p root node. 0 - tree is balanced;
+     * <0 - tree is biased to the left; >0 - tree is biased to the right.
+     *
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
-    int BalanceFactor(const TTreeNode* node)
+    int BalanceFactor(const TTreeNode* root)
     {
         return
-            (node->Right() ? 1 + Height(node->Right()) : 0) -
-            (node->Left() ? 1 + Height(node->Left()) : 0);
+            (root->Right() ? 1 + Height(root->Right()) : 0) -
+            (root->Left() ? 1 + Height(root->Left()) : 0);
     }
 
+    /**
+     * @brief Checks if specified tree is balanced or not.
+     * A tree is balanced if the absolute value of the balance
+     * factor of any of its nodes is less than 2.
+     *
+     * @param root - tree root.
+     *
+     * @return true if the tree is balanced, false otherwise.
+     *
+     * @tparam TTreeNode node type.
+     */
     template <typename TTreeNode>
     bool IsBalanced(const TTreeNode* root)
     {
@@ -379,6 +462,20 @@ namespace cs
         return (unbalanced_node == nullptr);
     }
 
+    /**
+     * @class BinarySearchTree
+     * 
+     * @brief Class representing a basic binary search tree.
+     * Allows for adding and searching elements (key-value pairs).
+     * This search tree is not trying to rebalance itself in case of unbalance,
+     * so it's not supposed to be used other than be inherited by other classes
+     * that do maintain balance in themselves.
+     * 
+     * @tparam K key type of a tree node.
+     * @tparam V value type of a tree node.
+     * @tparam TComparator Comparator type (must have a static member function bool LessThan(const K& a, const K& b)
+     * where K is the key type. For example @see DefaultComparator, @see ReverseComparator.
+    */
     template <typename K, typename V, typename TComparator = DefaultComparator<K> >
     class BinarySearchTree
     {
@@ -403,10 +500,14 @@ namespace cs
         tree_node* root;
 
     public:
+        /**
+         * @brief Creates an empty BinarySearchTree.
+         */
         BinarySearchTree() :
             root(nullptr)
         {}
 
+        // Move constructor.
         BinarySearchTree(BinarySearchTree&& rvalue) :
             root(rvalue.root)
         {
@@ -415,6 +516,7 @@ namespace cs
 
         BinarySearchTree(const BinarySearchTree&) = delete;
 
+        // The destructor is virtual because this class is supposed to be inherited.
         virtual ~BinarySearchTree()
         {
             DeleteTree(root);
@@ -424,9 +526,26 @@ namespace cs
     public:
         BinarySearchTree& operator=(const BinarySearchTree&) = delete;
         
+        /**
+         * @brief Returns a pointer to the root of the tree.
+         * @return Pointer to the root of the tree.
+         */
         tree_node* Root() { return root; }
+        /**
+         * @brief Returns a pointer to the root of the tree.
+         * @return Pointer to the root of the tree.
+         */
         const tree_node* Root() const { return root; }
 
+        /**
+         * @brief Returns the pointer to the tree node containing
+         * specified @p key or nullptr if such node is not found.
+         * Complexity: best case (balanced tree) - O(lgN), worst case - O(N),
+         * where N is the number of nodes in the tree.
+         * @param key - the key to search for.
+         * @return Pointer to the tree node containing specified @p key
+         * or nullptr if such node is not found.
+         */
         tree_node* find(const K& key)
         {
             tree_node* current_node = root;
@@ -444,24 +563,93 @@ namespace cs
             }
         }
 
+        /**
+         * @brief Returns the pointer to the tree node containing
+         * specified @p key or nullptr if such node is not found.
+         * Complexity: best case (balanced tree) - O(lgN), worst case - O(N),
+         * where N is the number of nodes in the tree.
+         * @param key - the key to search for.
+         * @return Pointer to the tree node containing specified @p key
+         * or nullptr if such node is not found.
+         */
+        const tree_node* find(const K& key) const
+        {
+            tree_node* current_node = root;
+            while (true)
+            {
+                if (!current_node)
+                    return nullptr;
+
+                if (TComparator::EqualTo(key, current_node->Key()))
+                    return current_node;
+                else if (TComparator::LessThan(key, current_node->Key()))
+                    current_node = current_node->Left();
+                else
+                    current_node = current_node->Right();
+            }
+        }
+
+        /**
+         * @brief Returns a reference to a value of a tree node
+         * having specified @p key. If such node doesn't exists,
+         * it's insersted in the tree.
+         * Complexity: best case (balanced tree) - O(lgN), worst case - O(N),
+         * where N is the number of nodes in the tree.
+         * @param key
+         * @return reference to value corresponding to specified @p key.
+         */
         V& operator[](const K& key)
         {
-            tree_node* node = find(key);
-            if (node)
-                return node->Value();
-            else
-                return insert(key, V()).first->Value();
+            return insert(key, V()).first->Value();
         }
 
-        const V& operator[](const K& key) const
+        /**
+         * @brief Returns a reference to a value of a tree node
+         * having specified @p key. If such node doesn't exists,
+         * an exception is thrown.
+         * Complexity: best case (balanced tree) - O(lgN), worst case - O(N),
+         * where N is the number of nodes in the tree.
+         * @param key
+         * @return reference to value corresponding to specified @p key.
+         */
+        V& at(const K& key)
         {
             tree_node* node = find(key);
-            if (node)
-                return node->Value();
-            else
-                return insert(key, V()).first->Value();
+            Requires::That(node, FUNCTION_INFO);
+            return node->Value();
         }
 
+        /**
+         * @brief Returns a reference to a value of a tree node
+         * having specified @p key. If such node doesn't exists,
+         * an exception is thrown.
+         * Complexity: best case (balanced tree) - O(lgN), worst case - O(N),
+         * where N is the number of nodes in the tree.
+         * @param key
+         * @return reference to value corresponding to specified @p key.
+         */
+        const V& at(const K& key) const
+        {
+            tree_node* node = find(key);
+            Requires::That(node, FUNCTION_INFO);
+            return node->Value();
+        }
+
+        /**
+         * @brief Inserts a new node in the tree having specified @p key and @p value
+         * and returns a pair (pointer-to-new-node, true).
+         * If such node already exists, no action is taken and function returns
+         * a pair (pointer-to-existing-node, false).
+         * Complexity: best case (balanced tree) - O(lgN), worst case - O(N),
+         * where N is the number of nodes in the tree.
+         * @param key
+         * @param value
+         * @return a pair in which the first element is the pointer to a tree node and the
+         * second element is a boolean flag indicating whether the insertion was successful.
+         * If a new tree node is created, fuction returns (pointer-to-new-node, true).
+         * If there is an existing node which has specified @p key,
+         * function returns (pointer-to-existing-node, false).
+         */
         virtual std::pair<tree_node*, bool> insert(
             const K& key,
             const V& value)
@@ -515,6 +703,13 @@ namespace cs
             }
         }
 
+        /**
+         * @brief Removes a node having specified @p key from the tree.
+         * Complexity: best case (balanced tree) - O(lgN), worst case - O(N),
+         * where N is the number of nodes in the tree.
+         * @param key
+         * @return true if a node with specified @p key was found in the tree, false otherwise.
+         */
         virtual bool remove(const K& key)
         {
             tree_node* node_removed = find(key);
@@ -532,7 +727,9 @@ namespace cs
         }
 
     protected:
-        // Returns potential imbalance node
+        // Replaces 'node_removed' with a specified leaf node 'replacement'.
+        // This operation may cause an imbalance and the function
+        // returns the potential imbalance node.
         tree_node* remove(
             tree_node* node_removed,
             tree_node* replacement)
@@ -625,8 +822,20 @@ namespace cs
         }
     };
 
+    /**
+     * @class AvlTree
+     *
+     * @brief Class representing a balanced binary search tree.
+     * This tree is distinguished by an algorithm of rebalancing after each insertion
+     * or removal - AVL named after its authors: Adelson, Velsky and Landis.
+     *
+     * @tparam K key type of a tree node.
+     * @tparam V value type of a tree node.
+     * @tparam TComparator Comparator type (must have a static member function bool LessThan(const K& a, const K& b)
+     * where K is the key type. For example @see DefaultComparator, @see ReverseComparator.
+    */
     template <typename K, typename V, typename TComparator = DefaultComparator<K> >
-    class AvlTree : public BinarySearchTree<K, V, TComparator>
+    class AvlTree final : public BinarySearchTree<K, V, TComparator>
     {
     public:
         using base = BinarySearchTree<K, V, TComparator>;
@@ -635,9 +844,24 @@ namespace cs
         using tree_node = typename base::tree_node;
 
     public:
+        // Use the constructors of base class.
         using base::BinarySearchTree;
 
     public:
+        /**
+         * @brief Inserts a new node in the tree having specified @p key and @p value
+         * and returns a pair (pointer-to-new-node, true).
+         * If such node already exists, no action is taken and function returns
+         * a pair (pointer-to-existing-node, false).
+         * Complexity: O(lgN), where N is the number of nodes in the tree.
+         * @param key
+         * @param value
+         * @return a pair in which the first element is the pointer to a tree node and the
+         * second element is a boolean flag indicating whether the insertion was successful.
+         * If a new tree node is created, fuction returns (pointer-to-new-node, true).
+         * If there is an existing node which has specified @p key,
+         * function returns (pointer-to-existing-node, false).
+         */
         std::pair<tree_node*, bool> insert(
             const K& key,
             const V& value) override
@@ -654,7 +878,8 @@ namespace cs
                     {
                         int balance_factor = ancestor->BalanceFactor();
                         return std::abs(balance_factor) > 1;
-                    });
+                    },
+                    /*inclusive*/ false);
 
                 if (deepest_unbalanced)
                 {
@@ -674,6 +899,12 @@ namespace cs
             return node_inserted;
         }
 
+        /**
+         * @brief Removes a node having specified @p key from the tree.
+         * Complexity: O(lgN), where N is the number of nodes in the tree.
+         * @param key
+         * @return true if a node with specified @p key was found in the tree, false otherwise.
+         */
         bool remove(const K& key) override
         {
             tree_node* node_removed = this->find(key);
@@ -690,15 +921,13 @@ namespace cs
                 {
                     // Find the deepest node out of balance (search starts from 'potential_imbalance_node' inclusive)
                     tree_node* deepest_unbalanced =
-                        std::abs(potential_imbalance_node->BalanceFactor()) > 1 ?
-                        potential_imbalance_node :
                         FindAncestor<tree_node>(
                             potential_imbalance_node,
                             [](const tree_node* ancestor) -> bool
                             {
-                                int balance_factor = ancestor->BalanceFactor();
-                                return std::abs(balance_factor) > 1;
-                            });
+                                return std::abs(ancestor->BalanceFactor()) > 1;
+                            },
+                            /*inclusive*/ true);
 
                     if (deepest_unbalanced)
                     {
@@ -723,6 +952,7 @@ namespace cs
         }
 
     private:
+        // Reestablishes the balance in the tree by moving nodes around.
         void Rebalance(
             tree_node* deepest_unbalanced,
             tree_node* in_direction_of_imbalance)
@@ -761,6 +991,8 @@ namespace cs
             }
         }
 
+        // Shifts 'node' to the left to the place of its parent
+        // which becomes 'node's left child.
         void LeftRotate(
             tree_node* node)
         {
@@ -788,6 +1020,8 @@ namespace cs
             parent->setParent(node);
         }
 
+        // Shifts 'node' to the right to the place of its parent
+        // which becomes 'node's right child.
         void RightRotate(
             tree_node* node)
         {
