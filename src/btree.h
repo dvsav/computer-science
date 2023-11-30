@@ -12,8 +12,8 @@ namespace cs
     template <size_t Order, typename K, typename V, typename TComparator = DefaultComparator<K> >
     class BTree
     {
-        // Check that B-Tree order is greater than 1
-        static_assert(Order > 1);
+        // Check that B-Tree order is greater than 2
+        static_assert(Order > 2, "Order must be greater than 2");
 
         // Check for the existence of a member function "LessThan" in TComparator type
         static_assert(
@@ -43,7 +43,7 @@ namespace cs
 
     public:
         BTree() :
-            root(new BTreeNode())
+            root(new BTreeNode(/*parent*/ nullptr))
         {}
 
         ~BTree()
@@ -72,6 +72,15 @@ namespace cs
 
                 // Item with this key not found
 
+                if (!current_node->IsLeaf())
+                {
+                    // current_node is not a leaf, so let's try to insert to its child
+                    current_node = current_node->getChild(search_result.first);
+                    continue;
+                }
+
+                // current_node is a leaf
+
                 if (!current_node->IsFull())
                 {
                     // There's enough room for a new element
@@ -81,26 +90,17 @@ namespace cs
                         /*value*/ value);
 
                     return std::make_pair(
-                        iterator(current_node, iter.first),
+                        iterator(current_node, search_result.first),
                         /*inserted_new*/ true);
                 }
 
-                // current_node is full
-
-                if (!current_node->IsLeaf())
-                {
-                    // current_node is not a leaf, so let's try to insert to its child
-                    current_node = current_node->getChild(iter.first);
-                    continue;
-                }
-
-                // current_node is a leaf, so we need to throw up one of its elements
+                // current_node is full so we need to throw up one of its elements
                 // which we are going to do ouside of this loop, but before...
                 
                 // ...As a quirk, we insert one extra element into the current_node,
                 // because the node is going to be broken into two new nodes anyway
                 current_node->insert(
-                    /*index*/ iter.first,
+                    /*index*/ search_result.first,
                     /*key*/ key,
                     /*value*/ value);
                 break;
@@ -123,15 +123,26 @@ namespace cs
                         /*index*/ search_result.first,
                         /*key*/ thrown_element.first,
                         /*value*/ thrown_element.second);
-                    root->setChild(search_result.first, left);
-                    root->setChild(search_result.first + 1, right);
+                    root->setChild(
+                        /*index*/ search_result.first,
+                        /*child*/ left);
+                    root->setChild(
+                        /*index*/ search_result.first + 1,
+                        /*child*/ right);
                 }
                 else
                 {
-                    root = new BTreeNode();
-                    root->insert(0, key, value);
-                    root->setChild(0, left);
-                    root->setChild(1, right);
+                    root = new BTreeNode(nullptr);
+                    root->insert(
+                        /*index*/ 0,
+                        /*key*/ thrown_element.first,
+                        /*value*/ thrown_element.second);
+                    root->setChild(
+                        /*index*/ 0,
+                        /*child*/ left);
+                    root->setChild(
+                        /*index*/ 1,
+                        /*child*/ right);
                     return std::make_pair(
                         iterator(root, 0),
                         /*inserted_new*/ true);
@@ -139,11 +150,59 @@ namespace cs
                 }
             }
         }
+
+        void print(std::ostream& os) const
+        {
+            PrintTree</*IsRoot*/ true, /*IsLast*/ false>(os, root);
+        }
+
+    private:
+        template <bool IsRoot, bool IsLast>
+        static void PrintTree(
+            std::ostream& os,
+            const BTreeNode* root,
+            const std::string& prefix = "")
+        {
+            os << prefix;
+            if (!IsRoot)
+                os << (IsLast ? "`--" : "|--");
+
+            if (!root)
+            {
+                os << std::endl;
+                return;
+            }
+
+            for (size_t i = 0; i < root->ItemsNumber(); i++)
+            {
+                os << '(' << root->getItem(i).first << ", " << root->getItem(i).second << ") ";
+            }
+            os << std::endl;
+
+            for (size_t i = 0; i < root->ChildrenNumber() - 1; i++)
+            {
+                PrintTree</*IsRoot*/ false, /*IsLast*/ false>(
+                    os,
+                    root->getChild(i),
+                    prefix + std::string(IsRoot ? "" : IsLast ? "   " : "|  ")
+                );
+            }
+            if (root->ChildrenNumber() > 0)
+            {
+                PrintTree</*IsRoot*/ false, /*IsLast*/ true>(
+                    os,
+                    root->getChild(root->ChildrenNumber() - 1),
+                    prefix + std::string(IsRoot ? "" : IsLast ? "   " : "|  ")
+                );
+            }
+        }
     };
 
     template <size_t Order, typename K, typename V, typename TComparator>
     class BTree<Order, K, V, TComparator>::iterator
     {
+        friend class BTree;
+
     private:
         BTreeNode* node;
         size_t index;
@@ -180,6 +239,7 @@ namespace cs
         {
             items.reserve(Order);
             children.reserve(Order);
+            children.push_back(nullptr);
         }
 
         BTreeNode(const BTreeNode&) = delete;
@@ -197,7 +257,12 @@ namespace cs
         size_t ChildrenNumber() const { return children.size(); }
         BTreeNode* getChild(size_t index) { return children[index]; }
         const BTreeNode* getChild(size_t index) const { return children[index]; }
-        void setChild(size_t index, BTreeNode* node) { children[index] = node; }
+        void setChild(size_t index, BTreeNode* child)
+        {
+            children[index] = child;
+            if (child)
+                child->setParent(this);
+        }
 
         bool IsLeaf() const
         {
@@ -217,12 +282,12 @@ namespace cs
             size_t i = 0;
             for (; i < items.size(); i++)
             {
-                if (TComparator::LessThan(key, items[i]))
-                    continue;
-                else if (TComparator::EqualTo(key, items[i]))
+                if (TComparator::LessThan(key, items[i].first))
+                    break;
+                else if (TComparator::EqualTo(key, items[i].first))
                     return std::make_pair(i, /*found*/ true);
                 else
-                    break;
+                    continue;
             }
             return std::make_pair(i, /*found*/ false);
         }
@@ -260,17 +325,34 @@ namespace cs
             /*out*/ BTreeNode** right)
         {
             const size_t thrown_index = Order / 2;
-            std::pair<K, V> thrown_element = children[thrown_index];
+            std::pair<K, V> thrown_element = items[thrown_index];
 
             *left = new BTreeNode(parent);
             for (size_t i = 0; i < thrown_index; i++)
-                (*left)->insert(children[i]);
+            {
+                (*left)->insert(i, items[i].first, items[i].second);
+                (*left)->setChild(i, children[i]);
+            }
+            (*left)->setChild(thrown_index, children[thrown_index]);
 
             *right = new BTreeNode(parent);
-            for (size_t i = thrown_index + 1; i < children.size(); i++)
-                (*right)->insert(children[i]);
+            for (size_t i = thrown_index + 1; i < items.size(); i++)
+            {
+                (*right)->insert(i - (thrown_index + 1), items[i].first, items[i].second);
+                (*right)->setChild(i - (thrown_index + 1), children[i]);
+            }
+            (*right)->setChild(items.size() - (thrown_index + 1), children[children.size() - 1]);
 
             return thrown_element;
+        }
+
+        void ReplaceChild(
+            BTreeNode* oldChild,
+            BTreeNode* newChild)
+        {
+            std::replace(
+                children.begin(), children.end(),
+                oldChild, newChild);
         }
     };
 } // namespace cs

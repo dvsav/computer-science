@@ -1,4 +1,5 @@
 #include "binary_tree.h"      // for cs::TreeNode
+#include "btree.h"            // for cs::Btree
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
 #include "heap.h"             // for cs::Heap
@@ -448,7 +449,7 @@ TEST_CASE("Heap", "[heap]")
     }
 }
 
-TEST_CASE("TreeNode", "[btree]")
+TEST_CASE("TreeNode", "[binarytree]")
 {
     using tree_node = cs::TreeNode<std::string, int>;
 
@@ -488,7 +489,7 @@ TEST_CASE("TreeNode", "[btree]")
     cs::DeleteTree(root);
 }
 
-TEST_CASE("BinarySearchTree", "[btree]")
+TEST_CASE("BinarySearchTree", "[binarytree]")
 {
     using bst_type = cs::BinarySearchTree<int, std::string>;
 
@@ -617,7 +618,7 @@ TEST_CASE("BinarySearchTree", "[btree]")
     }
 }
 
-TEST_CASE("AvlTree", "[btree]")
+TEST_CASE("AvlTree", "[binarytree]")
 {
     using bst_type = cs::AvlTree<int, std::string>;
 
@@ -666,4 +667,31 @@ TEST_CASE("AvlTree", "[btree]")
 
     bst.remove(3);
     REQUIRE(cs::IsBalanced(bst.Root()));
+}
+
+TEST_CASE("BTree", "[btree]")
+{
+    cs::BTree<4, int, std::string> btree;
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(1, "one");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(8, "eight");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(2, "two");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(0, "zero");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(5, "five");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
 }
