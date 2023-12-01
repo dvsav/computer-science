@@ -4,6 +4,8 @@
 #include "utility.h"   // for DefaultComparator
 
 #include <algorithm>   // for std::find_if
+#include <cmath>       // for std::ceilf
+#include <tuple>       // for std::tie
 #include <vector>      // for std:::vector
 #include <utility>     // for std::pair
 
@@ -30,7 +32,7 @@ namespace cs
     public:
         using key_type = K;
         using value_type = V;
-        static constexpr unsigned int order() { return Order; }
+        static constexpr size_t order() { return Order; }
 
     private:
         class BTreeNode;
@@ -61,12 +63,15 @@ namespace cs
 
             while (true)
             {
-                std::pair<size_t, bool> search_result = current_node->find(key);
-                if (search_result.second)
+                size_t index_of_item = 0;
+                bool item_found = false;
+                std::tie(index_of_item, item_found) = current_node->find(key);
+
+                if (item_found)
                 {
-                    // Item with this key is found
+                    // Item with this key is found, no insertion happens
                     return std::make_pair(
-                        iterator(current_node, search_result.first),
+                        iterator(current_node, index_of_item),
                         /*inserted_new*/ false);
                 }
 
@@ -75,7 +80,7 @@ namespace cs
                 if (!current_node->IsLeaf())
                 {
                     // current_node is not a leaf, so let's try to insert to its child
-                    current_node = current_node->getChild(search_result.first);
+                    current_node = current_node->getChild(index_of_item);
                     continue;
                 }
 
@@ -85,12 +90,12 @@ namespace cs
                 {
                     // There's enough room for a new element
                     current_node->insert(
-                        /*index*/ search_result.first,
+                        /*index*/ index_of_item,
                         /*key*/ key,
                         /*value*/ value);
 
                     return std::make_pair(
-                        iterator(current_node, search_result.first),
+                        iterator(current_node, index_of_item),
                         /*inserted_new*/ true);
                 }
 
@@ -98,9 +103,9 @@ namespace cs
                 // which we are going to do ouside of this loop, but before...
                 
                 // ...we insert one extra element into the current_node,
-                // because the node is going to be broken into two new nodes anyway
+                // so it becomes overfilled
                 current_node->insert(
-                    /*index*/ search_result.first,
+                    /*index*/ index_of_item,
                     /*key*/ key,
                     /*value*/ value);
                 break;
@@ -114,21 +119,27 @@ namespace cs
                 BTreeNode* parent = current_node->Parent();
                 std::pair<K, V> thrown_element = current_node->Split(&left, &right);
                 delete current_node;
+
                 if (parent)
                 {
                     parent->ReplaceChild(current_node, nullptr);
-                    std::pair<size_t, bool> search_result = parent->find(thrown_element.first);
+
+                    size_t index_of_item = parent->find(/*key*/ thrown_element.first).first;
+
                     parent->insert(
-                        /*index*/ search_result.first,
+                        /*index*/ index_of_item,
                         /*key*/ thrown_element.first,
                         /*value*/ thrown_element.second);
+
                     parent->setChild(
-                        /*index*/ search_result.first,
+                        /*index*/ index_of_item,
                         /*child*/ left);
+
                     parent->setChild(
-                        /*index*/ search_result.first + 1,
+                        /*index*/ index_of_item + 1,
                         /*child*/ right);
-                    if (parent->IsOverflown())
+
+                    if (parent->IsOverfilled())
                     {
                         current_node = parent;
                         continue;
@@ -136,26 +147,31 @@ namespace cs
                     else
                     {
                         return std::make_pair(
-                            iterator(parent, search_result.first),
+                            iterator(parent, index_of_item),
                             /*inserted_new*/ true);
                     }
                 }
                 else
                 {
-                    root = new BTreeNode(nullptr);
+                    root = new BTreeNode(/*parent*/ nullptr);
+
                     root->insert(
                         /*index*/ 0,
                         /*key*/ thrown_element.first,
                         /*value*/ thrown_element.second);
+
                     root->setChild(
                         /*index*/ 0,
                         /*child*/ left);
+
                     root->setChild(
                         /*index*/ 1,
                         /*child*/ right);
+
                     return std::make_pair(
                         iterator(root, 0),
                         /*inserted_new*/ true);
+
                     break;
                 }
             }
@@ -211,7 +227,7 @@ namespace cs
     template <size_t Order, typename K, typename V, typename TComparator>
     class BTree<Order, K, V, TComparator>::iterator
     {
-        friend class BTree;
+        friend class BTree; // for access to BTreeNode
 
     private:
         BTreeNode* node;
@@ -274,6 +290,8 @@ namespace cs
                 child->setParent(this);
         }
 
+        bool IsRoot() const { return parent == nullptr; }
+
         bool IsLeaf() const
         {
             return
@@ -287,9 +305,16 @@ namespace cs
             return (items.size() >= MaxItems());
         }
 
-        bool IsOverflown() const
+        bool IsOverfilled() const
         {
             return (items.size() > MaxItems());
+        }
+
+        bool IsUnderfilled() const
+        {
+            return
+                !IsRoot() &&
+                (items.size() < static_cast<size_t>(std::ceilf(Order / 2)) - 1);
         }
 
         std::pair<size_t, bool> find(const K& key)
@@ -312,7 +337,7 @@ namespace cs
             const K& key,
             const V& value)
         {
-            Requires::That(items.size() < MaxItems() + 1, FUNCTION_INFO);
+            Requires::That(items.size() <= MaxItems(), FUNCTION_INFO);
 
             items.insert(
                 items.begin() + index,
