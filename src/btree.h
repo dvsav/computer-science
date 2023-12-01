@@ -97,7 +97,7 @@ namespace cs
                 // current_node is full so we need to throw up one of its elements
                 // which we are going to do ouside of this loop, but before...
                 
-                // ...As a quirk, we insert one extra element into the current_node,
+                // ...we insert one extra element into the current_node,
                 // because the node is going to be broken into two new nodes anyway
                 current_node->insert(
                     /*index*/ search_result.first,
@@ -117,18 +117,28 @@ namespace cs
                 if (parent)
                 {
                     parent->ReplaceChild(current_node, nullptr);
-                    current_node = parent;
-                    std::pair<size_t, bool> search_result = current_node->find(thrown_element.first);
-                    current_node->insert(
+                    std::pair<size_t, bool> search_result = parent->find(thrown_element.first);
+                    parent->insert(
                         /*index*/ search_result.first,
                         /*key*/ thrown_element.first,
                         /*value*/ thrown_element.second);
-                    root->setChild(
+                    parent->setChild(
                         /*index*/ search_result.first,
                         /*child*/ left);
-                    root->setChild(
+                    parent->setChild(
                         /*index*/ search_result.first + 1,
                         /*child*/ right);
+                    if (parent->IsOverflown())
+                    {
+                        current_node = parent;
+                        continue;
+                    }
+                    else
+                    {
+                        return std::make_pair(
+                            iterator(parent, search_result.first),
+                            /*inserted_new*/ true);
+                    }
                 }
                 else
                 {
@@ -275,6 +285,11 @@ namespace cs
         bool IsFull() const
         {
             return (items.size() >= MaxItems());
+        }
+
+        bool IsOverflown() const
+        {
+            return (items.size() > MaxItems());
         }
 
         std::pair<size_t, bool> find(const K& key)

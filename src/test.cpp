@@ -694,4 +694,36 @@ TEST_CASE("BTree", "[btree]")
     btree.insert(5, "five");
     btree.print(std::cout);
     std::cout << "---------------------" << std::endl;
+
+    btree.insert(6, "six");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(4, "four");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(9, "nine");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(7, "seven");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(10, "ten");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(11, "eleven");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(12, "twelve");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
+
+    btree.insert(13, "thirteen");
+    btree.print(std::cout);
+    std::cout << "---------------------" << std::endl;
 }
