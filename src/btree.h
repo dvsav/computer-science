@@ -55,6 +55,31 @@ namespace cs
         }
 
     public:
+        iterator find(const K& key)
+        {
+            BTreeNode* current_node = root;
+
+            while (current_node)
+            {
+                size_t index_of_item = 0;
+                bool item_found = false;
+                std::tie(index_of_item, item_found) = current_node->find(key);
+                if (item_found)
+                    return iterator(current_node, index_of_item);
+                else
+                    current_node = current_node->getChild(index_of_item);
+            }
+
+            return iterator();
+        }
+
+        V& at(const K& key)
+        {
+            iterator it = find(key);
+            Requires::That(it != iterator(), FUNCTION_INFO);
+            return (*it).second;
+        }
+
         std::pair<iterator, bool> insert(
             const K& key,
             const V& value)
@@ -177,6 +202,12 @@ namespace cs
             }
         }
 
+        bool remove(const K& key)
+        {
+            // TODO
+            return false;
+        }
+
         void print(std::ostream& os) const
         {
             PrintTree</*IsRoot*/ true, /*IsLast*/ false>(os, root);
@@ -234,6 +265,11 @@ namespace cs
         size_t index;
 
     private:
+        iterator() :
+            node(nullptr),
+            index(0)
+        {}
+
         iterator(
             BTreeNode* node,
             size_t index) :
@@ -243,7 +279,18 @@ namespace cs
 
     public:
         std::pair<K, V>& operator*() { return node->getItem(index); }
+
         const std::pair<K, V>& operator*() const { return node->getItem(index); }
+
+        bool operator==(const iterator& other)
+        {
+            return node == other.node && index == other.index;
+        }
+
+        bool operator!=(const iterator& other)
+        {
+            return node != other.node || index != other.index;
+        }
     };
 
     template <size_t Order, typename K, typename V, typename TComparator>
