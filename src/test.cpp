@@ -692,4 +692,6 @@ TEST_CASE("BTree", "[btree]")
 
     for (int i = 0; i <= 13; i++)
         std::cout << "btree[" << i << "] = " << btree.at(i) << std::endl;
+
+    btree.remove(4);
 }
