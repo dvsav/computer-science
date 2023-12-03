@@ -8,6 +8,12 @@
 #include <string>   // for std::string
 #include <vector>   // for std::vector
 
+template <int N, int D>
+struct CeilDivision
+{
+    static constexpr int value = (N + D - 1) / D;
+};
+
 template <typename T>
 class DefaultComparator
 {

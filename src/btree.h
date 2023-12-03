@@ -4,7 +4,7 @@
 #include "utility.h"   // for DefaultComparator
 
 #include <algorithm>   // for std::find_if
-#include <cmath>       // for std::ceilf
+#include <cmath>       // for ceilf
 #include <tuple>       // for std::tie
 #include <vector>      // for std:::vector
 #include <utility>     // for std::pair
@@ -14,7 +14,7 @@ namespace cs
     template <size_t Order, typename K, typename V, typename TComparator = DefaultComparator<K> >
     class BTree
     {
-        // Check that B-Tree order is greater than 2
+        // Check that B-Tree order is greater than 2 (otherwise it won't be possible to split a tree node)
         static_assert(Order > 2, "Order must be greater than 2");
 
         // Check for the existence of a member function "LessThan" in TComparator type
@@ -30,40 +30,39 @@ namespace cs
             "EqualTo function is missing in TComparator");
 
     public:
+        class BTreeNode;
+        class iterator;
+
+    public:
+        using tree_node = BTreeNode;
         using key_type = K;
         using value_type = V;
         static constexpr size_t order() { return Order; }
 
     private:
-        class BTreeNode;
-
-    public:
-        class iterator;
-
-    private:
-        BTreeNode* root;
+        tree_node* root;
 
     public:
         BTree() :
-            root(new BTreeNode(/*parent*/ nullptr))
+            root(new tree_node(/*parent*/ nullptr))
         {}
 
         ~BTree()
         {
             // delete every node in the tree
-            root->DeleteTree();
+            DeleteTree(root);
         }
 
     public:
         iterator find(const K& key)
         {
-            BTreeNode* current_node = root;
+            tree_node* current_node = root;
 
             while (current_node)
             {
                 size_t index_of_item = 0;
                 bool item_found = false;
-                std::tie(index_of_item, item_found) = current_node->find(key);
+                std::tie(index_of_item, item_found) = current_node->FindItem(key);
                 if (item_found)
                     return iterator(current_node, index_of_item);
                 else
@@ -84,13 +83,13 @@ namespace cs
             const K& key,
             const V& value)
         {
-            BTreeNode* current_node = root;
+            tree_node* current_node = root;
 
             while (true)
             {
                 size_t index_of_item = 0;
                 bool item_found = false;
-                std::tie(index_of_item, item_found) = current_node->find(key);
+                std::tie(index_of_item, item_found) = current_node->FindItem(key);
 
                 if (item_found)
                 {
@@ -114,7 +113,7 @@ namespace cs
                 if (!current_node->IsFull())
                 {
                     // There's enough room for a new element
-                    current_node->insert(
+                    current_node->InsertItem(
                         /*index*/ index_of_item,
                         /*key*/ key,
                         /*value*/ value);
@@ -129,7 +128,7 @@ namespace cs
                 
                 // ...we insert one extra element into the current_node,
                 // so it becomes overfilled
-                current_node->insert(
+                current_node->InsertItem(
                     /*index*/ index_of_item,
                     /*key*/ key,
                     /*value*/ value);
@@ -139,9 +138,9 @@ namespace cs
             while (true)
             {
                 // throw up one of the elements of current_node
-                BTreeNode* left = nullptr;
-                BTreeNode* right = nullptr;
-                BTreeNode* parent = current_node->Parent();
+                tree_node* left = nullptr;
+                tree_node* right = nullptr;
+                tree_node* parent = current_node->Parent();
                 std::pair<K, V> thrown_element = current_node->Split(&left, &right);
                 delete current_node;
 
@@ -149,9 +148,9 @@ namespace cs
                 {
                     parent->ReplaceChild(current_node, nullptr);
 
-                    size_t index_of_item = parent->find(/*key*/ thrown_element.first).first;
+                    size_t index_of_item = parent->FindItem(/*key*/ thrown_element.first).first;
 
-                    parent->insert(
+                    parent->InsertItem(
                         /*index*/ index_of_item,
                         /*key*/ thrown_element.first,
                         /*value*/ thrown_element.second);
@@ -178,9 +177,9 @@ namespace cs
                 }
                 else
                 {
-                    root = new BTreeNode(/*parent*/ nullptr);
+                    root = new tree_node(/*parent*/ nullptr);
 
-                    root->insert(
+                    root->InsertItem(
                         /*index*/ 0,
                         /*key*/ thrown_element.first,
                         /*value*/ thrown_element.second);
@@ -200,20 +199,19 @@ namespace cs
             }
         }
 
-        bool remove(const K& key)
+        bool remove(const iterator& it)
         {
-            iterator it = find(key);
             if (!it)
                 return false;
 
-            BTreeNode* node_to_delete_from = it.node;
+            tree_node* node_to_delete_from = it.node;
             size_t index_of_deleted_item = it.index;
 
-            BTreeNode* node_to_rebalance = nullptr;
+            tree_node* node_to_rebalance = nullptr;
 
             if (node_to_delete_from->IsLeaf())
             {
-                node_to_delete_from->remove(index_of_deleted_item);
+                node_to_delete_from->RemoveItem(index_of_deleted_item);
 
                 node_to_rebalance = node_to_delete_from;
             }
@@ -235,7 +233,7 @@ namespace cs
                     );
 
                     // Remove the replacement from its leaf node
-                    in_order_predecessor.node->remove(in_order_predecessor.index);
+                    in_order_predecessor.node->RemoveItem(in_order_predecessor.index);
 
                     node_to_rebalance = in_order_predecessor.node;
                 }
@@ -257,14 +255,14 @@ namespace cs
                         );
 
                         // Remove the replacement from its leaf node
-                        in_order_successor.node->remove(in_order_successor.index);
+                        in_order_successor.node->RemoveItem(in_order_successor.index);
 
                         node_to_rebalance = in_order_successor.node;
                     }
                     else
                     {
                         // Replacement not found, remove 
-                        node_to_delete_from->remove(index_of_deleted_item);
+                        node_to_delete_from->RemoveItem(index_of_deleted_item);
 
                         node_to_rebalance = node_to_delete_from;
                     }
@@ -278,6 +276,11 @@ namespace cs
             return true;
         }
 
+        bool remove(const K& key)
+        {
+            return remove(find(key));
+        }
+
         void print(std::ostream& os) const
         {
             PrintTree</*IsRoot*/ true, /*IsLast*/ false>(os, root);
@@ -287,7 +290,7 @@ namespace cs
         template <bool IsRoot, bool IsLast>
         static void PrintTree(
             std::ostream& os,
-            const BTreeNode* root,
+            const tree_node* root,
             const std::string& prefix = "")
         {
             os << prefix;
@@ -302,7 +305,7 @@ namespace cs
 
             for (size_t i = 0; i < root->ItemsNumber(); i++)
             {
-                os << '(' << root->getItem(i).first << ", " << root->getItem(i).second << ") ";
+                os << '(' << root->Key(i) << ", " << root->Value(i) << ") ";
             }
             os << std::endl;
 
@@ -324,7 +327,7 @@ namespace cs
             }
         }
 
-        void Rebalance(BTreeNode* deficient_node)
+        void Rebalance(tree_node* deficient_node)
         {
             if (!deficient_node->IsUnderfilled())
             {
@@ -332,10 +335,10 @@ namespace cs
                 return;
             }
 
-            BTreeNode* left_sibling = nullptr;
-            BTreeNode* right_sibling = nullptr;
-            iterator left_separator = deficient_node->FindLeftSibling(&left_sibling);
-            iterator right_separator = deficient_node->FindRightSibling(&right_sibling);
+            tree_node* left_sibling = nullptr;
+            tree_node* right_sibling = nullptr;
+            iterator left_separator = deficient_node->LeftSibling(&left_sibling);
+            iterator right_separator = deficient_node->RightSibling(&right_sibling);
 
             // if the left sibling exists and has more than the minimum number of elements, then rotate right
             if (left_sibling && left_sibling->HasAvailableItems())
@@ -344,7 +347,7 @@ namespace cs
 
                 // Copy the separator from the parent to the start of the deficient node
                 // (the separator moves down; deficient node now has the minimum number of elements)
-                deficient_node->insert(
+                deficient_node->InsertItem(
                     /*index*/ 0,
                     /*key*/ left_separator.key(),
                     /*value*/ left_separator.value());
@@ -353,7 +356,7 @@ namespace cs
                 // (left sibling loses one node but still has at least the minimum number of elements)
                 left_separator.key() = left_sibling->items.back().first;
                 left_separator.value() = left_sibling->items.back().second;
-                left_sibling->remove(left_sibling->ItemsNumber() - 1);
+                left_sibling->RemoveItem(left_sibling->ItemsNumber() - 1);
             }
             // If the right sibling exists and has more than the minimum number of elements, then rotate left
             else if (right_sibling && right_sibling->HasAvailableItems())
@@ -362,7 +365,7 @@ namespace cs
 
                 // Copy the separator from the parent to the end of the deficient node
                 // (the separator moves down; the deficient node now has the minimum number of elements)
-                deficient_node->insert(
+                deficient_node->InsertItem(
                     /*index*/ deficient_node->ItemsNumber(),
                     /*key*/ right_separator.key(),
                     /*value*/ right_separator.value());
@@ -371,15 +374,15 @@ namespace cs
                 // (right sibling loses one node but still has at least the minimum number of elements)
                 right_separator.key() = right_sibling->items.front().first;
                 right_separator.value() = right_sibling->items.front().second;
-                right_sibling->remove(0);
+                right_sibling->RemoveItem(0);
             }
             // if both immediate siblings have only the minimum number of elements, then merge with a sibling
             // sandwiching their separator taken off from their parent
             else
             {
                 iterator separator;
-                BTreeNode* left_node = nullptr;
-                BTreeNode* right_node = nullptr;
+                tree_node* left_node = nullptr;
+                tree_node* right_node = nullptr;
                 if (left_sibling)
                 {
                     separator = left_separator;
@@ -399,7 +402,7 @@ namespace cs
 
                 // Copy the separator to the end of the left node
                 // (the left node may be the deficient node or it may be the sibling with the minimum number of elements)
-                left_node->insert(
+                left_node->InsertItem(
                     /*index*/ left_node->ItemsNumber(),
                     /*key*/ separator.key(),
                     /*value*/ separator.value());
@@ -408,15 +411,15 @@ namespace cs
                 // (the left node now has the maximum number of elements, and the right node – empty)
                 for (size_t i = 0; i < right_node->ItemsNumber(); i++)
                 {
-                    left_node->insert(
+                    left_node->InsertItem(
                         /*index*/ left_node->ItemsNumber(),
-                        /*key*/ right_node->getItem(i).first,
-                        /*value*/ right_node->getItem(i).second);
+                        /*key*/ right_node->Key(i),
+                        /*value*/ right_node->Value(i));
                 }
 
                 // Remove the separator from the parent along with its empty right child (the parent loses an element)
                 separator.node->setChild(separator.index + 1, nullptr);
-                separator.node->remove(separator.index);
+                separator.node->RemoveItem(separator.index);
                 delete right_node;
 
                 // If the parent is the root and now has no elements, then free it and make the merged node the new root (tree becomes shallower)
@@ -432,13 +435,23 @@ namespace cs
                 }
             }
         }
+
+        static void DeleteTree(tree_node* root)
+        {
+            if (!root)
+                return;
+
+            for (BTreeNode* child : root->children)
+                DeleteTree(child);
+
+            delete root;
+        }
     };
 
     template <size_t Order, typename K, typename V, typename TComparator>
     class BTree<Order, K, V, TComparator>::iterator
     {
         friend class BTree; // for BTree to access iterator's constructor
-        friend class BTree::iterator;
 
     private:
         BTreeNode* node;
@@ -458,8 +471,6 @@ namespace cs
         {}
 
     public:
-        std::pair<K, V>& operator*() { return node->getItem(index); }
-
         const std::pair<K, V>& operator*() const { return node->getItem(index); }
 
         const K& key() const { return node->getItem(index).first; }
@@ -488,15 +499,19 @@ namespace cs
     {
         friend class BTree;
 
+    public:
+        static constexpr size_t order() { return Order; }
+        static constexpr size_t MinItems() { return CeilDivision<Order, 2>::value - 1; }
         static constexpr size_t MaxItems() { return Order - 1; }
-        static constexpr size_t MaxChildren() { return Order; }
+        static constexpr size_t MinChildren() { return MinItems() + 1; }
+        static constexpr size_t MaxChildren() { return MaxItems() + 1; }
 
     private:
         BTreeNode* parent;
         std::vector<BTreeNode*> children;
         std::vector< std::pair<K, V> > items;
 
-    public:
+    private:
         BTreeNode(BTreeNode* parent) :
             parent(parent),
             children(),
@@ -512,16 +527,167 @@ namespace cs
     public:
         BTreeNode* Parent() { return parent; }
         const BTreeNode* Parent() const { return parent; }
-        void setParent(BTreeNode* node) { parent = node; }
 
         size_t ItemsNumber() const { return items.size(); }
         std::pair<K, V>& getItem(size_t index) { return items[index]; }
         const std::pair<K, V>& getItem(size_t index) const { return items[index]; }
-        void setItem(size_t index, const std::pair<K, V>& item) { items[index] = item; }
+
+        const K& Key(size_t index) const { return getItem(index).first; }
+
+        V& Value(size_t index) { return getItem(index).second; }
+        const V& Value(size_t index) const { return getItem(index).second; }
 
         size_t ChildrenNumber() const { return children.size(); }
         BTreeNode* getChild(size_t index) { return children[index]; }
         const BTreeNode* getChild(size_t index) const { return children[index]; }
+
+    public:
+        bool IsEmpty() const
+        {
+            return ItemsNumber() == 0;
+        }
+
+        bool IsRoot() const
+        {
+            return parent == nullptr;
+        }
+
+        bool IsLeaf() const
+        {
+            for (size_t i = 0; i < ChildrenNumber(); i++)
+            {
+                if (getChild(i) != nullptr)
+                    return false;
+            }
+            return true;
+        }
+
+        bool IsFull() const
+        {
+            return (ItemsNumber() >= MaxItems());
+        }
+
+        bool IsOverfilled() const
+        {
+            return (ItemsNumber() > MaxItems());
+        }
+
+        bool IsUnderfilled() const
+        {
+            return !IsRoot() && (ItemsNumber() < MinItems());
+        }
+
+        bool HasAvailableItems() const
+        {
+            return ItemsNumber() > MinItems();
+        }
+
+        std::pair<size_t, bool> FindItem(const K& key) const
+        {
+            for (size_t i = 0; i < ItemsNumber(); i++)
+            {
+                if (TComparator::LessThan(key, Key(i)))
+                    return std::make_pair(i, /*found*/ false);
+                
+                if (TComparator::EqualTo(Key(i), key))
+                    return std::make_pair(i, /*found*/ true);
+            }
+            return std::make_pair(ItemsNumber(), /*found*/ false);
+        }
+
+        // Returns the rightmost item of the left subtree of 'this' node
+        BTree::iterator InOrderPredecessor(size_t index) const
+        {
+            BTreeNode* current_node = children[index];
+            if (!current_node)
+                return BTree::iterator();
+
+            while (true)
+            {
+                if (current_node->IsLeaf())
+                    return BTree::iterator(current_node, current_node->ItemsNumber() - 1);
+                else
+                    current_node = current_node->children.back();
+            }
+        }
+
+        // Returns the leftmost item of the right subtree of 'this' node
+        BTree::iterator InOrderSuccessor(size_t index) const
+        {
+            BTreeNode* current_node = children[index + 1];
+            if (!current_node)
+                return BTree::iterator();
+
+            while (true)
+            {
+                if (current_node->IsLeaf())
+                    return BTree::iterator(current_node, 0);
+                else
+                    current_node = current_node->children.front();
+            }
+        }
+
+        BTree::iterator LeftSibling(BTreeNode** left_sibling) const
+        {
+            if (this->IsRoot())
+            {
+                *left_sibling = nullptr;
+                return BTree::iterator();
+            }
+
+            auto iter = std::find(parent->children.begin(), parent->children.end(), this);
+            Requires::That(iter != parent->children.end(), FUNCTION_INFO);
+
+            int child_index = iter - parent->children.begin();
+            int left_separator_index = child_index - 1;
+            if (left_separator_index < 0)
+            {
+                *left_sibling = nullptr;
+                return BTree::iterator();
+            }
+            else
+            {
+                *left_sibling = parent->children[left_separator_index];
+                return BTree::iterator(parent, left_separator_index);
+            }
+        }
+
+        BTree::iterator RightSibling(BTreeNode** right_sibling) const
+        {
+            if (this->IsRoot())
+            {
+                *right_sibling = nullptr;
+                return BTree::iterator();
+            }
+
+            auto iter = std::find(parent->children.begin(), parent->children.end(), this);
+            Requires::That(iter != parent->children.end(), FUNCTION_INFO);
+
+            int child_index = iter - parent->children.begin();
+            int right_separator_index = child_index + 1;
+            if (right_separator_index == static_cast<int>(parent->ChildrenNumber()))
+            {
+                *right_sibling = nullptr;
+                return BTree::iterator();
+            }
+            else
+            {
+                *right_sibling = parent->children[right_separator_index];
+                return BTree::iterator(parent, right_separator_index);
+            }
+        }
+
+    private:
+        void setParent(BTreeNode* node)
+        {
+            parent = node;
+        }
+
+        void setItem(size_t index, const std::pair<K, V>& item)
+        {
+            items[index] = item;
+        }
+
         void setChild(size_t index, BTreeNode* child)
         {
             children[index] = child;
@@ -529,50 +695,16 @@ namespace cs
                 child->setParent(this);
         }
 
-        bool IsEmpty() const { return ItemsNumber() == 0; }
-
-        bool IsRoot() const { return parent == nullptr; }
-
-        bool IsLeaf() const
+        void ReplaceChild(
+            BTreeNode* oldChild,
+            BTreeNode* newChild)
         {
-            return
-                std::find_if(
-                    children.cbegin(), children.cend(),
-                    [](const BTreeNode* child) { return child != nullptr; }) == children.cend();
+            std::replace(
+                children.begin(), children.end(),
+                oldChild, newChild);
         }
 
-        bool IsFull() const { return (items.size() >= MaxItems()); }
-
-        bool IsOverfilled() const { return (items.size() > MaxItems()); }
-
-        bool IsUnderfilled() const
-        {
-            return
-                !IsRoot() &&
-                (items.size() < static_cast<size_t>(std::ceilf(Order / 2.0f)) - 1);
-        }
-
-        bool HasAvailableItems() const
-        {
-            return items.size() > static_cast<size_t>(std::ceilf(Order / 2.0f)) - 1;
-        }
-
-        std::pair<size_t, bool> find(const K& key)
-        {
-            size_t i = 0;
-            for (; i < items.size(); i++)
-            {
-                if (TComparator::LessThan(key, items[i].first))
-                    break;
-                else if (TComparator::EqualTo(key, items[i].first))
-                    return std::make_pair(i, /*found*/ true);
-                else
-                    continue;
-            }
-            return std::make_pair(i, /*found*/ false);
-        }
-
-        void insert(
+        void InsertItem(
             size_t index,
             const K& key,
             const V& value)
@@ -599,7 +731,7 @@ namespace cs
             }
         }
 
-        void remove(size_t index)
+        void RemoveItem(size_t index)
         {
             Requires::That(index < ItemsNumber(), FUNCTION_INFO);
 
@@ -629,16 +761,6 @@ namespace cs
             }
         }
 
-        void DeleteTree()
-        {
-            for (BTreeNode* child : children)
-            {
-                if (child)
-                    child->DeleteTree();
-            }
-            delete this;
-        }
-
         std::pair<K, V> Split(
             /*out*/ BTreeNode** left,
             /*out*/ BTreeNode** right)
@@ -649,111 +771,20 @@ namespace cs
             *left = new BTreeNode(parent);
             for (size_t i = 0; i < thrown_index; i++)
             {
-                (*left)->insert(i, items[i].first, items[i].second);
-                (*left)->setChild(i, children[i]);
+                (*left)->InsertItem(i, Key(i), Value(i));
+                (*left)->setChild(i, getChild(i));
             }
-            (*left)->setChild(thrown_index, children[thrown_index]);
+            (*left)->setChild(thrown_index, getChild(thrown_index));
 
             *right = new BTreeNode(parent);
-            for (size_t i = thrown_index + 1; i < items.size(); i++)
+            for (size_t i = thrown_index + 1; i < ItemsNumber(); i++)
             {
-                (*right)->insert(i - (thrown_index + 1), items[i].first, items[i].second);
-                (*right)->setChild(i - (thrown_index + 1), children[i]);
+                (*right)->InsertItem(i - (thrown_index + 1), Key(i), Value(i));
+                (*right)->setChild(i - (thrown_index + 1), getChild(i));
             }
-            (*right)->setChild(items.size() - (thrown_index + 1), children[children.size() - 1]);
+            (*right)->setChild(items.size() - (thrown_index + 1), children.back());
 
             return thrown_element;
-        }
-
-        void ReplaceChild(
-            BTreeNode* oldChild,
-            BTreeNode* newChild)
-        {
-            std::replace(
-                children.begin(), children.end(),
-                oldChild, newChild);
-        }
-
-        // Returns the rightmost item of the left subtree of 'this' node
-        BTree::iterator InOrderPredecessor(size_t index)
-        {
-            BTreeNode* current_node = children[index];
-            if (!current_node)
-                return BTree::iterator();
-
-            while (true)
-            {
-                if (current_node->IsLeaf())
-                    return BTree::iterator(current_node, current_node->ItemsNumber() - 1);
-                else
-                    current_node = current_node->children.back();
-            }
-        }
-
-        // Returns the leftmost item of the right subtree of 'this' node
-        BTree::iterator InOrderSuccessor(size_t index)
-        {
-            BTreeNode* current_node = children[index + 1];
-            if (!current_node)
-                return BTree::iterator();
-
-            while (true)
-            {
-                if (current_node->IsLeaf())
-                    return BTree::iterator(current_node, 0);
-                else
-                    current_node = current_node->children.front();
-            }
-        }
-
-        BTree::iterator FindLeftSibling(BTreeNode** left_sibling)
-        {
-            if (this->IsRoot())
-            {
-                *left_sibling = nullptr;
-                return BTree::iterator();
-            }
-
-            auto iter = std::find(parent->children.begin(), parent->children.end(), this);
-            Requires::That(iter != parent->children.end(), FUNCTION_INFO);
-
-            int child_index = iter - parent->children.begin();
-            int left_separator_index = child_index - 1;
-            if (left_separator_index < 0)
-            {
-                *left_sibling = nullptr;
-                return BTree::iterator();
-            }
-            else
-            {
-                *left_sibling = parent->children[left_separator_index];
-                return BTree::iterator(parent, left_separator_index);
-            }
-        }
-
-        BTree::iterator FindRightSibling(BTreeNode** right_sibling)
-        {
-            if (this->IsRoot())
-            {
-                *right_sibling = nullptr;
-                return BTree::iterator();
-            }
-
-            auto iter = std::find(parent->children.begin(), parent->children.end(), this);
-            Requires::That(iter != parent->children.end(), FUNCTION_INFO);
-
-            int child_index = iter - parent->children.begin();
-            int right_separator_index = child_index + 1;
-            if (right_separator_index == parent->ChildrenNumber())
-            {
-                *right_sibling = nullptr;
-                return BTree::iterator();
-            }
-            else
-            {
-                *right_sibling = parent->children[right_separator_index];
-                return BTree::iterator(parent, right_separator_index);
-            }
         }
     };
 } // namespace cs
