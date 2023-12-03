@@ -542,13 +542,13 @@ TEST_CASE("BinarySearchTree", "[binarytree]")
 
     SECTION("change values")
     {
-        REQUIRE(bst[1] == "one");
-        REQUIRE(bst[2] == "two");
-        REQUIRE(bst[3] == "three");
-        REQUIRE(bst[4] == "four");
-        REQUIRE(bst[5] == "five");
-        REQUIRE(bst[6] == "six");
-        REQUIRE(bst[7] == "seven");
+        REQUIRE(bst.at(1) == "one");
+        REQUIRE(bst.at(2) == "two");
+        REQUIRE(bst.at(3) == "three");
+        REQUIRE(bst.at(4) == "four");
+        REQUIRE(bst.at(5) == "five");
+        REQUIRE(bst.at(6) == "six");
+        REQUIRE(bst.at(7) == "seven");
 
         bst[1] = "1st";
         REQUIRE(bst[1] == "1st");
@@ -671,7 +671,9 @@ TEST_CASE("AvlTree", "[binarytree]")
 
 TEST_CASE("BTree", "[btree]")
 {
-    cs::BTree<5, int, std::string> btree;
+    using btree_type = cs::BTree<5, int, std::string>;
+
+    btree_type btree;
 
     btree.insert(1, "one");
     btree.insert(8, "eight");
@@ -688,14 +690,62 @@ TEST_CASE("BTree", "[btree]")
     btree.insert(12, "twelve");
     btree.insert(13, "thirteen");
 
-    btree.print(std::cout);
+    //btree.print(std::cout);
 
-    for (int i = 0; i <= 13; i++)
-        std::cout << "btree[" << i << "] = " << btree.at(i) << std::endl;
+    SECTION("change values")
+    {
+        REQUIRE(btree.at(0) == "zero");
+        REQUIRE(btree.at(1) == "one");
+        REQUIRE(btree.at(2) == "two");
+        REQUIRE(btree.at(3) == "three");
+        REQUIRE(btree.at(4) == "four");
+        REQUIRE(btree.at(5) == "five");
+        REQUIRE(btree.at(6) == "six");
+        REQUIRE(btree.at(7) == "seven");
+        REQUIRE(btree.at(8) == "eight");
+        REQUIRE(btree.at(9) == "nine");
+        REQUIRE(btree.at(10) == "ten");
+        REQUIRE(btree.at(11) == "eleven");
+        REQUIRE(btree.at(12) == "twelve");
+        REQUIRE(btree.at(13) == "thirteen");
 
-    btree.remove(6);
-    btree.print(std::cout);
+        btree[1] = "1st";
+        REQUIRE(btree[1] == "1st");
 
-    btree.remove(13);
-    btree.print(std::cout);
+        btree[2] = "2nd";
+        REQUIRE(btree[2] == "2nd");
+
+        btree[3] = "3rd";
+        REQUIRE(btree[3] == "3rd");
+
+        btree[4] = "4th";
+        REQUIRE(btree[4] == "4th");
+
+        btree[5] = "5th";
+        REQUIRE(btree[5] == "5th");
+
+        btree[6] = "6th";
+        REQUIRE(btree[6] == "6th");
+
+        btree[7] = "7th";
+        REQUIRE(btree[7] == "7th");
+
+        btree[0] = "zero";
+        REQUIRE(btree[0] == "zero");
+
+        btree[8] = "8th";
+        REQUIRE(btree[8] == "8th");
+    }
+
+    SECTION("remove items")
+    {
+        for (int i = 0; i <= 13; i++)
+        {
+            btree_type::iterator it = btree.find(i);
+            REQUIRE(it);
+            REQUIRE(it.key() == i);
+            btree.remove(i);
+            REQUIRE(!btree.find(i));
+        }
+    }
 }

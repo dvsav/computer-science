@@ -51,11 +51,15 @@ namespace cs
         {
             // delete every node in the tree
             DeleteTree(root);
+            root = nullptr;
         }
 
     public:
         iterator find(const K& key)
         {
+            if(root->IsEmpty())
+                return iterator();
+
             tree_node* current_node = root;
 
             while (current_node)
@@ -70,6 +74,12 @@ namespace cs
             }
 
             return iterator();
+        }
+
+        V& operator[](const K& key)
+        {
+            iterator it = insert(key, V()).first;
+            return it.value();
         }
 
         V& at(const K& key)
@@ -354,7 +364,7 @@ namespace cs
                 
                 // Replace the separator in the parent with the last element of the left sibling
                 // (left sibling loses one node but still has at least the minimum number of elements)
-                left_separator.key() = left_sibling->items.back().first;
+                left_separator.setKey(left_sibling->items.back().first);
                 left_separator.value() = left_sibling->items.back().second;
                 left_sibling->RemoveItem(left_sibling->ItemsNumber() - 1);
             }
@@ -372,7 +382,7 @@ namespace cs
 
                 // Replace the separator in the parent with the first element of the right sibling
                 // (right sibling loses one node but still has at least the minimum number of elements)
-                right_separator.key() = right_sibling->items.front().first;
+                right_separator.setKey(right_sibling->items.front().first);
                 right_separator.value() = right_sibling->items.front().second;
                 right_sibling->RemoveItem(0);
             }
@@ -418,6 +428,8 @@ namespace cs
                 }
 
                 // Remove the separator from the parent along with its empty right child (the parent loses an element)
+                if (separator.node->ItemsNumber() == 1)
+                    separator.node->setChild(separator.index, nullptr);
                 separator.node->setChild(separator.index + 1, nullptr);
                 separator.node->RemoveItem(separator.index);
                 delete right_node;
@@ -426,6 +438,7 @@ namespace cs
                 if (separator.node->IsRoot() && separator.node->IsEmpty())
                 {
                     delete separator.node;
+                    left_node->setParent(nullptr);
                     root = left_node;
                 }
                 // Otherwise, if the parent has fewer than the required number of elements, then rebalance the parent
@@ -491,7 +504,7 @@ namespace cs
         operator bool() const { return node != nullptr; }
 
     private:
-        K& key() { return node->getItem(index).first; }
+        void setKey(const K& key) { node->getItem(index).first = key; }
     };
 
     template <size_t Order, typename K, typename V, typename TComparator>
@@ -664,15 +677,15 @@ namespace cs
             Requires::That(iter != parent->children.end(), FUNCTION_INFO);
 
             int child_index = iter - parent->children.begin();
-            int right_separator_index = child_index + 1;
-            if (right_separator_index == static_cast<int>(parent->ChildrenNumber()))
+            int right_separator_index = child_index;
+            if (right_separator_index + 1 == static_cast<int>(parent->ChildrenNumber()))
             {
                 *right_sibling = nullptr;
                 return BTree::iterator();
             }
             else
             {
-                *right_sibling = parent->children[right_separator_index];
+                *right_sibling = parent->children[right_separator_index + 1];
                 return BTree::iterator(parent, right_separator_index);
             }
         }
