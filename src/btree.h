@@ -338,7 +338,7 @@ namespace cs
             iterator right_separator = deficient_node->FindRightSibling(&right_sibling);
 
             // if the left sibling exists and has more than the minimum number of elements, then rotate right
-            if (left_sibling && !left_sibling->IsUnderfilled())
+            if (left_sibling && left_sibling->HasAvailableItems())
             {
                 // Rotate right
 
@@ -356,7 +356,7 @@ namespace cs
                 left_sibling->remove(left_sibling->ItemsNumber() - 1);
             }
             // If the right sibling exists and has more than the minimum number of elements, then rotate left
-            else if (right_sibling && right_sibling->IsUnderfilled())
+            else if (right_sibling && right_sibling->HasAvailableItems())
             {
                 // Rotate left
 
@@ -415,11 +415,12 @@ namespace cs
                 }
 
                 // Remove the separator from the parent along with its empty right child (the parent loses an element)
+                separator.node->setChild(separator.index + 1, nullptr);
                 separator.node->remove(separator.index);
                 delete right_node;
 
                 // If the parent is the root and now has no elements, then free it and make the merged node the new root (tree becomes shallower)
-                if (separator.node->IsRoot())
+                if (separator.node->IsRoot() && separator.node->IsEmpty())
                 {
                     delete separator.node;
                     root = left_node;
@@ -548,7 +549,12 @@ namespace cs
         {
             return
                 !IsRoot() &&
-                (items.size() < static_cast<size_t>(std::ceilf(Order / 2)) - 1);
+                (items.size() < static_cast<size_t>(std::ceilf(Order / 2.0f)) - 1);
+        }
+
+        bool HasAvailableItems() const
+        {
+            return items.size() > static_cast<size_t>(std::ceilf(Order / 2.0f)) - 1;
         }
 
         std::pair<size_t, bool> find(const K& key)

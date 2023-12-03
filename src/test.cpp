@@ -671,7 +671,7 @@ TEST_CASE("AvlTree", "[binarytree]")
 
 TEST_CASE("BTree", "[btree]")
 {
-    cs::BTree<4, int, std::string> btree;
+    cs::BTree<5, int, std::string> btree;
 
     btree.insert(1, "one");
     btree.insert(8, "eight");
@@ -693,7 +693,9 @@ TEST_CASE("BTree", "[btree]")
     for (int i = 0; i <= 13; i++)
         std::cout << "btree[" << i << "] = " << btree.at(i) << std::endl;
 
-    btree.remove(1);
+    btree.remove(6);
+    btree.print(std::cout);
 
+    btree.remove(13);
     btree.print(std::cout);
 }
