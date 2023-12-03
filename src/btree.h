@@ -503,7 +503,6 @@ namespace cs
         {
             items.reserve(Order);
             children.reserve(Order);
-            children.push_back(nullptr);
         }
 
         BTreeNode(const BTreeNode&) = delete;
@@ -572,28 +571,56 @@ namespace cs
             const K& key,
             const V& value)
         {
-            Requires::That(items.size() <= MaxItems(), FUNCTION_INFO);
+            Requires::That(ItemsNumber() <= MaxItems(), FUNCTION_INFO);
 
-            items.insert(
-                items.begin() + index,
-                std::make_pair(key, value)
-            );
+            if (ItemsNumber() == 0)
+            {
+                items.emplace_back(key, value);
+                children.push_back(nullptr);
+                children.push_back(nullptr);
+            }
+            else
+            {
+                items.insert(
+                    items.begin() + index,
+                    std::make_pair(key, value)
+                );
 
-            children.insert(
-                children.begin() + index,
-                nullptr
-            );
+                children.insert(
+                    children.begin() + index,
+                    nullptr
+                );
+            }
         }
 
         void remove(size_t index)
         {
-            items.erase(items.begin() + index);
-            if (!children[index])
-                children.erase(children.begin() + index);
-            else if (!children[index + 1])
-                children.erase(children.begin() + index + 1);
+            Requires::That(index < ItemsNumber(), FUNCTION_INFO);
+
+            if (ItemsNumber() == 1)
+            {
+                items.clear();
+                Requires::That(!children[0] && !children[1], FUNCTION_INFO);
+                children.clear();
+            }
             else
-                Requires::That(false, FUNCTION_INFO);
+            {
+                items.erase(items.begin() + index);
+
+                if (!children[index])
+                {
+                    children.erase(children.begin() + index);
+                }
+                else if (!children[index + 1])
+                {
+                    children.erase(children.begin() + index + 1);
+                }
+                else
+                {
+                    // Both left and right children aren't null, so can't delete
+                    Requires::That(false, FUNCTION_INFO);
+                }
+            }
         }
 
         void DeleteTree()
@@ -653,7 +680,7 @@ namespace cs
                 if (current_node->IsLeaf())
                     return BTree::iterator(current_node, current_node->ItemsNumber() - 1);
                 else
-                    current_node = children.back();
+                    current_node = current_node->children.back();
             }
         }
 
@@ -669,7 +696,7 @@ namespace cs
                 if (current_node->IsLeaf())
                     return BTree::iterator(current_node, 0);
                 else
-                    current_node = children.front();
+                    current_node = current_node->children.front();
             }
         }
 
@@ -681,10 +708,10 @@ namespace cs
                 return BTree::iterator();
             }
 
-            auto iter = std::find(children.begin(), children.end(), this);
-            Requires::That(iter != children.end(), FUNCTION_INFO);
+            auto iter = std::find(parent->children.begin(), parent->children.end(), this);
+            Requires::That(iter != parent->children.end(), FUNCTION_INFO);
 
-            int child_index = iter - children.begin();
+            int child_index = iter - parent->children.begin();
             int left_separator_index = child_index - 1;
             if (left_separator_index < 0)
             {
@@ -693,7 +720,7 @@ namespace cs
             }
             else
             {
-                *left_sibling = children[left_separator_index];
+                *left_sibling = parent->children[left_separator_index];
                 return BTree::iterator(parent, left_separator_index);
             }
         }
@@ -706,10 +733,10 @@ namespace cs
                 return BTree::iterator();
             }
 
-            auto iter = std::find(children.begin(), children.end(), this);
-            Requires::That(iter != children.end(), FUNCTION_INFO);
+            auto iter = std::find(parent->children.begin(), parent->children.end(), this);
+            Requires::That(iter != parent->children.end(), FUNCTION_INFO);
 
-            int child_index = iter - children.begin();
+            int child_index = iter - parent->children.begin();
             int right_separator_index = child_index + 1;
             if (right_separator_index == parent->ChildrenNumber())
             {
@@ -718,7 +745,7 @@ namespace cs
             }
             else
             {
-                *right_sibling = children[right_separator_index];
+                *right_sibling = parent->children[right_separator_index];
                 return BTree::iterator(parent, right_separator_index);
             }
         }
