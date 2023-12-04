@@ -1,4 +1,4 @@
-#include "binary_tree.h"      // for cs::TreeNode
+#include "binary_tree.h"      // for cs::BinaryTreeNode
 #include "btree.h"            // for cs::Btree
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
@@ -449,9 +449,9 @@ TEST_CASE("Heap", "[heap]")
     }
 }
 
-TEST_CASE("TreeNode", "[binarytree]")
+TEST_CASE("BinaryTreeNode", "[binarytree]")
 {
-    using tree_node = cs::TreeNode<std::string, int>;
+    using tree_node = cs::BinaryTreeNode<std::string, int>;
 
     tree_node* root = new tree_node(
         /*value*/ "root",

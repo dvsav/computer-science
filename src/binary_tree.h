@@ -15,7 +15,7 @@
 namespace cs
 {
     /**
-     * @class TreeNode
+     * @class BinaryTreeNode
      * 
      * @brief Class representing a node in a tree (e.g. binary search tree).
      * Has 'key' and 'value' fields. 'key' is supposed to be used for binary search.
@@ -24,7 +24,7 @@ namespace cs
      * @tparam V value type.
      */
     template <typename K, typename V>
-    class TreeNode
+    class BinaryTreeNode
     {
         template <typename, typename, typename>
         friend class BinarySearchTree;
@@ -37,9 +37,9 @@ namespace cs
         using value_type = V;
 
     private:
-        TreeNode* parent;
-        TreeNode* left;
-        TreeNode* right;
+        BinaryTreeNode* parent;
+        BinaryTreeNode* left;
+        BinaryTreeNode* right;
         K key;
         V value;
 
@@ -55,10 +55,10 @@ namespace cs
          * @param left - left child
          * @param right - right child
          */
-        TreeNode(
+        BinaryTreeNode(
             const K& key,
-            TreeNode* left = nullptr,
-            TreeNode* right = nullptr) :
+            BinaryTreeNode* left = nullptr,
+            BinaryTreeNode* right = nullptr) :
             parent(nullptr),
             left(left),
             right(right),
@@ -77,11 +77,11 @@ namespace cs
          * @param left - left child
          * @param right - right child
          */
-        TreeNode(
+        BinaryTreeNode(
             const K& key,
             const V& value,
-            TreeNode* left = nullptr,
-            TreeNode* right = nullptr) :
+            BinaryTreeNode* left = nullptr,
+            BinaryTreeNode* right = nullptr) :
             parent(nullptr),
             left(left),
             right(right),
@@ -92,42 +92,42 @@ namespace cs
             init();
         }
 
-        TreeNode(const TreeNode&) = delete;
-        TreeNode& operator=(const TreeNode&) = delete;
+        BinaryTreeNode(const BinaryTreeNode&) = delete;
+        BinaryTreeNode& operator=(const BinaryTreeNode&) = delete;
 
     public:
         /**
          * @brief Returns a pointer to the left child of this node.
          * @return a pointer to the left child of this node.
          */
-        const TreeNode* Left() const { return left; }
+        const BinaryTreeNode* Left() const { return left; }
         /**
          * @brief Returns a pointer to the left child of this node.
          * @return a pointer to the left child of this node.
          */
-        TreeNode* Left() { return left; }
+        BinaryTreeNode* Left() { return left; }
 
         /**
          * @brief Returns a pointer to the right child of this node.
          * @return a pointer to the right child of this node.
          */
-        const TreeNode* Right() const { return right; }
+        const BinaryTreeNode* Right() const { return right; }
         /**
          * @brief Returns a pointer to the right child of this node.
          * @return a pointer to the right child of this node.
          */
-        TreeNode* Right() { return right; }
+        BinaryTreeNode* Right() { return right; }
 
         /**
          * @brief Returns a pointer to the parent of this node.
          * @return a pointer to the parent of this node.
          */
-        const TreeNode* Parent() const { return parent; }
+        const BinaryTreeNode* Parent() const { return parent; }
         /**
          * @brief Returns a pointer to the parent of this node.
          * @return a pointer to the parent of this node.
          */
-        TreeNode* Parent() { return parent; }
+        BinaryTreeNode* Parent() { return parent; }
 
         /**
          * @brief Returns a reference to the key of this node.
@@ -159,15 +159,15 @@ namespace cs
 
         // Sets the left child of this node.
         // This method is supposed to be called by the friend classes (trees).
-        void setLeft(TreeNode* node) { left = node; }
+        void setLeft(BinaryTreeNode* node) { left = node; }
 
         // Sets the right child of this node.
         // This method is supposed to be called by the friend classes (trees).
-        void setRight(TreeNode* node) { right = node; }
+        void setRight(BinaryTreeNode* node) { right = node; }
 
         // Sets the parent of this node.
         // This method is supposed to be called by the friend classes (trees).
-        void setParent(TreeNode* node) { parent = node; }
+        void setParent(BinaryTreeNode* node) { parent = node; }
 
         // Returns the cached value of the height of the tree rooted in this node.
         // This method is supposed to be called by the friend classes (trees).
@@ -191,18 +191,22 @@ namespace cs
      * @param root - tree root.
      * @param visitor - functor called for each visited node.
      * 
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
+    template <typename TBinaryTreeNode>
     void PreOrderTraverse(
-        TTreeNode* root,
-        std::function<void(TTreeNode*)> visitor)
+        TBinaryTreeNode* root,
+        std::function<void(TBinaryTreeNode*)> visitor)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         if (root)
         {
             visitor(root);
-            PreOrderTraverse<TTreeNode>(root->Left(), visitor);
-            PreOrderTraverse<TTreeNode>(root->Right(), visitor);
+            PreOrderTraverse<TBinaryTreeNode>(root->Left(), visitor);
+            PreOrderTraverse<TBinaryTreeNode>(root->Right(), visitor);
         }
     }
 
@@ -213,18 +217,22 @@ namespace cs
      * @param root - tree root.
      * @param visitor - functor called for each visited node.
      *
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
+    template <typename TBinaryTreeNode>
     void InOrderTraverse(
-        TTreeNode* root,
-        std::function<void(TTreeNode*)> visitor)
+        TBinaryTreeNode* root,
+        std::function<void(TBinaryTreeNode*)> visitor)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         if (root)
         {
-            InOrderTraverse<TTreeNode>(root->Left(), visitor);
+            InOrderTraverse<TBinaryTreeNode>(root->Left(), visitor);
             visitor(root);
-            InOrderTraverse<TTreeNode>(root->Right(), visitor);
+            InOrderTraverse<TBinaryTreeNode>(root->Right(), visitor);
         }
     }
 
@@ -235,17 +243,21 @@ namespace cs
      * @param root - tree root.
      * @param visitor - functor called for each visited node.
      *
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
+    template <typename TBinaryTreeNode>
     void PostOrderTraverse(
-        TTreeNode* root,
-        std::function<void(TTreeNode*)> visitor)
+        TBinaryTreeNode* root,
+        std::function<void(TBinaryTreeNode*)> visitor)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         if (root)
         {
-            PostOrderTraverse<TTreeNode>(root->Left(), visitor);
-            PostOrderTraverse<TTreeNode>(root->Right(), visitor);
+            PostOrderTraverse<TBinaryTreeNode>(root->Left(), visitor);
+            PostOrderTraverse<TBinaryTreeNode>(root->Right(), visitor);
             visitor(root);
         }
     }
@@ -257,22 +269,26 @@ namespace cs
      * @param root - tree root.
      * @param visitor - functor called for each visited node.
      *
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
+    template <typename TBinaryTreeNode>
     void LevelOrderTraverse(
-        TTreeNode* root,
-        std::function<void(TTreeNode*)> visitor)
+        TBinaryTreeNode* root,
+        std::function<void(TBinaryTreeNode*)> visitor)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         if (!root)
             return;
 
-        std::stack<TTreeNode*> level;
+        std::stack<TBinaryTreeNode*> level;
         level.push(root);
 
         while (!level.empty())
         {
-            TTreeNode* node = level.top();
+            TBinaryTreeNode* node = level.top();
             level.pop();
 
             if (node->Left())
@@ -288,17 +304,21 @@ namespace cs
     /**
      * @brief Deteles every node of specified tree.
      * @param root - tree root.
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
+    template <typename TBinaryTreeNode>
     void DeleteTree(
-        TTreeNode* root)
+        TBinaryTreeNode* root)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         // We've chosen post-order traverse because it
         // visits leaves first and goes towards the root.
-        PostOrderTraverse<TTreeNode>(
+        PostOrderTraverse<TBinaryTreeNode>(
             root,
-            [](TTreeNode* node) -> void
+            [](TBinaryTreeNode* node) -> void
             {
                 delete node;
             });
@@ -317,18 +337,22 @@ namespace cs
      * @return either the first ancestor satisfying @p predicate or nullptr
      * if there are no such ancestors.
      * 
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
-    TTreeNode* FindAncestor(
-        TTreeNode* child,
-        std::function<bool(const TTreeNode*)> predicate,
+    template <typename TBinaryTreeNode>
+    TBinaryTreeNode* FindAncestor(
+        TBinaryTreeNode* child,
+        std::function<bool(const TBinaryTreeNode*)> predicate,
         bool inclusive)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         if (!child)
             return nullptr;
 
-        TTreeNode* current_node = inclusive ? child : child->Parent();
+        TBinaryTreeNode* current_node = inclusive ? child : child->Parent();
         while (current_node && !predicate(current_node))
             current_node = current_node->Parent();
         return current_node;
@@ -341,16 +365,20 @@ namespace cs
      * @param root - tree root.
      * @param prefix
      * 
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      * @tparam IsRoot
      * @tparam IsLeft
      */
-    template <typename TTreeNode, bool IsRoot = true, bool IsLeft = false>
+    template <typename TBinaryTreeNode, bool IsRoot = true, bool IsLeft = false>
     void PrintTree(
         std::ostream& os,
-        const TTreeNode* root,
+        const TBinaryTreeNode* root,
         const std::string& prefix = "")
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+        
         os << prefix;
         if (!IsRoot)
             os << (IsLeft ? "|--" : "`--");
@@ -366,8 +394,8 @@ namespace cs
         if (!root->Left() && !root->Right())
             return;
 
-        PrintTree<TTreeNode, false, true>(os, root->Left(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
-        PrintTree<TTreeNode, false, false>(os, root->Right(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
+        PrintTree<TBinaryTreeNode, false, true>(os, root->Left(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
+        PrintTree<TBinaryTreeNode, false, false>(os, root->Right(), prefix + std::string(IsRoot ? "" : IsLeft ? "|  " : "   "));
     }
 
     /**
@@ -379,15 +407,19 @@ namespace cs
      * 
      * @return in-order predecessor of @p root node.
      * 
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
-    TTreeNode* InOrderPredecessor(TTreeNode* root)
+    template <typename TBinaryTreeNode>
+    TBinaryTreeNode* InOrderPredecessor(TBinaryTreeNode* root)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         if (!root)
             return nullptr;
 
-        TTreeNode* predecessor = root->Left();
+        TBinaryTreeNode* predecessor = root->Left();
         if (!predecessor)
             return nullptr;
 
@@ -406,11 +438,15 @@ namespace cs
      *
      * @return height of a tree rooted in @p root node.
      *
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
-    int Height(const TTreeNode* root)
+    template <typename TBinaryTreeNode>
+    int Height(const TBinaryTreeNode* root)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         return std::max(
             root->Right() ? 1 + Height(root->Right()) : 0,
             root->Left() ? 1 + Height(root->Left()) : 0);
@@ -426,11 +462,15 @@ namespace cs
      * @return balance factor of a tree rooted in @p root node. 0 - tree is balanced;
      * <0 - tree is biased to the left; >0 - tree is biased to the right.
      *
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
-    int BalanceFactor(const TTreeNode* root)
+    template <typename TBinaryTreeNode>
+    int BalanceFactor(const TBinaryTreeNode* root)
     {
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
         return
             (root->Right() ? 1 + Height(root->Right()) : 0) -
             (root->Left() ? 1 + Height(root->Left()) : 0);
@@ -445,15 +485,19 @@ namespace cs
      *
      * @return true if the tree is balanced, false otherwise.
      *
-     * @tparam TTreeNode node type.
+     * @tparam TBinaryTreeNode node type.
      */
-    template <typename TTreeNode>
-    bool IsBalanced(const TTreeNode* root)
+    template <typename TBinaryTreeNode>
+    bool IsBalanced(const TBinaryTreeNode* root)
     {
-        TTreeNode* unbalanced_node = nullptr;
-        LevelOrderTraverse<TTreeNode>(
-            const_cast<TTreeNode*>(root),
-            [&unbalanced_node](TTreeNode* node) -> void
+        static_assert(
+            std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
+            "TBinaryTreeNode must be an instantiation of BinaryTreeNode");
+
+        TBinaryTreeNode* unbalanced_node = nullptr;
+        LevelOrderTraverse<TBinaryTreeNode>(
+            const_cast<TBinaryTreeNode*>(root),
+            [&unbalanced_node](TBinaryTreeNode* node) -> void
             {
                 if (std::abs(cs::BalanceFactor(node)) > 1)
                     unbalanced_node = node;
@@ -494,7 +538,7 @@ namespace cs
     public:
         using key_type = K;
         using value_type = V;
-        using tree_node = TreeNode<K, V>;
+        using tree_node = BinaryTreeNode<K, V>;
 
     protected:
         tree_node* root;
@@ -803,7 +847,7 @@ namespace cs
         }
 
         // Updates 'height' for specified node only
-        static void refreshHeight(TreeNode<K, V>* node)
+        static void refreshHeight(BinaryTreeNode<K, V>* node)
         {
             node->height = std::max(
                 node->Left() ? 1 + node->Left()->Height() : 0,
@@ -811,7 +855,7 @@ namespace cs
         }
 
         // Updates 'height' beginning from the specified node and all the way up to the root
-        static void refreshHeightUp(TreeNode<K, V>* node)
+        static void refreshHeightUp(BinaryTreeNode<K, V>* node)
         {
             tree_node* current_node = node;
             while (current_node)
