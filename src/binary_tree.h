@@ -17,7 +17,7 @@ namespace cs
     /**
      * @class BinaryTreeNode
      * 
-     * @brief Class representing a node in a tree (e.g. binary search tree).
+     * @brief Class representing a node in a binary search tree.
      * Has 'key' and 'value' fields. 'key' is supposed to be used for binary search.
      * 
      * @tparam K key type.
@@ -517,7 +517,8 @@ namespace cs
      * 
      * @tparam K key type of a tree node.
      * @tparam V value type of a tree node.
-     * @tparam TComparator Comparator type (must have a static member function bool LessThan(const K& a, const K& b)
+     * @tparam TComparator Comparator type for comparing the keys
+     * (must have a static member function bool LessThan(const K& a, const K& b)
      * where K is the key type. For example @see DefaultComparator, @see ReverseComparator.
     */
     template <typename K, typename V, typename TComparator = DefaultComparator<K> >

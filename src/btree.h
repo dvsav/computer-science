@@ -12,6 +12,23 @@
 
 namespace cs
 {
+    /**
+     * @class BTree
+     * 
+     * @brief Class representing a B-Tree - a data structure facilitating search of key-value pairs
+     * and generalizing the idea of binary search tree (BST). Each node of a BST divides (separates)
+     * the elements of its subtrees into two groups: those less than the node and those greater than
+     * the node. So, BST node contains exactly one such separator. In contrast, a B-Tree node contains
+     * more than one separator (in a sorted collection) and more than two subtrees.
+     * 
+     * @tparam Order the order of B-Tree: the max number of keys (separators) in a tree node is (Order - 1),
+     * the max number of subtrees of a tree node is Order.
+     * @tparam K type of a key which uniquely identifies a tree node.
+     * @tparam V value of a tree node.
+     * @tparam TComparator comparator type for comparing the keys
+     * (must have a static member function bool LessThan(const K& a, const K& b)
+     * where K is the key type. For example @see DefaultComparator, @see ReverseComparator.
+     */
     template <size_t Order, typename K, typename V, typename TComparator = DefaultComparator<K> >
     class BTree
     {
@@ -56,6 +73,27 @@ namespace cs
         }
 
     public:
+        /**
+         * @brief Returns a pointer to the root of the tree.
+         * @return Pointer to the root of the tree.
+         */
+        tree_node* Root() { return root; }
+        /**
+         * @brief Returns a pointer to the root of the tree.
+         * @return Pointer to the root of the tree.
+         */
+        const tree_node* Root() const { return root; }
+
+        /**
+         * @brief Searches for a @p key in the B-Tree.
+         * Complexity: O( log(M, N) * log(M) ) where M is the max number of keys
+         * in a tree node, N is the total number of elements in the tree.
+         * 
+         * @param key - the key to search for.
+         * @return iterator containing the pointer to a tree node containing the
+         * key searched for and the index of that key inside the node in case the key is found.
+         * In case the key is not found, a default iterator is returned.
+         */
         iterator find(const K& key)
         {
             if(root->IsEmpty())
@@ -77,12 +115,30 @@ namespace cs
             return iterator();
         }
 
+        /**
+         * @brief Returns a reference to a value of a tree node
+         * having specified @p key. If such node or key doesn't exists,
+         * it's insersted in the tree.
+         * Complexity: O( log(M, N) * log(M) ) where M is the max number of keys
+         * in a tree node, N is the total number of elements in the tree.
+         * @param key
+         * @return reference to value corresponding to specified @p key.
+         */
         V& operator[](const K& key)
         {
             iterator it = insert(key, V()).first;
             return it.value();
         }
 
+        /**
+         * @brief Returns a reference to a value of a tree node
+         * having specified @p key. If such node or key doesn't exists,
+         * an exception is thrown.
+         * Complexity: O( log(M, N) * log(M) ) where M is the max number of keys
+         * in a tree node, N is the total number of elements in the tree.
+         * @param key
+         * @return reference to value corresponding to specified @p key.
+         */
         V& at(const K& key)
         {
             iterator it = find(key);
@@ -90,12 +146,46 @@ namespace cs
             return it.value();
         }
 
+        /**
+         * @brief Returns a reference to a value of a tree node
+         * having specified @p key. If such node or key doesn't exists,
+         * an exception is thrown.
+         * Complexity: O( log(M, N) * log(M) ) where M is the max number of keys
+         * in a tree node, N is the total number of elements in the tree.
+         * @param key
+         * @return reference to value corresponding to specified @p key.
+         */
+        const V& at(const K& key) const
+        {
+            iterator it = find(key);
+            Requires::That(it, FUNCTION_INFO);
+            return it.value();
+        }
+
+        /**
+         * @brief Inserts a new key-value pair in the tree using specified @p key and @p value
+         * and returns a pair (iterator-pointing-to-inserted-pair, true).
+         * If such pair already exists, no action is taken and function returns
+         * a pair (iterator-pointing-to-existing-pair, false).
+         * Complexity: O( log(M, N) * log(M) ) where M is the max number of keys
+         * in a tree node, N is the total number of elements in the tree.
+         * @param key
+         * @param value
+         * @return a pair in which the first element is the iterator pointing to the key-value pair
+         * and the second element is a boolean flag indicating whether the insertion was successful.
+         * If a new key-value pair is created, fuction returns (pointer-to-new-pair, true).
+         * If there is an existing pair which has specified @p key,
+         * function returns (pointer-to-existing-pair, false).
+         */
         std::pair<iterator, bool> insert(
             const K& key,
             const V& value)
         {
             tree_node* current_node = root;
 
+            // Find a leaf to insert the new key-value pair into.
+            // If there is an existing key-value pair with specified key, don't do the insertion.
+            // If a leaf to insert to is overfilled, go to next step (throw up a median key from that node).
             while (true)
             {
                 size_t index_of_item = 0;
@@ -146,34 +236,44 @@ namespace cs
                 break;
             }
 
+            // Throw up a median key from the overfilled leaf node splitting the node into two new nodes.
+            // Continue throwing up median keys until either the current node is not overfilled or the
+            // current node is the root.
             while (true)
             {
-                // throw up one of the elements of current_node
                 tree_node* left = nullptr;
                 tree_node* right = nullptr;
                 tree_node* parent = current_node->Parent();
+                // Extract median key (thrown_element) from the overfilled node
+                // and split it into two new nodes (left and right)
                 std::pair<K, V> thrown_element = current_node->Split(&left, &right);
                 delete current_node;
 
                 if (parent)
                 {
+                    // Remove the deleted node from its former parent
                     parent->ReplaceChild(current_node, nullptr);
 
+                    // Find the position in the parent node at which to put the thrown key
                     size_t index_of_item = parent->FindItem(/*key*/ thrown_element.first).first;
 
+                    // Insert the thrown key into the parent node
                     parent->InsertItem(
                         /*index*/ index_of_item,
                         /*key*/ thrown_element.first,
                         /*value*/ thrown_element.second);
 
+                    // Add the 'left' node as a child to the parent
                     parent->setChild(
                         /*index*/ index_of_item,
                         /*child*/ left);
 
+                    // Add the 'right' node as a child to the parent
                     parent->setChild(
                         /*index*/ index_of_item + 1,
                         /*child*/ right);
 
+                    // If the parent is now overfilled, proceed with this loop (throwing up a median key)
                     if (parent->IsOverfilled())
                     {
                         current_node = parent;
@@ -188,6 +288,8 @@ namespace cs
                 }
                 else
                 {
+                    // If current node (which is already split) is the root, create
+                    // a new root consisting of just one key and two children (left and right)
                     root = new tree_node(/*parent*/ nullptr);
 
                     root->InsertItem(
@@ -210,25 +312,36 @@ namespace cs
             }
         }
 
+        /**
+         * @brief Removes from the tree a key-value pair pointed to by specified iterator @p it.
+         * Complexity: O( log(M, N) * log(M) ) where M is the max number of keys
+         * in a tree node, N is the total number of elements in the tree.
+         * @param it - iterator pointing to the key-value pair to be removed.
+         * @return true if iterator @p it points to an existing key-value pair, false otherwise.
+         */
         bool remove(const iterator& it)
         {
             if (!it)
                 return false;
 
             tree_node* node_to_delete_from = it.node;
-            size_t index_of_deleted_item = it.index;
+            size_t index_of_deleted_item = it.Index();
 
             tree_node* node_to_rebalance = nullptr;
 
             if (node_to_delete_from->IsLeaf())
             {
+                // If the node to delete from is a leaf, remove the key from it...
                 node_to_delete_from->RemoveItem(index_of_deleted_item);
 
+                // ...after which the node may become underfilled,
+                // so we'll need to rebalance the tree to make it filled again.
                 node_to_rebalance = node_to_delete_from;
             }
             else
             {
-                // Find a replacement for the deleted item
+                // If the node to delete from is an internal node,
+                // find a replacement for the deleted key
 
                 // Try to find in-order predecessor of the deleted item (rightmost node in the left subtree)
                 iterator in_order_predecessor = node_to_delete_from->InOrderPredecessor(index_of_deleted_item);
@@ -240,12 +353,14 @@ namespace cs
                     // Replace
                     node_to_delete_from->setItem(
                         /*index*/ index_of_deleted_item,
-                        /*item*/ in_order_predecessor.node->getItem(in_order_predecessor.index)
+                        /*item*/ in_order_predecessor.node->getItem(in_order_predecessor.Index())
                     );
 
                     // Remove the replacement from its leaf node
-                    in_order_predecessor.node->RemoveItem(in_order_predecessor.index);
+                    in_order_predecessor.node->RemoveItem(in_order_predecessor.Index());
 
+                    // After the deletion the 'in-order predecessor node' might become underfilled,
+                    // so we'll need to rebalance the tree to make it filled again.
                     node_to_rebalance = in_order_predecessor.node;
                 }
                 else
@@ -262,23 +377,23 @@ namespace cs
                         // Replace
                         node_to_delete_from->setItem(
                             /*index*/ index_of_deleted_item,
-                            /*item*/ in_order_successor.node->getItem(in_order_successor.index)
+                            /*item*/ in_order_successor.node->getItem(in_order_successor.Index())
                         );
 
                         // Remove the replacement from its leaf node
-                        in_order_successor.node->RemoveItem(in_order_successor.index);
+                        in_order_successor.node->RemoveItem(in_order_successor.Index());
 
+                        // After the deletion the 'in-order successor node' might become underfilled,
+                        // so we'll need to rebalance the tree to make it filled again.
                         node_to_rebalance = in_order_successor.node;
                     }
                     else
                     {
-                        // Replacement not found, remove 
-                        node_to_delete_from->RemoveItem(index_of_deleted_item);
-
-                        node_to_rebalance = node_to_delete_from;
+                        // A node is either a leaf or it has an in-order predecessor
+                        // or it has an in-order successor, so we shouldn't have gotten here
+                        Requires::That(false, FUNCTION_INFO);
                     }
                 }
-
             }
 
             // Rebalance the tree if needed
@@ -287,11 +402,23 @@ namespace cs
             return true;
         }
 
+        /**
+         * @brief Removes a key-value pair having specified @p key from the tree.
+         * Complexity: O( log(M, N) * log(M) ) where M is the max number of keys
+         * in a tree node, N is the total number of elements in the tree.
+         * @param key
+         * @return true if a key-value pair with specified @p key was
+         * found in the tree and false otherwise.
+         */
         bool remove(const K& key)
         {
             return remove(find(key));
         }
 
+        /**
+         * @brief Prints out the tree in a pretty form.
+         * @param os - output stream.
+         */
         void print(std::ostream& os) const
         {
             PrintTree</*IsRoot*/ true, /*IsLast*/ false>(os, root);
@@ -430,9 +557,9 @@ namespace cs
 
                 // Remove the separator from the parent along with its empty right child (the parent loses an element)
                 if (separator.node->ItemsNumber() == 1)
-                    separator.node->setChild(separator.index, nullptr);
-                separator.node->setChild(separator.index + 1, nullptr);
-                separator.node->RemoveItem(separator.index);
+                    separator.node->setChild(separator.Index(), nullptr);
+                separator.node->setChild(separator.Index() + 1, nullptr);
+                separator.node->RemoveItem(separator.Index());
                 delete right_node;
 
                 // If the parent is the root and now has no elements, then free it and make the merged node the new root (tree becomes shallower)
@@ -462,6 +589,15 @@ namespace cs
         }
     };
 
+    /**
+     * @class iterator
+     * @brief Class representing an iterator pointing to a key-value pair in a B-Tree.
+     * @see BTree
+     * @tparam Order the order of B-Tree.
+     * @tparam K type of a key which uniquely identifies a tree node.
+     * @tparam V value of a tree node.
+     * @tparam TComparator comparator type for comparing the keys.
+     */
     template <size_t Order, typename K, typename V, typename TComparator>
     class BTree<Order, K, V, TComparator>::iterator
     {
@@ -487,20 +623,18 @@ namespace cs
     public:
         const std::pair<K, V>& operator*() const { return node->getItem(index); }
 
+        BTreeNode* Node() { return node; }
+        const BTreeNode* Node() const { return node; }
+
+        size_t Index() const { return index; }
+
         const K& key() const { return node->getItem(index).first; }
 
         V& value() { return node->getItem(index).second; }
         const V& value() const { return node->getItem(index).second; }
 
-        bool operator==(const iterator& other)
-        {
-            return node == other.node && index == other.index;
-        }
-
-        bool operator!=(const iterator& other)
-        {
-            return node != other.node || index != other.index;
-        }
+        bool operator==(const iterator& other) const { return node == other.node && index == other.index; }
+        bool operator!=(const iterator& other) const { return node != other.node || index != other.index; }
 
         operator bool() const { return node != nullptr; }
 
@@ -508,16 +642,41 @@ namespace cs
         void setKey(const K& key) { node->getItem(index).first = key; }
     };
 
+    /**
+     * @class BTreeNode
+     * @brief Class representing a node of a B-Tree.
+     * May contain multiple keys (in a sorted collection) and children/subtrees.
+     * @see BTree
+     * @tparam Order the order of B-Tree.
+     * @tparam K type of a key which uniquely identifies a tree node.
+     * @tparam V value of a tree node.
+     * @tparam TComparator comparator type for comparing the keys.
+     */
     template <size_t Order, typename K, typename V, typename TComparator>
     class BTree<Order, K, V, TComparator>::BTreeNode
     {
         friend class BTree;
 
     public:
+        /**
+         * @brief Returns the order of B-Tree.
+         */
         static constexpr size_t order() { return Order; }
+        /**
+         * @brief Returns minimal number of keys in an internal node.
+         */
         static constexpr size_t MinItems() { return CeilDivision<Order, 2>::value - 1; }
+        /**
+         * @brief Returns maximal number of keys in a node.
+         */
         static constexpr size_t MaxItems() { return Order - 1; }
+        /**
+         * @brief Returns minimal number of children in an internal node.
+         */
         static constexpr size_t MinChildren() { return MinItems() + 1; }
+        /**
+         * @brief Returns maximal number of children in a node.
+         */
         static constexpr size_t MaxChildren() { return MaxItems() + 1; }
 
     private:
@@ -539,9 +698,18 @@ namespace cs
         BTreeNode& operator=(const BTreeNode&) = delete;
 
     public:
+        /**
+         * @brief Returns a pointer to the parent of this node.
+         */
         BTreeNode* Parent() { return parent; }
+        /**
+         * @brief Returns a pointer to the parent of this node.
+         */
         const BTreeNode* Parent() const { return parent; }
 
+        /**
+         * @brief Returns the number of keys in the node.
+         */
         size_t ItemsNumber() const { return items.size(); }
         std::pair<K, V>& getItem(size_t index) { return items[index]; }
         const std::pair<K, V>& getItem(size_t index) const { return items[index]; }
@@ -551,6 +719,9 @@ namespace cs
         V& Value(size_t index) { return getItem(index).second; }
         const V& Value(size_t index) const { return getItem(index).second; }
 
+        /**
+         * @brief Returns the number of children of the node.
+         */
         size_t ChildrenNumber() const { return children.size(); }
         BTreeNode* getChild(size_t index) { return children[index]; }
         const BTreeNode* getChild(size_t index) const { return children[index]; }
