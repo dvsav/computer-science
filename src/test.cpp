@@ -1,3 +1,4 @@
+#include "binary_search.h"    // for cs::BinarySearch
 #include "binary_tree.h"      // for cs::BinaryTreeNode
 #include "btree.h"            // for cs::Btree
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
@@ -108,6 +109,20 @@ TEST_CASE("Vectors are sorted", "[sort]")
     {
         cs::heap_sort<std::vector<int>::iterator, ReverseComparator<int> >(vec.begin(), vec.end());
         REQUIRE(vec == descen_vec);
+    }
+}
+
+TEST_CASE("BinarySearch", "[misc]")
+{
+    std::vector<int> sorted_vec{ -10, -6, 1, 2, 3, 5, 7, 8, 8, 15, 48 };
+
+    for (int i = sorted_vec[0] - 2; i <= sorted_vec[0] + 2; i++)
+    {
+        std::pair<size_t, bool> search_result = cs::BinarySearch(sorted_vec, i);
+        size_t lower_bound = static_cast<size_t>(std::lower_bound(sorted_vec.begin(), sorted_vec.end(), i) - sorted_vec.begin());
+        auto find_result = std::find(sorted_vec.begin(), sorted_vec.end(), i);
+        REQUIRE(search_result.first == lower_bound);
+        REQUIRE((find_result != sorted_vec.end()) == search_result.second);
     }
 }
 

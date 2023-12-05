@@ -1,13 +1,14 @@
 #pragma once
 
-#include "requires.h"  // for Requires
-#include "utility.h"   // for DefaultComparator
+#include "binary_search.h" // for cs::BinarySearch
+#include "requires.h"      // for Requires
+#include "utility.h"       // for DefaultComparator
 
-#include <algorithm>   // for std::find_if
-#include <cmath>       // for ceilf
-#include <tuple>       // for std::tie
-#include <vector>      // for std:::vector
-#include <utility>     // for std::pair
+#include <algorithm>       // for std::binary_search
+#include <cmath>           // for ceilf
+#include <tuple>           // for std::tie
+#include <vector>          // for std:::vector
+#include <utility>         // for std::pair
 
 namespace cs
 {
@@ -597,15 +598,11 @@ namespace cs
 
         std::pair<size_t, bool> FindItem(const K& key) const
         {
-            for (size_t i = 0; i < ItemsNumber(); i++)
-            {
-                if (TComparator::LessThan(key, Key(i)))
-                    return std::make_pair(i, /*found*/ false);
-                
-                if (TComparator::EqualTo(Key(i), key))
-                    return std::make_pair(i, /*found*/ true);
-            }
-            return std::make_pair(ItemsNumber(), /*found*/ false);
+            return BinarySearch<std::pair<K, V>, K>(
+                /*sortedArray*/ items,
+                /*target*/ key,
+                /*extractKey*/ [](const std::pair<K, V>& x) { return x.first; }
+            );
         }
 
         // Returns the rightmost item of the left subtree of 'this' node
