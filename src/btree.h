@@ -711,32 +711,69 @@ namespace cs
          * @brief Returns the number of keys in the node.
          */
         size_t ItemsNumber() const { return items.size(); }
+        /**
+         * @brief Returns the index-th key-value pair of the tree node.
+         * @param index of a key-value pair of the tree node.
+         */
         std::pair<K, V>& getItem(size_t index) { return items[index]; }
+        /**
+         * @brief Returns the index-th key-value pair of the tree node.
+         * @param index of a key-value pair of the tree node.
+         */
         const std::pair<K, V>& getItem(size_t index) const { return items[index]; }
 
+        /**
+         * @brief Returns the index-th key of the tree node.
+         * @param index of a key of the tree node.
+         */
         const K& Key(size_t index) const { return getItem(index).first; }
 
+        /**
+         * @brief Returns the index-th value of the tree node.
+         * @param index of a value of the tree node.
+         */
         V& Value(size_t index) { return getItem(index).second; }
+        /**
+         * @brief Returns the index-th value of the tree node.
+         * @param index of a value of the tree node.
+         */
         const V& Value(size_t index) const { return getItem(index).second; }
 
         /**
          * @brief Returns the number of children of the node.
          */
         size_t ChildrenNumber() const { return children.size(); }
+        /**
+         * @brief Returns the pointer to an index-th child node.
+         * @param index of a child node.
+         */
         BTreeNode* getChild(size_t index) { return children[index]; }
+        /**
+         * @brief Returns the pointer to an index-th child node.
+         * @param index of a child node.
+         */
         const BTreeNode* getChild(size_t index) const { return children[index]; }
 
     public:
+        /**
+         * @brief Returns true if the node doesn't contain any keys.
+         */
         bool IsEmpty() const
         {
             return ItemsNumber() == 0;
         }
 
+        /**
+         * @brief Returns true if the node doesn't have a parent.
+         */
         bool IsRoot() const
         {
             return parent == nullptr;
         }
 
+        /**
+         * @brief Returns true if the node doesn't have any child nodes.
+         */
         bool IsLeaf() const
         {
             for (size_t i = 0; i < ChildrenNumber(); i++)
@@ -747,26 +784,47 @@ namespace cs
             return true;
         }
 
+        /**
+         * @brief Returns true if the node contains the maximum possible number of keys
+         * and has no room for new keys.
+         */
         bool IsFull() const
         {
             return (ItemsNumber() >= MaxItems());
         }
 
+        /**
+         * @brief Returns true if the node contains more than the maximum possible number of keys
+         * and has to be split.
+         */
         bool IsOverfilled() const
         {
             return (ItemsNumber() > MaxItems());
         }
 
+        /**
+        * @brief Returns true if the node contains less than the minimum possible number of keys
+        * and has to be rebalanced.
+        */
         bool IsUnderfilled() const
         {
             return !IsRoot() && (ItemsNumber() < MinItems());
         }
 
+        /**
+        * @brief Returns true if the node contains more than the minimum possible number of keys
+        * and can be a source of kes for underfilled nodes.
+        */
         bool HasAvailableItems() const
         {
             return ItemsNumber() > MinItems();
         }
 
+        /**
+        * @brief Searches for a key inside the node. If the key is found, returns a pair
+        * (index-of-key, true), otherwise returns a pair (index-at-which-the-key-would-be-inserted, false).
+        * @param key - key to be searched for.
+        */
         std::pair<size_t, bool> FindItem(const K& key) const
         {
             return BinarySearch<std::pair<K, V>, K>(
@@ -776,7 +834,12 @@ namespace cs
             );
         }
 
-        // Returns the rightmost item of the left subtree of 'this' node
+        /**
+         * @brief Returns the rightmost item of the left subtree of 'this' node's index'th key.
+         * @param index - index of the key whose in-order predecessor is to be found.
+         * @return iterator pointing to the key-value pair which is the in-order predecessor of
+         * specified key of the node.
+         */
         BTree::iterator InOrderPredecessor(size_t index) const
         {
             BTreeNode* current_node = children[index];
@@ -912,6 +975,8 @@ namespace cs
             }
         }
 
+        // Removes key-value pair (separator) specified by its index 
+        // as well as its respective children.
         void RemoveItem(size_t index)
         {
             Requires::That(index < ItemsNumber(), FUNCTION_INFO);
