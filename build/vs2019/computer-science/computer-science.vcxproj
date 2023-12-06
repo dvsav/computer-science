@@ -139,7 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\binary_search.h" />
     <ClInclude Include="..\..\..\src\binary_tree.h" />
+    <ClInclude Include="..\..\..\src\btree.h" />
     <ClInclude Include="..\..\..\src\conditional_compilation.h" />
     <ClInclude Include="..\..\..\src\graph.h" />
     <ClInclude Include="..\..\..\src\graph_algorithms.h" />

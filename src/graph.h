@@ -592,6 +592,7 @@ namespace cs
     /**
      * @class Graph
      * @brief Class representing a graph.
+     * Implemented as adjacency list + edge list.
      *
      * A graph consists of a set of vertices connected by edges.
      * Graph can be treated as directed or undirected,
