@@ -838,7 +838,7 @@ namespace cs
          * @brief Returns the rightmost item of the left subtree of 'this' node's index'th key.
          * @param index - index of the key whose in-order predecessor is to be found.
          * @return iterator pointing to the key-value pair which is the in-order predecessor of
-         * specified key of the node.
+         * the specified key of the node. Returns a default iterator if the node is a leaf.
          */
         BTree::iterator InOrderPredecessor(size_t index) const
         {
@@ -855,7 +855,12 @@ namespace cs
             }
         }
 
-        // Returns the leftmost item of the right subtree of 'this' node
+        /**
+         * @brief Returns the leftmost item of the right subtree of 'this' node's index'th key.
+         * @param index - index of the key whose in-order successor is to be found.
+         * @return iterator pointing to the key-value pair which is the in-order successor of
+         * the specified key of the node. Returns a default iterator if the node is a leaf.
+         */
         BTree::iterator InOrderSuccessor(size_t index) const
         {
             BTreeNode* current_node = children[index + 1];
@@ -871,6 +876,13 @@ namespace cs
             }
         }
 
+        /**
+         * @brief Finds the left sibling of 'this' node
+         * (child of the same parent located to the left of 'this' node).
+         * @param left_sibling - [output] pointer to a memory location to which
+         * a pointer to the left sibling node will be put.
+         * @return iterator pointing to a separator key, separating 'this' node and its left sibling.
+         */
         BTree::iterator LeftSibling(BTreeNode** left_sibling) const
         {
             if (this->IsRoot())
@@ -896,6 +908,13 @@ namespace cs
             }
         }
 
+        /**
+         * @brief Finds the right sibling of 'this' node
+         * (child of the same parent located to the right of 'this' node).
+         * @param right_sibling - [output] pointer to a memory location to which
+         * a pointer to the right sibling node will be put.
+         * @return iterator pointing to a separator key, separating 'this' node and its right sibling.
+         */
         BTree::iterator RightSibling(BTreeNode** right_sibling) const
         {
             if (this->IsRoot())
