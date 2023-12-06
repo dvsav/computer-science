@@ -621,21 +621,58 @@ namespace cs
         {}
 
     public:
+        /**
+         * @brief Dereferencing operator.
+         * @return Reference to a key-value pair.
+         */
         const std::pair<K, V>& operator*() const { return node->getItem(index); }
 
+        /**
+         * @brief Returns a pointer to the B-Tree node containing the key-value pair
+         * pointed to by 'this' iterator.
+         */
         BTreeNode* Node() { return node; }
+        /**
+         * @brief Returns a pointer to the B-Tree node containing the key-value pair
+         * pointed to by 'this' iterator.
+         */
         const BTreeNode* Node() const { return node; }
 
+        /**
+         * @brief Returns the index of the key inside the node.
+         */
         size_t Index() const { return index; }
 
+        /**
+         * @brief Returns the key in a key-value pair of the B-Tree node
+         * pointed to by 'this' iterator.
+         */
         const K& key() const { return node->getItem(index).first; }
 
+        /**
+         * @brief Returns the value in a key-value pair of the B-Tree node
+         * pointed to by 'this' iterator.
+         */
         V& value() { return node->getItem(index).second; }
+        /**
+        * @brief Returns the value in a key-value pair of the B-Tree node
+        * pointed to by 'this' iterator.
+        */
         const V& value() const { return node->getItem(index).second; }
 
+        /**
+        * @brief Equality comparison operator.
+        */
         bool operator==(const iterator& other) const { return node == other.node && index == other.index; }
+        /**
+        * @brief Inequality comparison operator.
+        */
         bool operator!=(const iterator& other) const { return node != other.node || index != other.index; }
 
+        /**
+        * @brief Cast-to-bool operator. Returns true if 'this' iterator points to an
+        * existing key-value pair in an existing B-Tree node.
+        */
         operator bool() const { return node != nullptr; }
 
     private:
