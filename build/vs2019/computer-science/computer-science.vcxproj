@@ -151,6 +151,7 @@
     <ClInclude Include="..\..\..\src\hash_map.h" />
     <ClInclude Include="..\..\..\src\heap.h" />
     <ClInclude Include="..\..\..\src\merge_sort.h" />
+    <ClInclude Include="..\..\..\src\prime.h" />
     <ClInclude Include="..\..\..\src\quick_sort.h" />
     <ClInclude Include="..\..\..\src\requires.h" />
     <ClInclude Include="..\..\..\src\simple_sorts.h" />

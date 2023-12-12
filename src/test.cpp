@@ -3,6 +3,7 @@
 #include "btree.h"            // for cs::Btree
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
+#include "hash_map.h"         // for cs::HashMap
 #include "heap.h"             // for cs::Heap
 #include "merge_sort.h"       // for cs::merge_sort
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
@@ -763,4 +764,57 @@ TEST_CASE("BTree", "[btree]")
             REQUIRE(!btree.find(i));
         }
     }
+}
+
+TEST_CASE("HashMap", "[hash]")
+{
+    using key_type = int;
+    using value_type = std::string;
+
+    cs::HashMap<key_type, value_type> hashMap;
+
+    auto printInfo = [&hashMap]()
+    {
+        std::cout << "elements = " << hashMap.size() << " buckets = " << hashMap.buckets_number() << " load = " << hashMap.load() << std::endl;
+        hashMap.visit_bucket_sizes(
+            [](size_t size)
+            {
+                std::cout << size << ' ';
+            });
+        std::cout << std::endl;
+    };
+
+    hashMap.insert(1, "one");
+    printInfo();
+
+    hashMap.insert(2, "two");
+    printInfo();
+
+    hashMap.insert(3, "three");
+    printInfo();
+
+    hashMap.insert(4, "four");
+    printInfo();
+
+    hashMap.insert(5, "five");
+    printInfo();
+
+    hashMap.insert(6, "six");
+    printInfo();
+
+    hashMap.insert(7, "seven");
+    printInfo();
+
+    hashMap.insert(8, "eight");
+    printInfo();
+
+    hashMap.insert(9, "nine");
+    printInfo();
+
+    hashMap.visit(
+        [](const key_type& key, const value_type& value)
+        {
+            std::cout << key << ' ' << value << std::endl;
+        }
+    );
 }
