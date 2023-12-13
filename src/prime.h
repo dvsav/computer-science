@@ -23,4 +23,14 @@ namespace cs
                 return x;
         }
     }
+
+    inline int PreviousPrime(int x)
+    {
+        while (x > 1)
+        {
+            if (IsPrime(--x))
+                return x;
+        }
+        return 0;
+    }
 } // namespace cs

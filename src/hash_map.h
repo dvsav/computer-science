@@ -64,7 +64,7 @@ namespace cs
 
         V& operator[](const K& key)
         {
-            std::pair<bucket_type::iterator, bool> result = insert(key, V{});
+            std::pair<typename bucket_type::iterator, bool> result = insert(key, V{});
             return result.first->second;
         }
 
@@ -81,30 +81,14 @@ namespace cs
             if (load() >= 1.0f)
             {
                 // load too high => increase the number of buckets
-                std::vector<bucket_type>* new_buckets = new std::vector<bucket_type>(
-                    /*count*/ NextPrime(buckets->size()),
-                    /*value*/ bucket_type{});
+                resize(NextPrime(buckets->size()));
 
-                // copy elements from old buckets to new ones
-                for (bucket_type& bucket : *buckets)
-                {
-                    for (const std::pair<K, V>& element : bucket)
-                    {
-                        size_t index = hash(/*key*/ element.first) % new_buckets->size();
-                        (*new_buckets)[index].emplace_front(element);
-                    }
-                }
                 // insert the new value
-                size_t index = hash(key) % new_buckets->size();
-                (*new_buckets)[index].emplace_front(std::make_pair(key, value));
-
-                // delete old buckets
-                delete buckets;
-                // update buckets
-                buckets = new_buckets;
+                size_t index = hash(key) % buckets->size();
+                (*buckets)[index].emplace_front(std::make_pair(key, value));
 
                 ++nElements;
-                return std::make_pair((*new_buckets)[index].begin(), true);
+                return std::make_pair((*buckets)[index].begin(), true);
             }
             else
             {
@@ -123,9 +107,25 @@ namespace cs
             {
                 pBucket->erase(found);
                 --nElements;
+
+                if (load() < 0.5f)
+                {
+                    // load too low => decrease the number of buckets
+                    size_t newSize = PreviousPrime(buckets->size());
+                    if (newSize > 0)
+                        resize(newSize);
+                }
+
                 return true;
             }
             return false;
+        }
+
+        void clear()
+        {
+            delete buckets;
+            nElements = 0;
+            buckets = new std::vector<bucket_type>(2, bucket_type{});
         }
 
         bool contains(const K& key) const
@@ -174,7 +174,7 @@ namespace cs
 
         typename bucket_type::iterator find(
             const K& key,
-            typename bucket_type** pBucket)
+            bucket_type** pBucket)
         {
             size_t index = hash(key) % buckets->size();
             bucket_type& bucket = (*buckets)[index];
@@ -191,7 +191,7 @@ namespace cs
 
         typename bucket_type::const_iterator find(
             const K& key,
-            typename const bucket_type** pBucket) const
+            const bucket_type** pBucket) const
         {
             size_t index = hash(key) % buckets->size();
             const bucket_type& bucket = (*buckets)[index];
@@ -204,6 +204,29 @@ namespace cs
                 {
                     return element.first == key;
                 });
+        }
+
+        void resize(size_t newSize)
+        {
+            // allocate new buckets
+            std::vector<bucket_type>* new_buckets = new std::vector<bucket_type>(
+                /*count*/ newSize,
+                /*value*/ bucket_type{});
+
+            // copy elements from old buckets to new ones
+            for (bucket_type& bucket : *buckets)
+            {
+                for (const std::pair<K, V>& element : bucket)
+                {
+                    size_t index = hash(/*key*/ element.first) % new_buckets->size();
+                    (*new_buckets)[index].emplace_front(element);
+                }
+            }
+
+            // delete old buckets
+            delete buckets;
+            // update buckets
+            buckets = new_buckets;
         }
     };
 } // namespace cs

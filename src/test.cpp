@@ -772,49 +772,117 @@ TEST_CASE("HashMap", "[hash]")
     using value_type = std::string;
 
     cs::HashMap<key_type, value_type> hashMap;
+    REQUIRE(hashMap.size() == 0);
 
-    auto printInfo = [&hashMap]()
-    {
-        std::cout << "elements = " << hashMap.size() << " buckets = " << hashMap.buckets_number() << " load = " << hashMap.load() << std::endl;
-        hashMap.visit_bucket_sizes(
-            [](size_t size)
-            {
-                std::cout << size << ' ';
-            });
-        std::cout << std::endl;
-    };
+    //auto printInfo = [&hashMap]()
+    //{
+    //    std::cout << "elements = " << hashMap.size() << " buckets = " << hashMap.buckets_number() << " load = " << hashMap.load() << std::endl;
+    //    hashMap.visit_bucket_sizes(
+    //        [](size_t size)
+    //        {
+    //            std::cout << size << ' ';
+    //        });
+    //    std::cout << std::endl;
+
+    //    hashMap.visit(
+    //        [](const key_type& key, const value_type& value)
+    //        {
+    //            std::cout << key << " --> " << value << ' ';
+    //        }
+    //    );
+    //    std::cout << std::endl;
+    //    std::cout << std::endl;
+    //};
 
     hashMap.insert(1, "one");
-    printInfo();
+    REQUIRE(hashMap.size() == 1);
+    REQUIRE(hashMap.at(1) == "one");
+    REQUIRE(hashMap[1] == "one");
+    //printInfo();
 
-    hashMap.insert(2, "two");
-    printInfo();
+    hashMap[2] = "two";
+    REQUIRE(hashMap.size() == 2);
+    REQUIRE(hashMap.at(2) == "two");
+    REQUIRE(hashMap[2] == "two");
+    //printInfo();
 
     hashMap.insert(3, "three");
-    printInfo();
+    REQUIRE(hashMap.size() == 3);
+    REQUIRE(hashMap.at(3) == "three");
+    REQUIRE(hashMap[3] == "three");
+    //printInfo();
 
-    hashMap.insert(4, "four");
-    printInfo();
+    hashMap[4] = "four";
+    REQUIRE(hashMap.size() == 4);
+    REQUIRE(hashMap.at(4) == "four");
+    REQUIRE(hashMap[4] == "four");
+    //printInfo();
 
     hashMap.insert(5, "five");
-    printInfo();
+    REQUIRE(hashMap.size() == 5);
+    REQUIRE(hashMap.at(5) == "five");
+    REQUIRE(hashMap[5] == "five");
+    //printInfo();
 
-    hashMap.insert(6, "six");
-    printInfo();
+    hashMap[6] = "six";
+    REQUIRE(hashMap.size() == 6);
+    REQUIRE(hashMap.at(6) == "six");
+    REQUIRE(hashMap[6] == "six");
+    //printInfo();
 
     hashMap.insert(7, "seven");
-    printInfo();
+    REQUIRE(hashMap.size() == 7);
+    REQUIRE(hashMap.at(7) == "seven");
+    REQUIRE(hashMap[7] == "seven");
+    //printInfo();
 
-    hashMap.insert(8, "eight");
-    printInfo();
+    hashMap[8] = "eight";
+    REQUIRE(hashMap.size() == 8);
+    REQUIRE(hashMap.at(8) == "eight");
+    REQUIRE(hashMap[8] == "eight");
+    //printInfo();
 
     hashMap.insert(9, "nine");
-    printInfo();
+    REQUIRE(hashMap.size() == 9);
+    REQUIRE(hashMap.at(9) == "nine");
+    REQUIRE(hashMap[9] == "nine");
+    //printInfo();
 
-    hashMap.visit(
-        [](const key_type& key, const value_type& value)
-        {
-            std::cout << key << ' ' << value << std::endl;
-        }
-    );
+    // --- erase ---
+
+    hashMap.erase(9);
+    REQUIRE(hashMap.size() == 8);
+    //printInfo();
+
+    hashMap.erase(8);
+    REQUIRE(hashMap.size() == 7);
+    //printInfo();
+
+    hashMap.erase(7);
+    REQUIRE(hashMap.size() == 6);
+    //printInfo();
+
+    hashMap.erase(6);
+    REQUIRE(hashMap.size() == 5);
+    //printInfo();
+
+    hashMap.erase(5);
+    REQUIRE(hashMap.size() == 4);
+    //printInfo();
+
+    hashMap.erase(4);
+    REQUIRE(hashMap.size() == 3);
+    //printInfo();
+
+    hashMap.erase(3);
+    REQUIRE(hashMap.size() == 2);
+    //printInfo();
+
+    hashMap.erase(2);
+    REQUIRE(hashMap.size() == 1);
+    //printInfo();
+
+    hashMap.erase(1);
+    REQUIRE(hashMap.size() == 0);
+    //printInfo();
 }
