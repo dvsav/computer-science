@@ -30,7 +30,7 @@ namespace cs
      * where K is the key type. For example @see DefaultComparator, @see ReverseComparator.
      */
     template <size_t Order, typename K, typename V, typename TComparator = DefaultComparator<K> >
-    class BTree
+    class BTree final
     {
         // Check that B-Tree order is greater than 2 (otherwise it won't be possible to split a tree node)
         static_assert(Order > 2, "Order must be greater than 2");
@@ -78,6 +78,7 @@ namespace cs
          * @return Pointer to the root of the tree.
          */
         tree_node* Root() { return root; }
+
         /**
          * @brief Returns a pointer to the root of the tree.
          * @return Pointer to the root of the tree.
