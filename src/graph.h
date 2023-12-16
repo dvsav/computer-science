@@ -604,7 +604,7 @@ namespace cs
      * @tparam TLen The data type of edge length.
      */
     template<typename TId = int, typename TLen = int>
-    class Graph
+    class Graph final
     {
     public:
         using vertex_type = Vertex<TId, TLen>;
