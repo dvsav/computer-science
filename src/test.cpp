@@ -1,5 +1,6 @@
 #include "binary_search.h"    // for cs::BinarySearch
 #include "binary_tree.h"      // for cs::BinaryTreeNode
+#include "bloom_filter.h"     // for cs::BloomFilter
 #include "btree.h"            // for cs::Btree
 #include "graph.h"            // for cs::Graph, cs::Vertex, cs::Edge
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
@@ -885,4 +886,50 @@ TEST_CASE("HashMap", "[hash]")
     hashMap.erase(1);
     REQUIRE(hashMap.size() == 0);
     //printInfo();
+}
+
+TEST_CASE("BloomFilter", "[bloom]")
+{
+    const unsigned int NBits = 59;
+    const unsigned int NHashes = 3;
+
+    cs::BloomFilter<std::string, NBits, NHashes> bloomFilter;
+
+    bloomFilter.insert("zero");
+    bloomFilter.insert("one");
+    bloomFilter.insert("two");
+    bloomFilter.insert("three");
+    bloomFilter.insert("four");
+    bloomFilter.insert("five");
+    bloomFilter.insert("six");
+    bloomFilter.insert("seven");
+    bloomFilter.insert("eight");
+    bloomFilter.insert("nine");
+
+    //bloomFilter.print(std::cout); std::cout << std::endl;
+
+    REQUIRE(bloomFilter.contains("zero"));
+    REQUIRE(bloomFilter.contains("one"));
+    REQUIRE(bloomFilter.contains("two"));
+    REQUIRE(bloomFilter.contains("three"));
+    REQUIRE(bloomFilter.contains("four"));
+    REQUIRE(bloomFilter.contains("five"));
+    REQUIRE(bloomFilter.contains("six"));
+    REQUIRE(bloomFilter.contains("seven"));
+    REQUIRE(bloomFilter.contains("eight"));
+    REQUIRE(bloomFilter.contains("nine"));
+
+    size_t false_positives = 0;
+    if (bloomFilter.contains("ten")) ++false_positives;
+    if (bloomFilter.contains("eleven")) ++false_positives;
+    if (bloomFilter.contains("twelve")) ++false_positives;
+    if (bloomFilter.contains("thirteen")) ++false_positives;
+    if (bloomFilter.contains("fourteen")) ++false_positives;
+    if (bloomFilter.contains("fifteen")) ++false_positives;
+    if (bloomFilter.contains("sixteen")) ++false_positives;
+    if (bloomFilter.contains("seventeen")) ++false_positives;
+    if (bloomFilter.contains("eighteen")) ++false_positives;
+    if (bloomFilter.contains("nineteen")) ++false_positives;
+
+    REQUIRE(false_positives == 0);
 }
