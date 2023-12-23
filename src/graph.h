@@ -432,7 +432,7 @@ namespace cs
      *
      * @param vertex
      * @param visitor - functor called for each edge; accepts a reference to
-     * a @p vertex's neighbor and the length of the edge.
+     * a @p vertex's neighbor and a reference to an edge.
      *
      * @tparam TId The data type of vertex Id.
      * @tparam TLen The data type of edge length.
@@ -440,7 +440,7 @@ namespace cs
     template<typename TId, typename TLen>
     void VisitEdges(
         Vertex<TId, TLen>& vertex,
-        std::function<void(Vertex<TId, TLen>& /*neighbor*/, TLen /*length*/)> visitor)
+        std::function<void(Vertex<TId, TLen>& /*neighbor*/, Edge<TId, TLen>& /*edge*/)> visitor)
     {
         using vertex_type = Vertex<TId, TLen>;
         using edge_type = typename vertex_type::edge_type;
@@ -449,7 +449,7 @@ namespace cs
             /*visitor*/
             [visitor](edge_type& edge)
             {
-                visitor(edge.From(), edge.Length());
+                visitor(edge.From(), edge);
             }
         );
 
@@ -457,7 +457,7 @@ namespace cs
             /*visitor*/
             [visitor](edge_type& edge)
             {
-                visitor(edge.To(), edge.Length());
+                visitor(edge.To(), edge);
             }
         );
     }
@@ -467,7 +467,7 @@ namespace cs
      *
      * @param vertex
      * @param visitor - functor called for each edge; accepts a reference to
-     * a @p vertex's neighbor and the length of the edge.
+     * a @p vertex's neighbor and a reference to an edge.
      *
      * @tparam TId The data type of vertex Id.
      * @tparam TLen The data type of edge length.
@@ -475,7 +475,7 @@ namespace cs
     template<typename TId, typename TLen>
     void VisitEdges(
         const Vertex<TId, TLen>& vertex,
-        std::function<void(const Vertex<TId, TLen>& /*neighbor*/, TLen /*length*/)> visitor)
+        std::function<void(const Vertex<TId, TLen>& /*neighbor*/, const Edge<TId, TLen>& /*edge*/)> visitor)
     {
         using vertex_type = Vertex<TId, TLen>;
         using edge_type = typename vertex_type::edge_type;
@@ -484,7 +484,7 @@ namespace cs
             /*visitor*/
             [visitor](const edge_type& edge)
             {
-                visitor(edge.From(), edge.Length());
+                visitor(edge.From(), edge);
             }
         );
 
@@ -492,7 +492,7 @@ namespace cs
             /*visitor*/
             [visitor](const edge_type& edge)
             {
-                visitor(edge.To(), edge.Length());
+                visitor(edge.To(), edge);
             }
         );
     }
@@ -741,7 +741,7 @@ namespace cs
          */
         void VisitVertices(std::function<void(vertex_type&)> visitor)
         {
-            for (auto key_value : vertices)
+            for (auto& key_value : vertices)
                 visitor(*key_value.second);
         }
 
@@ -751,8 +751,42 @@ namespace cs
          */
         void VisitVertices(std::function<void(const vertex_type&)> visitor) const
         {
-            for (auto key_value : vertices)
+            for (const auto& key_value : vertices)
                 visitor(*key_value.second);
+        }
+
+        /**
+         * @brief Calls functor @p predicate for each vertex of the graph until
+         * the @p predicate returns true. Returns the first vertex for which the
+         * @p predicate returned true.
+         * @param predicate - functor accepting a reference to vertex.
+         * @return the first vertex for which the @p predicate returned true.
+         */
+        vertex_type* FindVertex(std::function<bool(const vertex_type&)> predicate)
+        {
+            for (auto& key_value : vertices)
+            {
+                if (predicate(*key_value.second))
+                    return key_value.second;
+            }
+            return nullptr;
+        }
+
+        /**
+         * @brief Calls functor @p predicate for each vertex of the graph until
+         * the @p predicate returns true. Returns the first vertex for which the
+         * @p predicate returned true.
+         * @param predicate - functor accepting a reference to vertex.
+         * @return the first vertex for which the @p predicate returned true.
+         */
+        const vertex_type* FindVertex(std::function<bool(const vertex_type&)> predicate) const
+        {
+            for (const auto& key_value : vertices)
+            {
+                if (predicate(*key_value.second))
+                    return key_value.second;
+            }
+            return nullptr;
         }
 
         /**

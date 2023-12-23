@@ -224,6 +224,7 @@ namespace cs
         bool clearDijkstraData = true)
     {
         using vertex_type = Vertex<TId, TLen>;
+        using edge_type = Edge<TId, TLen>;
         using dijkstra_type = DijkstraShortestPath_Data<TId, TLen>;
 
         vertex_type& from = graph.GetVertexById(from_id);
@@ -244,12 +245,12 @@ namespace cs
             VisitEdges<TId, TLen>(
                 /*vertex*/ *current_node,
                 /*visitor*/
-                [current_node, &frontier](vertex_type& frontier_node, TLen length)
+                [current_node, &frontier](vertex_type& frontier_node, edge_type& edge)
                 {
                     if (frontier_node.Discovered())
                         return;
 
-                    TLen newLen = current_node->template AuxData<dijkstra_type>()->shortestPathLength + length;
+                    TLen newLen = current_node->template AuxData<dijkstra_type>()->shortestPathLength + edge.Length();
 
                     if (frontier_node.template AuxData<dijkstra_type>())
                     {
