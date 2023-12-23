@@ -3,6 +3,7 @@
 #include "utility.h"
 
 #include <bitset>
+#include <limits>
 #include <ostream>
 #include <random>
 
@@ -59,11 +60,15 @@ namespace cs
         void insert(const T& value)
         {
             std::default_random_engine prng;
-            std::uniform_int_distribution<int> uniform_dist(0, NBits-1);
+            std::uniform_int_distribution<std::size_t> uniform_dist(std::numeric_limits<std::size_t>::min(), std::numeric_limits<std::size_t>::max());
+            // We need a set of N hash functions, to get them we use
+            // a sigle seeded hash functions with different seeds.
             for (unsigned int i = 1; i <= NHashFunctions; ++i)
             {
                 Hasher hasher;
-                size_t nBit = hasher(uniform_dist(prng), value) % NBits;
+                // Using pseudorandom integers as seeds makes hash
+                // functions virtually independent of each other.
+                size_t nBit = hasher(/*seed*/ uniform_dist(prng), /*value*/ value) % NBits;
                 bitArray[nBit] = true;
             }
         }
@@ -77,11 +82,15 @@ namespace cs
         bool contains(const T& value) const
         {
             std::default_random_engine prng;
-            std::uniform_int_distribution<int> uniform_dist(0, NBits - 1);
+            std::uniform_int_distribution<std::size_t> uniform_dist(std::numeric_limits<std::size_t>::min(), std::numeric_limits<std::size_t>::max());
+            // We need a set of N hash functions, to get them we use
+            // a sigle seeded hash functions with different seeds.
             for (unsigned int i = 1; i <= NHashFunctions; ++i)
             {
                 Hasher hasher;
-                size_t nBit = hasher(uniform_dist(prng), value) % NBits;
+                // Using pseudorandom integers as seeds makes hash
+                // functions virtually independent of each other.
+                size_t nBit = hasher(/*seed*/ uniform_dist(prng), /*value*/ value) % NBits;
                 if (!bitArray[nBit])
                     return false;
             }

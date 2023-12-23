@@ -1,6 +1,6 @@
 #pragma once
 
-#include "prime.h"    // for NextPrime
+#include "prime.h"    // for NextPrime, PreviousPrime
 #include "requires.h" // for Requires
 
 #include <algorithm>  // for find_if
@@ -146,7 +146,9 @@ namespace cs
 
             if (load() >= 1.0f)
             {
-                // load too high => increase the number of buckets
+                // load too high => increase the number of buckets.
+                // Number of buckets is selected to be prime to minimize collisions
+                // (in case hash function generates numbers that have common divisors with the number of buckets).
                 resize(NextPrime(buckets->size()));
 
                 // insert the new value
@@ -183,7 +185,9 @@ namespace cs
 
                 if (load() < 0.5f)
                 {
-                    // load too low => decrease the number of buckets
+                    // load too low => decrease the number of buckets.
+                    // Number of buckets is selected to be prime to minimize collisions
+                    // (in case hash function generates numbers that have common divisors with the number of buckets).
                     size_t newSize = PreviousPrime(buckets->size());
                     if (newSize > 0)
                         resize(newSize);
