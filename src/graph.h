@@ -440,7 +440,7 @@ namespace cs
     template<typename TId, typename TLen>
     void VisitEdges(
         Vertex<TId, TLen>& vertex,
-        std::function<void(Vertex<TId, TLen>& /*neighbor*/, Edge<TId, TLen>& /*edge*/)> visitor)
+        std::function<void(Vertex<TId, TLen>& /*neighbor*/, Edge<Vertex<TId, TLen>, TLen>& /*edge*/)> visitor)
     {
         using vertex_type = Vertex<TId, TLen>;
         using edge_type = typename vertex_type::edge_type;
@@ -475,7 +475,7 @@ namespace cs
     template<typename TId, typename TLen>
     void VisitEdges(
         const Vertex<TId, TLen>& vertex,
-        std::function<void(const Vertex<TId, TLen>& /*neighbor*/, const Edge<TId, TLen>& /*edge*/)> visitor)
+        std::function<void(const Vertex<TId, TLen>& /*neighbor*/, const Edge<Vertex<TId, TLen>, TLen>& /*edge*/)> visitor)
     {
         using vertex_type = Vertex<TId, TLen>;
         using edge_type = typename vertex_type::edge_type;
@@ -1006,7 +1006,7 @@ namespace cs
     /**
      * @brief Reads an edge from an input stream @p is in the form of
      * three variables: from (id of edge tail), to (id of edge head) and edge length.
-     * The latter one is optional: if not present in the input stream it receives the default value.
+     * The length one is optional: if not present in the input stream it receives the default value.
      *
      * @param is - input stream
      * @param from - edge tail

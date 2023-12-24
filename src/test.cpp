@@ -933,3 +933,105 @@ TEST_CASE("BloomFilter", "[bloom]")
 
     REQUIRE(false_positives <= 2);
 }
+
+TEST_CASE("Prim", "[prim]")
+{
+    using graph_type = cs::Graph<>;
+    using edge_type = typename graph_type::edge_type;
+    using id_type = typename graph_type::id_type;
+    using length_type = typename graph_type::length_type;
+
+    SECTION("triangle")
+    {
+        /*
+           1       0 --> 1 (len=1)
+          / \      1 --> 2 (len=2)
+         0 - 2     0 --> 2 (len=3)
+        */
+
+        const char* path_vertex_edge_list = "./graph/triangle.txt";
+
+        graph_type graph;
+        {
+            std::ifstream ifs(path_vertex_edge_list);
+            REQUIRE(ifs);
+            cs::read_vertex_edge_list(ifs, graph);
+        }
+
+        length_type len = 0;
+        cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
+            graph,
+            [&len](edge_type& edge) -> void
+            {
+                len += edge.Length();
+                //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+            });
+        REQUIRE(len == 3);
+    }
+
+    SECTION("rectangle")
+    {
+        /*
+         1---2     0 --> 1 (len=1)
+         | \ |     1 --> 2 (len=1)
+         0---3     1 --> 3 (len=1)
+                   2 --> 3 (len=2)
+                   0 --> 3 (len=2)
+        */
+
+        const char* path_vertex_edge_list = "./graph/rectangle.txt";
+
+        graph_type graph;
+        {
+            std::ifstream ifs(path_vertex_edge_list);
+            REQUIRE(ifs);
+            cs::read_vertex_edge_list(ifs, graph);
+        }
+
+        length_type len = 0;
+        cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
+            graph,
+            [&len](edge_type& edge) -> void
+            {
+                len += edge.Length();
+                //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+            });
+        REQUIRE(len == 3);
+    }
+
+
+    SECTION("pentagon")
+    {
+        /*
+           0---1     0 --> 1 (len=2)
+          /|   |\    0 --> 2 (len=1)
+         2-+---+-3   0 --> 3 (len=3)
+          \ \ / /    0 --> 4 (len=1)
+           \ | /     1 --> 2 (len=2)
+            \|/      1 --> 3 (len=1)
+             4       1 --> 4 (len=1)
+                     2 --> 3 (len=3)
+                     2 --> 4 (len=2)
+                     3 --> 4 (len=2)
+        */
+
+        const char* path_vertex_edge_list = "./graph/pentagon.txt";
+
+        graph_type graph;
+        {
+            std::ifstream ifs(path_vertex_edge_list);
+            REQUIRE(ifs);
+            cs::read_vertex_edge_list(ifs, graph);
+        }
+
+        length_type len = 0;
+        cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
+            graph,
+            [&len](edge_type& edge) -> void
+            {
+                len += edge.Length();
+                //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+            });
+        REQUIRE(len == 4);
+    }
+}

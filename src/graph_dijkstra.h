@@ -224,7 +224,7 @@ namespace cs
         bool clearDijkstraData = true)
     {
         using vertex_type = Vertex<TId, TLen>;
-        using edge_type = Edge<TId, TLen>;
+        using edge_type = Edge<vertex_type, TLen>;
         using dijkstra_type = DijkstraShortestPath_Data<TId, TLen>;
 
         vertex_type& from = graph.GetVertexById(from_id);
