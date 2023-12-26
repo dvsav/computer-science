@@ -959,14 +959,17 @@ TEST_CASE("Prim", "[prim]")
         }
 
         length_type len = 0;
+        size_t n_edges = 0;
         cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
             graph,
-            [&len](edge_type& edge) -> void
+            [&len, &n_edges](edge_type& edge) -> void
             {
                 len += edge.Length();
+                ++n_edges;
                 //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
             });
         REQUIRE(len == 3);
+        REQUIRE(n_edges == graph.VerticesNumber() - 1);
     }
 
     SECTION("rectangle")
@@ -989,14 +992,17 @@ TEST_CASE("Prim", "[prim]")
         }
 
         length_type len = 0;
+        size_t n_edges = 0;
         cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
             graph,
-            [&len](edge_type& edge) -> void
+            [&len, &n_edges](edge_type& edge) -> void
             {
                 len += edge.Length();
+                ++n_edges;
                 //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
             });
         REQUIRE(len == 3);
+        REQUIRE(n_edges == graph.VerticesNumber() - 1);
     }
 
 
@@ -1025,13 +1031,16 @@ TEST_CASE("Prim", "[prim]")
         }
 
         length_type len = 0;
+        size_t n_edges = 0;
         cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
             graph,
-            [&len](edge_type& edge) -> void
+            [&len, &n_edges](edge_type& edge) -> void
             {
                 len += edge.Length();
+                ++n_edges;
                 //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
             });
         REQUIRE(len == 4);
+        REQUIRE(n_edges == graph.VerticesNumber() - 1);
     }
 }

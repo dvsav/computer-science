@@ -92,6 +92,6 @@ namespace cs
 		}
 
 		// Clean up
-		cs::ClearDiscovered(graph);
+		cs::ClearDiscovered(undirectedGraph);
 	}
 } // namespace cs
