@@ -97,6 +97,24 @@ namespace cs
     };
 
     /**
+	 * @class EdgeLengthGreater
+	 * Compares two edges by their length (cost).
+	 * operator(edge1, edge2) returns true if edge1.length > edge2.length.
+	 * @tparam TEdge edge type.
+	 */
+	template<typename TEdge>
+	class EdgeLengthGreater
+	{
+	public:
+		bool operator() (
+			const TEdge* lhs,
+			const TEdge* rhs)
+		{
+			return lhs->Length() > rhs->Length();
+		}
+	};
+
+    /**
      * @class Vertex
      * @brief Class representing a vertex of a graph.
      *
