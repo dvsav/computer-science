@@ -11,6 +11,7 @@
 # ...
 # vertexN neighborN1 ... neighborNL
 # }
+# This format doesn't support weighted graphs (edges with different lengths).
 
 {
 0 1 2 3
