@@ -934,7 +934,7 @@ TEST_CASE("BloomFilter", "[bloom]")
     REQUIRE(false_positives <= 2);
 }
 
-TEST_CASE("Prim", "[prim]")
+TEST_CASE("MinimalSpanningTree", "[mst]")
 {
     using graph_type = cs::Graph<>;
     using edge_type = typename graph_type::edge_type;
@@ -958,18 +958,36 @@ TEST_CASE("Prim", "[prim]")
             cs::read_vertex_edge_list(ifs, graph);
         }
 
-        length_type len = 0;
-        size_t n_edges = 0;
-        cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
-            graph,
-            [&len, &n_edges](edge_type& edge) -> void
-            {
-                len += edge.Length();
-                ++n_edges;
-                //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
-            });
-        REQUIRE(len == 3);
-        REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        {
+            length_type len = 0;
+            size_t n_edges = 0;
+            cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
+                graph,
+                [&len, &n_edges](edge_type& edge) -> void
+                {
+                    len += edge.Length();
+                    ++n_edges;
+                    //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+                });
+            REQUIRE(len == 3);
+            REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        }
+        //std::cout << "--------------------" << std::endl;
+        {
+            length_type len = 0;
+            size_t n_edges = 0;
+            cs::VisitMinimumSpanningTree_Kruskal<id_type, length_type>(
+                graph,
+                [&len, &n_edges](edge_type& edge) -> void
+                {
+                    len += edge.Length();
+                    ++n_edges;
+                    //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+                });
+            REQUIRE(len == 3);
+            REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        }
+        //std::cout << "--------------------" << std::endl;
     }
 
     SECTION("rectangle")
@@ -991,20 +1009,37 @@ TEST_CASE("Prim", "[prim]")
             cs::read_vertex_edge_list(ifs, graph);
         }
 
-        length_type len = 0;
-        size_t n_edges = 0;
-        cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
-            graph,
-            [&len, &n_edges](edge_type& edge) -> void
-            {
-                len += edge.Length();
-                ++n_edges;
-                //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
-            });
-        REQUIRE(len == 3);
-        REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        {
+            length_type len = 0;
+            size_t n_edges = 0;
+            cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
+                graph,
+                [&len, &n_edges](edge_type& edge) -> void
+                {
+                    len += edge.Length();
+                    ++n_edges;
+                    //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+                });
+            REQUIRE(len == 3);
+            REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        }
+        //std::cout << "--------------------" << std::endl;
+        {
+            length_type len = 0;
+            size_t n_edges = 0;
+            cs::VisitMinimumSpanningTree_Kruskal<id_type, length_type>(
+                graph,
+                [&len, &n_edges](edge_type& edge) -> void
+                {
+                    len += edge.Length();
+                    ++n_edges;
+                    //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+                });
+            REQUIRE(len == 3);
+            REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        }
+        //std::cout << "--------------------" << std::endl;
     }
-
 
     SECTION("pentagon")
     {
@@ -1030,17 +1065,35 @@ TEST_CASE("Prim", "[prim]")
             cs::read_vertex_edge_list(ifs, graph);
         }
 
-        length_type len = 0;
-        size_t n_edges = 0;
-        cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
-            graph,
-            [&len, &n_edges](edge_type& edge) -> void
-            {
-                len += edge.Length();
-                ++n_edges;
-                //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
-            });
-        REQUIRE(len == 4);
-        REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        {
+            length_type len = 0;
+            size_t n_edges = 0;
+            cs::VisitMinimumSpanningTree_Prim<id_type, length_type>(
+                graph,
+                [&len, &n_edges](edge_type& edge) -> void
+                {
+                    len += edge.Length();
+                    ++n_edges;
+                    //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+                });
+            REQUIRE(len == 4);
+            REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        }
+        //std::cout << "--------------------" << std::endl;
+        {
+            length_type len = 0;
+            size_t n_edges = 0;
+            cs::VisitMinimumSpanningTree_Kruskal<id_type, length_type>(
+                graph,
+                [&len, &n_edges](edge_type& edge) -> void
+                {
+                    len += edge.Length();
+                    ++n_edges;
+                    //std::cout << edge.From().Id() << " --> " << edge.To().Id() << " (" << edge.Length() << ')' << std::endl;
+                });
+            REQUIRE(len == 4);
+            REQUIRE(n_edges == graph.VerticesNumber() - 1);
+        }
+        //std::cout << "--------------------" << std::endl;
     }
 }

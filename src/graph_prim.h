@@ -11,7 +11,8 @@ namespace cs
 	 * @brief Visits the edges of the Minimum Spanning Tree (MST) of the graph.
 	 * MST is a subgraph connecting all vertices of the graph and having minimal
 	 * total cost (length) of its edges (and consequently no loops).
-	 * Complexity: O(NlogN) where N is the number of vertices of the graph.
+	 * Complexity: O(MlogN) where N is the number of vertices of the graph,
+	 * M is the number of graph edges.
 	 * @param undirectedGraph - undirected connected graph.
 	 * @param visit - functor to call on each edge of the MST.
 	 * @tparam TId The data type of vertex Id.
