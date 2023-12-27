@@ -147,6 +147,7 @@
     <ClInclude Include="..\..\..\src\graph.h" />
     <ClInclude Include="..\..\..\src\graph_algorithms.h" />
     <ClInclude Include="..\..\..\src\graph_dijkstra.h" />
+    <ClInclude Include="..\..\..\src\graph_kruskal.h" />
     <ClInclude Include="..\..\..\src\graph_prim.h" />
     <ClInclude Include="..\..\..\src\graph_search.h" />
     <ClInclude Include="..\..\..\src\graph_topology.h" />

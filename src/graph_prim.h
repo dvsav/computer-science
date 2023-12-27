@@ -8,27 +8,11 @@
 namespace cs
 {
 	/**
-	 * @class EdgeLengthGreater
-	 * Compares two edges by their length (cost).
-	 * @tparam TEdge edge type.
-	 */
-	template<typename TEdge>
-	class EdgeLengthGreater
-	{
-	public:
-		bool operator() (
-			const TEdge* lhs,
-			const TEdge* rhs)
-		{
-			return lhs->Length() > rhs->Length();
-		}
-	};
-
-	/**
 	 * @brief Visits the edges of the Minimum Spanning Tree (MST) of the graph.
 	 * MST is a subgraph connecting all vertices of the graph and having minimal
 	 * total cost (length) of its edges (and consequently no loops).
-	 * Complexity: O(NlogN) where N is the number of vertices of the graph.
+	 * Complexity: O(MlogN) where N is the number of vertices of the graph,
+	 * M is the number of graph edges.
 	 * @param undirectedGraph - undirected connected graph.
 	 * @param visit - functor to call on each edge of the MST.
 	 * @tparam TId The data type of vertex Id.
