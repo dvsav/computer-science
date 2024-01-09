@@ -1,8 +1,12 @@
 #pragma once
 
-#include <queue>  // for std::priority_queue
-#include <stack>  // for std::stack
-#include <vector> // for std::vector
+#include "requires.h"
+
+#include <map>     // for std::map
+#include <queue>   // for std::priority_queue
+#include <stack>   // for std::stack
+#include <utility> // for std::pair
+#include <vector>  // for std::vector
 
 namespace cs
 {
@@ -10,43 +14,13 @@ namespace cs
     class HuffmanEncoding final
     {
     private:
-        class HuffmanSymbol
+        struct HuffmanSymbol
         {
-            template <typename, typename>
-            friend class HuffmanEncoding;
-
-        private:
             TSymbol symbol;
             TFrequency frequency;
-            HuffmanSymbol* leftChild;
-            HuffmanSymbol* rightChild;
-
-        private:
-            HuffmanSymbol(
-                bool rightOrLeft,
-                TSymbol symbol,
-                TFrequency frequency,
-                HuffmanSymbol* leftChild = nullptr,
-                HuffmanSymbol* rightChild = nullptr) :
-                symbol(symbol),
-                frequency(frequency),
-                leftChild(leftChild),
-                rightChild(rightChild)
-            {}
-
-            HuffmanSymbol(const HuffmanSymbol&) = delete;
-            HuffmanSymbol& operator=(const HuffmanSymbol&) = delete;
-
-        private:
-            TSymbol Symbol() const { return symbol; }
-
-            TFrequency Frequency() const { return frequency; }
-
-            HuffmanSymbol* LeftChild() { return leftChild; }
-            const HuffmanSymbol* LeftChild() const { return leftChild; }
-
-            HuffmanSymbol* RightChild() { return rightChild; }
-            const HuffmanSymbol* RightChild() const { return rightChild; }
+            HuffmanSymbol* parent;
+            HuffmanSymbol* left;
+            HuffmanSymbol* right;
         };
 
         class SymbolComparator
@@ -54,20 +28,36 @@ namespace cs
         public:
             bool operator() (
                 const HuffmanSymbol* lhs,
-                const HuffmanSymbol* rhs)
+                const HuffmanSymbol* rhs) const
             {
-                return lhs->Frequency() > rhs->Frequency();
+                return lhs->frequency > rhs->frequency;
             }
         };
 
     private:
         HuffmanSymbol* root;
+        std::map<TSymbol, HuffmanSymbol*> leaves;
 
-    private:
+    public:
         HuffmanEncoding(
-            std::priority_queue<HuffmanSymbol*, std::vector<HuffmanSymbol*>, SymbolComparator>& minHeap) :
-            root(nullptr)
+            std::vector<std::pair<TSymbol, TFrequency> >& alphabet) :
+            root(nullptr),
+            leaves()
         {
+            std::priority_queue<HuffmanSymbol*, std::vector<HuffmanSymbol*>, SymbolComparator> minHeap;
+            for (const std::pair<TSymbol, TFrequency>& symbol_freq : alphabet)
+            {
+                minHeap.push(
+                    new HuffmanSymbol
+                    {
+                        /*symbol*/ symbol_freq.first,
+                        /*frequency*/ symbol_freq.second,
+                        /*parent*/ nullptr,
+                        /*leftChild*/ nullptr,
+                        /*rightChild*/ nullptr
+                    });
+            }
+
             while (true)
             {
                 HuffmanSymbol* a = minHeap.top();
@@ -76,11 +66,19 @@ namespace cs
                 HuffmanSymbol* b = minHeap.top();
                 minHeap.pop();
 
-                HuffmanSymbol* ab = new HuffmanSymbol(
+                HuffmanSymbol* ab = new HuffmanSymbol
+                {
                     /*symbol*/ TSymbol{},
-                    /*frequency*/ a->Frequency() + b->Frequency(),
+                    /*frequency*/ a->frequency + b->frequency,
+                    /*parent*/ nullptr,
                     /*leftChild*/ a,
-                    /*rightChild*/ b);
+                    /*rightChild*/ b
+                };
+                a->parent = ab;
+                b->parent = ab;
+
+                leaves.emplace(a->symbol, a);
+                leaves.emplace(b->symbol, b);
 
                 if (minHeap.empty())
                 {
@@ -101,8 +99,9 @@ namespace cs
                 while (!st.empty())
                 {
                     HuffmanSymbol* ab = st.top();
-                    if (ab->LeftChild()) st.push(ab->LeftChild());
-                    if (ab->RightChild()) st.push(ab->RightChild());
+                    st.pop();
+                    if (ab->left) st.push(ab->left);
+                    if (ab->right) st.push(ab->right);
                     delete ab;
                 }
                 root = nullptr;
@@ -112,28 +111,29 @@ namespace cs
     public:
         std::vector<bool> Encode(TSymbol symbol) const
         {
-            //std::stack<bool> encoded;
-            //HuffmanSymbol* current_node = root;
-            //while (true)
-            //{
-            //    if (!current_node->LeftChild() && !current_node->RightChild())
-            //    {
-            //        if (current_node->Symbol() == symbol)
-            //            return std::vector<bool>(encoded);
-            //        else
-            //            encoded.pop();
+            HuffmanSymbol* current_node = leaves.at(symbol);
+            std::vector<bool> encoded;
+            while (current_node->parent)
+            {
+                encoded.insert(
+                    /*where*/ encoded.begin(),
+                    /*val*/ current_node == current_node->parent->right);
 
-            //    if (current_node->LeftChild())
-            //    encoded.push(root);
+                current_node = current_node->parent;
+            }
+            return encoded;
+        }
 
-
-            //    if (TComparator::EqualTo(key, current_node->Key()))
-            //        return current_node;
-            //    else if (TComparator::LessThan(key, current_node->Key()))
-            //        current_node = current_node->Left();
-            //    else
-            //        current_node = current_node->Right();
-            //}
+        TSymbol Decode(const std::vector<bool>& code)
+        {
+            HuffmanSymbol* current_node = root;
+            for (bool right : code)
+            {
+                Requires::That(current_node, FUNCTION_INFO);
+                current_node = right ? current_node->right : current_node->left;
+            }
+            Requires::That(current_node->left == nullptr && current_node->right == nullptr, FUNCTION_INFO);
+            return current_node->symbol;
         }
     };
 } // namespace cs

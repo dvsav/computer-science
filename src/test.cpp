@@ -6,6 +6,7 @@
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
 #include "hash_map.h"         // for cs::HashMap
 #include "heap.h"             // for cs::Heap
+#include "huffman_encoding.h" // for HuffmanEncoding
 #include "merge_sort.h"       // for cs::merge_sort
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
 #include "simple_sorts.h"     // for cs::selection_sort, cs::insertion_sort, cs::bubble_sort
@@ -17,6 +18,7 @@
 #include <fstream>            // for std::ifstream, std::ofstream
 #include <iostream>           // for std:::cout
 #include <string>             // for std::string
+#include <utility>            // for std::pair
 #include <vector>             // for std::vector
 
 // Catch2 - a single header unit test framework
@@ -1095,5 +1097,55 @@ TEST_CASE("MinimalSpanningTree", "[mst]")
             REQUIRE(n_edges == graph.VerticesNumber() - 1);
         }
         //std::cout << "--------------------" << std::endl;
+    }
+}
+
+TEST_CASE("HuffmanEncoding", "[huffman]")
+{
+    using TSymbol = char;
+    using TFrequency = int;
+
+    std::vector<std::pair<TSymbol, TFrequency> > alphabet;
+    alphabet.reserve(10);
+
+    // Frequencies were selected to be power of 2 so that codes of all symbols were unambiguous
+    alphabet.emplace_back('a', 1024);
+    alphabet.emplace_back('b', 512);
+    alphabet.emplace_back('c', 256);
+    alphabet.emplace_back('d', 128);
+    alphabet.emplace_back('e', 64);
+    alphabet.emplace_back('f', 32);
+    alphabet.emplace_back('g', 16);
+    alphabet.emplace_back('h', 8);
+    alphabet.emplace_back('i', 4);
+    alphabet.emplace_back('j', 2);
+
+    cs::HuffmanEncoding<TSymbol, TFrequency> encoding(alphabet);
+
+    for (size_t i = 0; i < alphabet.size(); ++i)
+    {
+        TSymbol symbol = alphabet[i].first;
+        std::vector<bool> code = encoding.Encode(symbol);
+        TSymbol decoded = encoding.Decode(code);
+
+        //TFrequency frequency = alphabet[i].second;
+        //std::cout << "symbol    = " << symbol << std::endl;
+        //std::cout << "decoded   = " << decoded << std::endl;
+        //std::cout << "frequency = " << frequency << std::endl;
+        //std::cout << "code      = ";
+        //print(std::cout, code.cbegin(), code.cend(), "");
+        //std::cout << std::endl << std::endl;
+
+        REQUIRE(symbol == decoded);
+
+        if (i < alphabet.size() - 1)
+        {
+            REQUIRE(code.size() == i + 1);
+        }
+        else
+        {
+            // last symbol code has the same length as penultimate symbol
+            REQUIRE(code.size() == i);
+        }
     }
 }

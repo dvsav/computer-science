@@ -153,6 +153,7 @@
     <ClInclude Include="..\..\..\src\graph_topology.h" />
     <ClInclude Include="..\..\..\src\hash_map.h" />
     <ClInclude Include="..\..\..\src\heap.h" />
+    <ClInclude Include="..\..\..\src\huffman_encoding.h" />
     <ClInclude Include="..\..\..\src\merge_sort.h" />
     <ClInclude Include="..\..\..\src\prime.h" />
     <ClInclude Include="..\..\..\src\quick_sort.h" />

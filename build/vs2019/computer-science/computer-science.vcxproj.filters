@@ -75,6 +75,9 @@
     <ClInclude Include="..\..\..\src\graph_kruskal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\huffman_encoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\test.cpp">
