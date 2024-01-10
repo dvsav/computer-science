@@ -11,6 +11,11 @@ SRC_DIR = $(PROJDIR)/src
 BIN_DIR = $(CURDIR)/bin
 TEST_DIR = $(PROJDIR)/test
 
+# Determine environment in which this makefile is being executed
+# (e.g. Cygwin, MSYS, Linux, etc.)
+UNAME = $(shell uname)
+$(info Environment: $(UNAME))
+
 # installation directory (used by 'install' target, can be specified in make command line)
 # example: sudo make install DESTDIR=/usr/local/bin
 DESTDIR ?= /usr/local/bin
@@ -37,10 +42,13 @@ CXXFLAGS+=-Wall -Wextra
 # Enable exception handling. Generates extra code needed to propagate exceptions.
 CXXFLAGS+=-fexceptions
 
-# This is to overcome compiler issue:
-# too many sections
-# Assembler messages: can't write bytes to section .text of test.o: 'file too big'
-CXXFLAGS+=-Wa,-mbig-obj
+# Cygwin specific part
+ifeq ($(findstring CYGWIN,$(UNAME)),CYGWIN)
+	# This is to overcome compiler issue:
+	# too many sections
+	# Assembler messages: can't write bytes to section .text of test.o: 'file too big'
+	CXXFLAGS+=-Wa,-mbig-obj
+endif
 
 # Linking to libstdc++fs is required for use of the Filesystem library extensions in <experimental/filesystem>
 STDLIBS= \
