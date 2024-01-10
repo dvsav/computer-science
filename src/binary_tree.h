@@ -10,7 +10,7 @@
 #include <stack>       // for std::stack
 #include <string>      // for std::string
 #include <type_traits> // for std::is_same
-#include <utility>     // for std:::pair
+#include <utility>     // for std::pair
 
 namespace cs
 {

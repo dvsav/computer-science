@@ -28,11 +28,14 @@ namespace cs
         // Put all graph edges in a min-heap (key = edge length).
         // Iteratively pop an edge from the top of min-heap and if
         // this edge doesn't create a loop in MST, add it to MST.
+        // Whether or not a particular edge creates a loop in MST
+        // is determined via union-find structures (aka disjoint sets).
 
         using vertex_type = Vertex<TId, TLen>;
         using edge_type = Edge<vertex_type, TLen>;
 
         // Init union-find (disjoint set) structure for each vertex
+        // which in our case is just a pointer to a "leader" vertex.
         undirectedGraph.VisitVertices(
             [](vertex_type& v)
             {
