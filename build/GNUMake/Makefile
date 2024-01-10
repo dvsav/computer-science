@@ -34,7 +34,13 @@ endif
 # '-Wextra' enables some extra warning flags that are not enabled by '-Wall'
 CXXFLAGS+=-Wall -Wextra
 
+# Enable exception handling. Generates extra code needed to propagate exceptions.
 CXXFLAGS+=-fexceptions
+
+# This is to overcome compiler issue:
+# too many sections
+# Assembler messages: can't write bytes to section .text of test.o: 'file too big'
+CXXFLAGS+=-Wa,-mbig-obj
 
 # Linking to libstdc++fs is required for use of the Filesystem library extensions in <experimental/filesystem>
 STDLIBS= \
