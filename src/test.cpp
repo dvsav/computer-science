@@ -6,7 +6,8 @@
 #include "graph_algorithms.h" // for cs::BreadthFirstSearch_Directed, cs::DepthFirstSearch_Directed, ...
 #include "hash_map.h"         // for cs::HashMap
 #include "heap.h"             // for cs::Heap
-#include "huffman_encoding.h" // for HuffmanEncoding
+#include "huffman_encoding.h" // for cs::HuffmanEncoding
+#include "knapsack.h"         // for cs::PackKnapsack
 #include "merge_sort.h"       // for cs::merge_sort
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
 #include "simple_sorts.h"     // for cs::selection_sort, cs::insertion_sort, cs::bubble_sort
@@ -17,6 +18,7 @@
 #include <cstdio>             // for std::remove
 #include <fstream>            // for std::ifstream, std::ofstream
 #include <iostream>           // for std:::cout
+#include <numeric>            // for std::accumulate
 #include <string>             // for std::string
 #include <utility>            // for std::pair
 #include <vector>             // for std::vector
@@ -1147,5 +1149,55 @@ TEST_CASE("HuffmanEncoding", "[huffman]")
             // last symbol code has the same length as penultimate symbol
             REQUIRE(code.size() == i);
         }
+    }
+}
+
+TEST_CASE("PackKnapsack", "[knapsack]")
+{
+    using TValue = int;
+    auto plus = [](const TValue& a, const cs::KnapsackItem<TValue>& b) -> TValue { return a + b.value; };
+
+    SECTION("case1")
+    {
+        std::vector<cs::KnapsackItem<TValue> > items
+        {
+            cs::KnapsackItem<TValue>(/*weight*/ 4, /*value*/ 3),
+            cs::KnapsackItem<TValue>(/*weight*/ 3, /*value*/ 2),
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 4), // *
+            cs::KnapsackItem<TValue>(/*weight*/ 3, /*value*/ 4)  // *
+        };
+
+        std::vector<cs::KnapsackItem<TValue> > knapsack = cs::PackKnapsack<TValue>(/*maxWeight*/ 6, /*items*/ items);
+        REQUIRE(std::accumulate(knapsack.begin(), knapsack.end(), TValue(0), plus) == 8);
+    }
+
+    SECTION("case2")
+    {
+        std::vector<cs::KnapsackItem<TValue> > items
+        {
+            cs::KnapsackItem<TValue>(/*weight*/ 9, /*value*/ 9),
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 2), // *
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 2), // *
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 2), // *
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 4)  // *
+        };
+
+        std::vector<cs::KnapsackItem<TValue> > knapsack = cs::PackKnapsack<TValue>(/*maxWeight*/ 10, /*items*/ items);
+        REQUIRE(std::accumulate(knapsack.begin(), knapsack.end(), TValue(0), plus) == 10);
+    }
+
+    SECTION("case3")
+    {
+        std::vector<cs::KnapsackItem<TValue> > items
+        {
+            cs::KnapsackItem<TValue>(/*weight*/ 9, /*value*/ 11), // *
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 2),
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 2),
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 2),
+            cs::KnapsackItem<TValue>(/*weight*/ 2, /*value*/ 4)
+        };
+
+        std::vector<cs::KnapsackItem<TValue> > knapsack = cs::PackKnapsack<TValue>(/*maxWeight*/ 10, /*items*/ items);
+        REQUIRE(std::accumulate(knapsack.begin(), knapsack.end(), TValue(0), plus) == 11);
     }
 }
