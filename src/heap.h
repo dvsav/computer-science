@@ -181,7 +181,7 @@ namespace cs
         }
 
         // Bubbles up an element until it gets to its correct position in the heap.
-        // Complexity: O(lgN) where N is the number of elements in the heap.s
+        // Complexity: O(lgN) where N is the number of elements in the heap.
         void heapifyUp(iterator_type i)
         {
             if (i != collection.begin() && TComparator::LessThan(*i, *parent(i)))
@@ -192,7 +192,7 @@ namespace cs
         }
 
         // Sink down the element until it gets to its correct position in the heap.
-        // Complexity: O(lgN) where N is the number of elements in the heap.s
+        // Complexity: O(lgN) where N is the number of elements in the heap.
         void heapifyDown(iterator_type i)
         {
             iterator_type lChild = leftChild(i);
