@@ -215,11 +215,18 @@ namespace cs
         // Move the elements of collection around so to establish the heap property.
         void buildHeap()
         {
-            // Begin from the leaves and go to the root, heapifying every element down.
+            // Begin from the penultimate level and go to the root, heapifying every element down.
             // Complexity: O(N) where N is the number of elements in the heap.
-            if (collection.size() > 0)
+            if (collection.size() > 1)
             {
-                for (auto i = std::prev(collection.end()); i != collection.begin(); --i)
+				// find the last element of penultimate level of the heap
+				size_t k = 2;
+				while (k - 2 < size() - 1)
+					k *= 2;
+				k = k / 2 - 2;
+				
+				// heapify down elements starting from last element of penultimate level all the way up to the root of the heap
+                for (auto i = collection.begin() + k; i != collection.begin(); --i)
                     heapifyDown(i);
                 heapifyDown(collection.begin());
             }
