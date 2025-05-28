@@ -44,6 +44,7 @@ On Windows install CMake build system using [Chocolatey](https://chocolatey.org/
 ```
 choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
 ```
+...or [download CMake installer for Windows](https://cmake.org/download/)
 
 ## How to build
 
@@ -59,25 +60,27 @@ Compile the sources using one of convenience scripts that call either GNU Make:
 ```bash
 ./make.sh test
 ```
+If the build is successful, you'll find the binary files in `build/GNUMake/bin` directory.
 
 ...or CMake:
 
 ```bash
 ./cmake.sh
 ```
+If the build is successful, you'll find a binary executable `computer-science` in `build/CMake/gnumake` directory.
 
 ## Usage
 
-You can include the source code of this project into your own project.
+You can include the source code of this project into your own project, e.g. add this git repository as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
 
-[Fork the repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
-Create a new branch (`git checkout -b feature/YourFeature`).
-Commit your changes (`git commit -m 'Add some feature'`).
-Push to the branch (`git push origin feature/YourFeature`).
+[Fork the repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).  
+Create a new branch (`git checkout -b feature/YourFeature`).  
+Commit your changes (`git commit -m 'Add some feature'`).  
+Push to the branch (`git push origin feature/YourFeature`).  
 [Open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
 
 ## License
