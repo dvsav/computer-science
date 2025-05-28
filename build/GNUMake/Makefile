@@ -100,7 +100,8 @@ test : $(TEST)
 	@echo -e "\n(You may specify test case name using RUN_TEST parameter)"
 	$(QUIET)cd $(TEST_DIR) && $(DEBUGGER) $(BIN_DIR)/test.exe $(RUN_TEST)
 
-# 'install' command is mostly similar to 'cp' but provides additionally the option to
+# 'install' target copies specified INSTALL_FILES to DESTDIR directory.
+# 'install' command is mostly similar to 'cp' but provides additionally the option -m to
 # set the destination file properties directly without having to use chmod separately.
 install :
 	@echo -e "\n(You may specify installation directory using DESTDIR parameter)"
