@@ -24,7 +24,7 @@ print_message("-------------------- COMPUTER SCIENCE --------------------")
 # specifies the project name (in MS Visual Studio defines the solution name)
 project(computer-science
         VERSION 1.0
-        DESCRIPTION "Computer Science (c) 2023 Dmitry Savchenkov"
+        DESCRIPTION "Computer Science (c) 2023-2025 Dmitry Savchenkov"
         LANGUAGES CXX)
 
 # the repository's root is two folders higher than this CMakeLists file

@@ -4,6 +4,7 @@ namespace cs
 {
     /**
      * @brief Returns true if specified number @p num is prime.
+     * Complexity: O(sqrt(num))
      * @param num - integer number tested for primality.
      * @return true if specified number @p num is prime, false otherwise.
      */
