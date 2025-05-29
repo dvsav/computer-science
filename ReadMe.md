@@ -71,7 +71,11 @@ If the build is successful, you'll find a binary executable `computer-science` i
 
 ## Usage
 
-You can include the source code of this project into your own project, e.g. add this git repository as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+You can include the source code of this project into your own project, e.g. add this git repository as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules):
+```
+cd your_repository
+git submodule add https://github.com/dvsav/computer-science.git
+```
 
 ## Contributing
 
