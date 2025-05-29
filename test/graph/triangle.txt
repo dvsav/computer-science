@@ -1,0 +1,20 @@
+#   1       0 --> 1 (len=1)
+#  / \      1 --> 2 (len=2)
+# 0 - 2     0 --> 2 (len=3)
+
+# A graph represented as a vertex list + edge list:
+# {
+# vertex1 vertex2 ... vertexN
+# edge1
+# edge2
+# ...
+# edgeM
+# }
+# Edge format: vertex_from vertex_to [length]
+
+{
+0 1 2
+0 1 1
+0 2 3
+1 2 2
+}

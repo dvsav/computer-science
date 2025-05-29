@@ -30,3 +30,18 @@
 *.exe
 *.out
 *.app
+
+# Directories
+bin/
+install/
+
+# Visual Studio cache/options directory
+**/.vs/
+**/x64/
+**/[Dd]ebug/
+**/[Rr]elease/
+
+# CMake
+!build/CMake/
+build/CMake/*
+!/build/CMake/CMakeLists.txt
