@@ -4,6 +4,10 @@ on:
   push:        # This workflow is triggered by pushing to a git branch specified below
     branches:
       - devel  # Project's branch name
+    paths:
+      - src/**
+      - test/**
+      - build/**
 
 jobs:
   test-on-ubuntu-linux:

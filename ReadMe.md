@@ -28,12 +28,12 @@ The list of implemented algorithms.
   - insertion sort
   - bubble sort
 - Merge sort ([merge_sort.h](src/merge_sort.h))
-- Quick sort ([quick_sort.h](src/quick_sort.h))
+- Quick sort with Lomuto and randomized partitioning ([quick_sort.h](src/quick_sort.h))
 - Binary search in a sorted array ([binary_search.h](src/binary_search.h))
 - [Trial division](https://en.wikipedia.org/wiki/Trial_division) ([prime.h](src/prime.h))
 - Binary search tree, AVL tree ([binary_tree.h](src/binary_tree.h))
-- Bloom filter ([bloom_filter.h](src/bloom_filter.h))
 - B-tree ([btree.h](src/btree.h))
+- Heap (aka pyramid), priority queue, heap sort ([heap.h](src/heap.h))
 - Graph algorithms
   - Graph data structure ([graph.h](src/graph.h))
   - Breadth-first and Depth-first search ([graph_search.h](src/graph_search.h))
@@ -41,6 +41,20 @@ The list of implemented algorithms.
   - Dijkstra shortest path ([graph_dijkstra.h](src/graph_dijkstra.h))
   - Kruskal's Minimal Spanning Tree ([graph_kruskal.h](src/graph_kruskal.h))
   - Prim's Minimal Spanning Tree ([graph_prim.h](src/graph_prim.h))
+  - Bellman-Ford shortest path algorithm (to be implemented)
+  - Floyd-Warshall shortest path algorithm (to be implemented)
+  - Johnson's shortest path algorithm (to be implemented)
+- Hash map with separate chaining collision resolution ([hash_map.h](src/hash_map.h))
+- Bloom filter ([bloom_filter.h](src/bloom_filter.h))
+- Greedy algorithms
+  - Huffman encoding ([huffman_encoding.h](src/huffman_encoding.h))
+- Dynamic programming
+  - Knapsack problem ([knapsack.h](src/knapsack.h))
+- Divide and conquer algorithms
+  - Karatsuba multiplication algorithm (to be implemented)
+  - Strassen's matrix multiplication algorithm (to be implemented)
+- NP-hard problems
+  - Travelling salesman problem (to be implemented)
 
 ## Prerequisites
 
