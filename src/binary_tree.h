@@ -302,7 +302,8 @@ namespace cs
     }
 
     /**
-     * @brief Deteles every node of specified tree.
+     * @brief Traverses a specified tree in a post-order
+     * fashion and calls destructor for each of its nodes.
      * @param root - tree root.
      * @tparam TBinaryTreeNode node type.
      */

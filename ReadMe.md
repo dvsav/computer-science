@@ -28,8 +28,19 @@ The list of implemented algorithms.
   - insertion sort
   - bubble sort
 - Merge sort ([merge_sort.h](src/merge_sort.h))
-- Quick sort ([quick_sort.h](quick_sort.h))
+- Quick sort ([quick_sort.h](src/quick_sort.h))
+- Binary search in a sorted array ([binary_search.h](src/binary_search.h))
 - [Trial division](https://en.wikipedia.org/wiki/Trial_division) ([prime.h](src/prime.h))
+- Binary search tree, AVL tree ([binary_tree.h](src/binary_tree.h))
+- Bloom filter ([bloom_filter.h](src/bloom_filter.h))
+- B-tree ([btree.h](src/btree.h))
+- Graph algorithms
+  - Graph data structure ([graph.h](src/graph.h))
+  - Breadth-first and Depth-first search ([graph_search.h](src/graph_search.h))
+  - Topological sort and Kosaraju's strongly connected components algorithm ([graph_topology.h](src/graph_topology.h))
+  - Dijkstra shortest path ([graph_dijkstra.h](src/graph_dijkstra.h))
+  - Kruskal's Minimal Spanning Tree ([graph_kruskal.h](src/graph_kruskal.h))
+  - Prim's Minimal Spanning Tree ([graph_prim.h](src/graph_prim.h))
 
 ## Prerequisites
 
