@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utility.h"
+
 #include <algorithm> // for std::swap, std::min_element
 #include <iterator>  // for std::next, std::prev
 
@@ -9,7 +11,8 @@ namespace cs
      * @brief Sort specified range of values using selection sort algorithm.
      * Idea: Find the minimal value and put it at the beginning of collection (N elements).
      * Then do the same for the rest of collection (N - 1 elements).
-     * Complexity: O(N^2).
+     * Time complexity: O(N^2).
+     * Space complexity: O(1).
      *
      * @tparam TIterator Iterator type (enough to be a forward iterator).
      * @tparam TComparator Comparator type (must have a static member function bool LessThan(const T& a, const T& b)

@@ -114,6 +114,11 @@ std::istream& operator>>(
     return is;
 }
 
+/**
+ * @brief Prints out a collection of elements specified by a 
+ * pair of iterators @p begin and @p end to a specified output stream @p os.
+ * The elements are separated by a specified @p delimeter.
+ */
 template <typename TIterator>
 void print(
     std::ostream& os,
@@ -125,6 +130,11 @@ void print(
         os << *i << delimeter;
 }
 
+/**
+ * @brief Prints out a collection of elements specified by a 
+ * pair of iterators @p begin and @p end to the standard output stream.
+ * The elements are separated by a specified @p delimeter.
+ */
 template <typename TIterator>
 void print(
     TIterator begin,
