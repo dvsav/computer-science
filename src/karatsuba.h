@@ -3,6 +3,10 @@
 #include "requires.h"
 
 #include <algorithm>
+#include <bitset>
+#include <cstdint>
+#include <iomanip>
+#include <sstream>
 #include <string>
 
 namespace cs
@@ -19,7 +23,7 @@ namespace cs
         // value[1] represents the next 8 bits (8...15), etc.
         // The sign of the number is stored in its most significant bit.
         // If the number is negative 
-        unsigned char* value;
+        uint8_t* value;
 
         // The number of bytes in the binary representation of the number.
         size_t nBytes;
@@ -30,8 +34,9 @@ namespace cs
          */
         VeryLongInteger(size_t size) :
             nBytes(size),
-            value(new unsigned char[nBytes])
+            value(new uint8_t[nBytes])
         {
+            Requires::ArgumentPositive(size, NAMEOF(size), FUNCTION_INFO);
             for (size_t i = 0; i < nBytes; i++)
                 value[i] = 0;
         }
@@ -42,7 +47,7 @@ namespace cs
          */
         VeryLongInteger(const VeryLongInteger& other) :
             nBytes(other.nBytes),
-            value(new unsigned char[other.nBytes])
+            value(new uint8_t[other.nBytes])
         {
             std::copy(other.value, other.value + nBytes, value);
         }
@@ -82,7 +87,7 @@ namespace cs
                 {
                     delete[] value;
                     nBytes = other.nBytes;
-                    value = new unsigned char[nBytes];
+                    value = new uint8_t[nBytes];
                 }
                 std::copy(other.value, other.value + nBytes, value);
             }
@@ -106,9 +111,48 @@ namespace cs
         }
 
     public:
+        template <typename T>
+        static VeryLongInteger FromInteger(T value)
+        {
+            static_assert(std::is_integral<T>::value, "T must be an integral type");
+            size_t nBytes = sizeof(T);
+            VeryLongInteger result(nBytes);
+            for (size_t i = 0; i < nBytes; ++i)
+                result.value[i] = static_cast<uint8_t>(i >> (8 * i));
+            return result;
+        }
+
         static VeryLongInteger FromDecimal(const std::string& decimal)
         {
+            std::string cleaned = decimal;
+            bool isPositive = true;
+            if (decimal.rfind("-", 0) == 0)
+            {
+                cleaned = decimal.substr(1);
+                isPositive = false;
+            }
+            else if (decimal.rfind("+", 0) == 0)
+            {
+                cleaned = decimal.substr(1);
+            }
+            Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
+            VeryLongInteger result(1);
+            size_t decIndex = cleaned.length();
+            while (true)
+            {
+                size_t start = std::max(decIndex - 9, 0ul);
+                std::string str = cleaned.substr(start, decIndex - start);
+                unsigned long val = std::stoul(/*str*/ str, /*pos*/ nullptr, /*base*/ 10);
+                result = result +
+                    VeryLongInteger::FromInteger(val) *
+                        Power(/*val*/ VeryLongInteger::FromInteger(10ul), /*power*/ cleaned.length() - decIndex);
+                decIndex = start;
+                if (decIndex <= 0)
+                    break;
+            }
+
+            return isPositive ? result : -result;
         }
 
         static VeryLongInteger FromHexadecimal(const std::string& hex)
@@ -117,6 +161,7 @@ namespace cs
             std::string cleaned = hex;
             if (hex.rfind("0x", 0) == 0 || hex.rfind("0X", 0) == 0)
                 cleaned = hex.substr(2);
+            Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             // total number of bytes required to store the number
             size_t lenBytes = (cleaned.length() + 1) / 2;
@@ -130,7 +175,7 @@ namespace cs
                 size_t start = std::max(hexIndex - 2, 0ul);
                 std::string byteStr = cleaned.substr(start, hexIndex - start);
                 // convert hex string to unsigned integer
-                result.value[i] = static_cast<unsigned char>(
+                result.value[i] = static_cast<uint8_t>(
                     std::stoul(/*str*/ byteStr, /*pos*/ nullptr, /*base*/ 16)
                 );
                 hexIndex = start;
@@ -144,6 +189,7 @@ namespace cs
             std::string cleaned = bin;
             if (bin.rfind("0b", 0) == 0 || bin.rfind("0B", 0) == 0)
                 cleaned = bin.substr(2);
+            Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             // total number of bytes required to store the number
             size_t lenBytes = (cleaned.length() + 7) / 8;
@@ -157,7 +203,7 @@ namespace cs
                 size_t start = std::max(bitIndex - 8, 0ul);
                 std::string byteStr = cleaned.substr(start, bitIndex - start);
                 // convert binary string to unsigned integer
-                result.value[i] = static_cast<unsigned char>(
+                result.value[i] = static_cast<uint8_t>(
                     std::stoul(/*str*/ byteStr, /*pos*/ nullptr, /*base*/ 2)
                 );
                 bitIndex = start;
@@ -200,26 +246,47 @@ namespace cs
             return result;
         }
 
+        VeryLongInteger operator-() const
+        {
+            VeryLongInteger result(nBytes);
+
+            for (size_t i = 0; i < nBytes; ++i)
+                result.value[i] ^= 0b11111111;
+
+            uint8_t carry = 1;
+            for (size_t i = 0; i < nBytes; ++i)
+            {
+                uint16_t sum = result.value[i] + carry;
+                result.value[i] = static_cast<uint8_t>(sum & 0xFF);
+                carry = sum >> 8;
+            }
+
+            return result;
+        }
+
         std::string ToDecimal() const;
 
-        std::string ToHexadecimal() const;
+        std::string ToHexadecimal() const
+        {
+            std::ostringstream oss;
+            for (size_t i = 0; i < nBytes; ++i)
+                oss << std::setw(2) << std::setfill('0') << std::hex << (int)value[nBytes - 1 - i];
+            return oss.str();
+        }
 
-        std::string ToBinary() const;
+        std::string ToBinary() const
+        {
+            std::ostringstream oss;
+            for (size_t i = 0; i < nBytes; ++i)
+                oss << std::bitset<8>(value[nBytes - 1 - i]);
+            std::string str = oss.str();
+            return str;
+        }
 
     public:
         friend VeryLongInteger operator+(
             const VeryLongInteger& lhs,
             const VeryLongInteger& rhs);
-        {
-            size_t maxSize = std::max(lhs.size(), rhs.size())
-            VeryLongInteger a = lhs.Extend(maxSize);
-            VeryLongInteger b = rhs.Extend(maxSize);
-
-            for (size_t i = 0; i < maxSize; ++i)
-            {
-                
-            }
-        }
 
         friend VeryLongInteger operator-(
             const VeryLongInteger& lhs,
@@ -236,11 +303,30 @@ namespace cs
 
     inline VeryLongInteger operator+(
         const VeryLongInteger& lhs,
-        const VeryLongInteger& rhs);
+        const VeryLongInteger& rhs)
+    {
+        size_t maxSize = std::max(lhs.size(), rhs.size());
+        VeryLongInteger a = lhs.Extend(maxSize);
+        VeryLongInteger b = rhs.Extend(maxSize);
+        VeryLongInteger result(maxSize + 1);
+
+        uint8_t carry = 0;
+        for (size_t i = 0; i < maxSize; ++i)
+        {
+            uint16_t sum = a.value[i] + b.value[i] + carry;
+            result.value[i] = static_cast<uint8_t>(sum & 0xFF);
+            carry = sum >> 8;
+        }
+
+        return result;
+    }
 
     inline VeryLongInteger operator-(
         const VeryLongInteger& lhs,
-        const VeryLongInteger& rhs);
+        const VeryLongInteger& rhs)
+    {
+        return lhs + (-rhs);
+    }
 
     inline VeryLongInteger operator*(
         const VeryLongInteger& lhs,
@@ -249,4 +335,14 @@ namespace cs
     inline VeryLongInteger operator/(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs);
+
+    inline VeryLongInteger Power(
+        const VeryLongInteger& val,
+        size_t power)
+    {
+        Requires::ArgumentNotNegative(power, NAMEOF(power), FUNCTION_INFO);
+        VeryLongInteger result = VeryLongInteger::FromInteger(1);
+        for (size_t i = 0; i < power; ++i)
+            result = result * val;
+    }
 }
