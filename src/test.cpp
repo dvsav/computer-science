@@ -7,6 +7,7 @@
 #include "hash_map.h"         // for cs::HashMap
 #include "heap.h"             // for cs::Heap
 #include "huffman_encoding.h" // for cs::HuffmanEncoding
+#include "karatsuba.h"        // for cs::VeryLongInteger
 #include "knapsack.h"         // for cs::PackKnapsack
 #include "merge_sort.h"       // for cs::merge_sort
 #include "quick_sort.h"       // for cs::quick_sort_lomuto_partition, cs::quick_sort_randomized_partition
