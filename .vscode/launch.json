@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "WSL Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/mnt/d/DVSAV/Projects/CPP/computer-science/build/GNUMake/bin/test.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "/mnt/d/DVSAV/Projects/CPP/computer-science",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "pipeTransport": {
+        "pipeProgram": "C:\\Windows\\Sysnative\\bash.exe",
+        "pipeArgs": ["-c"],
+        "debuggerPath": "/usr/bin/gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

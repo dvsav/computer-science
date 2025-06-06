@@ -69,5 +69,6 @@
         "variant": "cpp",
         "xstring": "cpp",
         "xlocale": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "D:/DVSAV/Projects/CPP/computer-science/build/CMake"
 }

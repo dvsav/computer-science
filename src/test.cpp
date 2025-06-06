@@ -28,6 +28,15 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "Catch2/catch.hpp"
 
+TEST_CASE("Karatsuba", "[karatsuba]")
+{
+    cs::VeryLongInteger x = cs::VeryLongInteger::FromBinary("0b01");
+    SECTION("merge_sort in ascending order")
+    {
+        REQUIRE(x.ToBinary() == "01");
+    }
+}
+
 TEST_CASE("Vectors are sorted", "[sort]")
 {
     std::vector<int> vec{ 5, 2, 8, 15, 48, 1, -6, 7, 3, 8, -10 };

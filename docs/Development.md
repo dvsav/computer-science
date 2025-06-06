@@ -1,0 +1,92 @@
+# How to Setup Development Environment
+
+This document will guide you through the process of setting up typical development environment on Linux and Windows.
+
+## On Windows
+
+Install WSL:
+```PowerShell
+wsl --install
+```
+
+## On Linux (including WSL)
+
+Install development tools:
+```bash
+sudo apt update
+sudo apt install build-essential gdb make cmake
+```
+
+## Visual Studio Code
+
+1. [Install VS Code](https://code.visualstudio.com/Download)
+
+2. Launch VS Code and install the following extensions:
+   - [C/C++ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack)
+   - [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack)
+
+### Build Command in VS Code
+
+#### WSL
+
+In VS Code you can setup build commands and run them directly from VS Code GUI via menu `Terminal > Run Build Task...` or `Terminal > Run Task...`.
+In order to do that you need to create `.vscode/tasks.json` file inside your workspace.
+To create a single build task that runs our build script `make.sh` from WSL on Windows you can create the following `.vscode/tasks.json` file:
+```json
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "(WSL) build debug version",
+            "type": "process",
+            "command": "wsl",
+            "args": [
+                "bash", "-c",
+                "cd \"$(wslpath '${workspaceFolder}')\" && ./make.sh -B DEBUG=yes"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}
+```
+Note that this task works under Windows only. Here's a detailed explanation of each line in the above file:  
+
+- `"label": "(WSL) build debug version"`
+  - A user-friendly name for the task.
+  - This label is shown in the Run Task menu and can be used in launch.json (as a preLaunchTask).
+  - You can choose any string, but it must be unique within the file.
+
+- `"type": "process"`
+  - Indicates the task runs a process directly, without going through the integrated shell.
+  - This means that command refers to a system executable (like wsl, make, python, etc.).
+
+- `"command": "wsl"`
+  - Specifies the executable to run.
+  - In this case, it's the wsl command, which launches a process inside Windows Subsystem for Linux.
+  - So, everything after this is interpreted inside the WSL environment.
+
+- `"args": [...]`
+- An array of arguments to pass to the command.
+- In this case:
+  - `"bash"`: runs the Bash shell inside WSL
+  - `"-c"`: tells Bash to execute the following command string
+  - `"cd \"$(wslpath '${workspaceFolder}')\" && ./make.sh -B DEBUG=yes"`: this is the actual shell command being run inside WSL:
+    - `$(wslpath ...)` converts the Windows path of `${workspaceFolder}` to a Linux-style path (`/mnt/...`)
+    - `cd` into that path
+    - then run the script `make.sh` with flags `-B DEBUG=yes`
+
+- `"group": { "kind": "build", "isDefault": false }`
+  - Organizes the task for VS Code’s UI:
+    - `"kind": "build"` marks this task as a build task (shown in the Build Task menu).
+    - `"isDefault": false` means this is not the default build task (i.e., not run automatically when you press `Ctrl+Shift+B`).
+
+- `"problemMatcher": []`
+  - Defines how VS Code should parse output from the task to detect errors/warnings.
+  - An empty array [] means no error parsing - output will just go to the terminal, but VS Code won't try to detect errors or navigate to files.
+  - You could attach a matcher like `$gcc` if you want VS Code to recognize compiler errors.

@@ -58,11 +58,11 @@ The list of implemented algorithms.
 
 ## Prerequisites
 
-On Linux install GNU Make and CMake build systems (example below is given for APT package manager which is used by default in Debian based Linux, e.g. Ubuntu and Linux Mint):
+On Linux install development tools (GCC, GDB, etc.), GNU Make and CMake build systems (example below is given for APT package manager which is used by default in Debian based Linux, e.g. Ubuntu and Linux Mint):
 
 ```bash
-sudo apt-get -y install make
-sudo apt-get -y install cmake
+sudo apt update
+sudo apt install build-essential gdb make cmake
 ```
 
 On Windows install CMake build system using [Chocolatey](https://chocolatey.org/) package manager:
