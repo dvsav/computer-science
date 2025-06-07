@@ -5,10 +5,10 @@
       "name": "WSL Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "/mnt/d/DVSAV/Projects/CPP/computer-science/build/GNUMake/bin/test.exe",
+      "program": "${command:extension.vscode-wsl-workspaceFolder}/build/GNUMake/bin/test.exe",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "/mnt/d/DVSAV/Projects/CPP/computer-science",
+      "cwd": "${command:extension.vscode-wsl-workspaceFolder}",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",
@@ -24,7 +24,10 @@
           "text": "-enable-pretty-printing",
           "ignoreFailures": true
         }
-      ]
+      ],
+      "sourceFileMap": {
+        "/mnt/d": "d:\\"
+      }
     }
   ]
 }

@@ -90,3 +90,46 @@ Note that this task works under Windows only. Here's a detailed explanation of e
   - Defines how VS Code should parse output from the task to detect errors/warnings.
   - An empty array [] means no error parsing - output will just go to the terminal, but VS Code won't try to detect errors or navigate to files.
   - You could attach a matcher like `$gcc` if you want VS Code to recognize compiler errors.
+
+### Debugging Command in VS Code
+
+#### WSL
+
+1. Install [WSL workspaceFolder](https://marketplace.visualstudio.com/items?itemName=lfurzewaddock.vscode-wsl-workspacefolder) extension in VS Code to be able to convert `"${workspaceFolder}"` to Linux style path.
+
+2. Create `.vscode/launch.json` file inside your workspace with the following content:
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "WSL Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:extension.vscode-wsl-workspaceFolder}/build/GNUMake/bin/test.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${command:extension.vscode-wsl-workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "pipeTransport": {
+        "pipeProgram": "C:\\Windows\\Sysnative\\bash.exe",
+        "pipeArgs": ["-c"],
+        "debuggerPath": "/usr/bin/gdb"
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "sourceFileMap": {
+        "/mnt/d": "d:\\"
+      }
+    }
+  ]
+}
+```

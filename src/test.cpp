@@ -30,11 +30,12 @@
 
 TEST_CASE("Karatsuba", "[karatsuba]")
 {
-    cs::VeryLongInteger x = cs::VeryLongInteger::FromBinary("0b01");
-    SECTION("merge_sort in ascending order")
-    {
-        REQUIRE(x.ToBinary() == "01");
-    }
+    cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(0xFF);
+
+    REQUIRE(x.size() == sizeof(0xFF));
+    REQUIRE(x.ToBinary() == "00000000000000000000000011111111");
+    REQUIRE(x.ToHexadecimal() == "000000FF");
+    REQUIRE(x.ToDecimal() == "255");
 }
 
 TEST_CASE("Vectors are sorted", "[sort]")

@@ -257,7 +257,7 @@ namespace cs
             size_t bitIndex = cleaned.length();
             for (size_t i = 0; i < lenBytes; ++i)
             {
-                size_t start = std::max(bitIndex - 8, 0ul);
+                size_t start = std::max(static_cast<int>(bitIndex) - 8, 0);
                 std::string byteStr = cleaned.substr(start, bitIndex - start);
                 // convert binary string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(
@@ -384,7 +384,7 @@ namespace cs
         {
             std::ostringstream oss;
             for (size_t i = 0; i < nBytes; ++i)
-                oss << std::setw(2) << std::setfill('0') << std::hex << (int)value[nBytes - 1 - i];
+                oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << (int)value[nBytes - 1 - i];
             return oss.str();
         }
 
@@ -393,8 +393,7 @@ namespace cs
             std::ostringstream oss;
             for (size_t i = 0; i < nBytes; ++i)
                 oss << std::bitset<8>(value[nBytes - 1 - i]);
-            std::string str = oss.str();
-            return str;
+            return oss.str();
         }
 
         void SetBit(size_t bit)
