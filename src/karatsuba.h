@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <vector>
+#include <utility>
 
 /*
 TODO
@@ -32,27 +34,25 @@ namespace cs
     class VeryLongInteger
     {
     private:
-        // The number of bytes in the binary representation of the number.
-        size_t nBytes;
-
         // Array containing binary representation of the number.
         // E.g. value[0] represents the least significant 8 bits of the number (0...7),
         // value[1] represents the next 8 bits (8...15), etc.
         // The sign of the number is stored in its most significant bit.
         // If the number is negative 
-        uint8_t* value;
+        std::vector<uint8_t> value;
 
         /**
          * @brief Creates a VeryLongInteger and initializes it to 0.
          * @param size - the number of bytes in the binary representation of the number.
          */
         VeryLongInteger(size_t size) :
-            nBytes(size),
-            value(new uint8_t[nBytes])
+            value(/*count*/ size, /*val*/ 0)
+        {}
+
+        void Prune()
         {
-            Requires::ArgumentPositive(size, NAMEOF(size), FUNCTION_INFO);
-            for (size_t i = 0; i < nBytes; i++)
-                value[i] = 0;
+            while ((value.back() == 0x00 || value.back() == 0xFF) && value.size() > 1)
+                value.pop_back();
         }
 
         static uint8_t shiftLeft(uint8_t val, int offset)
@@ -82,51 +82,22 @@ namespace cs
          * @brief Copy constructor
          */
         VeryLongInteger(const VeryLongInteger& other) :
-            nBytes(other.nBytes),
-            value(new uint8_t[other.nBytes])
-        {
-            std::copy(other.value, other.value + nBytes, value);
-        }
+            value(other.value)
+        {}
 
         /**
          * @brief Move constructor
          */
         VeryLongInteger(VeryLongInteger&& other) noexcept :
-            nBytes(other.nBytes),
-            value(other.value)
-        {
-            other.value = nullptr;
-            other.nBytes = 0;
-        }
-
-        /**
-         * @brief Destructor
-         */
-        ~VeryLongInteger()
-        {
-            if (value)
-            {
-                delete[] value;
-                value = nullptr;
-                nBytes = 0;
-            }
-        }
+            value(std::move(other.value))
+        {}
 
         /**
          * @brief Copy assignment operator
          */
         VeryLongInteger& operator=(const VeryLongInteger& other)
         {
-            if (this != &other)
-            {
-                if (nBytes != other.size())
-                {
-                    delete[] value;
-                    nBytes = other.nBytes;
-                    value = new uint8_t[nBytes];
-                }
-                std::copy(other.value, other.value + nBytes, value);
-            }
+            value = other.value;
             return *this;
         }
 
@@ -135,14 +106,7 @@ namespace cs
          */
         VeryLongInteger& operator=(VeryLongInteger&& other) noexcept
         {
-            if (this != &other)
-            {
-                delete[] value;
-                value = other.value;
-                nBytes = other.nBytes;
-                other.value = nullptr;
-                other.nBytes = 0;
-            }
+            value = std::move(other.value);
             return *this;
         }
 
@@ -274,7 +238,7 @@ namespace cs
          */
         size_t size() const
         {
-            return nBytes;
+            return value.size();
         }
 
         bool IsNonNegative() const
@@ -284,54 +248,42 @@ namespace cs
 
         bool IsNegative() const
         {
-            return (value[nBytes - 1] & 0x80) != 0;
-        }
-
-        bool IsPositive() const
-        {
-            if (IsNegative())
-                return false;
-
-            for (size_t i = 0; i < nBytes; ++i)
-            {
-                if (value[i])
-                    return true;
-            }
-
-            return false;
+            // Check the most significant (sign) bit
+            return (value.back() & 0x80) != 0;
         }
 
         bool IsZero() const
         {
-            for (size_t i = 0; i < nBytes; ++i)
+            for (const auto byte : value)
             {
-                if (value[i])
+                if (byte)
                     return false;
             }
             return true;
         }
 
-        VeryLongInteger Extend(size_t new_size) const
+        bool IsPositive() const
         {
-            Requires::That(new_size >= nBytes, FUNCTION_INFO);
+            return !IsNegative() && !IsZero();
+        }
 
-            if (new_size == nBytes)
+        VeryLongInteger Extended(size_t new_size) const
+        {
+            Requires::That(new_size >= size(), FUNCTION_INFO);
+
+            if (new_size == size())
                 return *this;
 
             VeryLongInteger result(new_size);
-            std::copy(result.value, result.value + nBytes, value);
+            std::copy(
+                /*First*/ value.cbegin(),
+                /*Last*/  value.cend(),
+                /*Dest*/  result.value.begin());
 
-            if (value[nBytes - 1] & 0b10000000)
+            if (IsNegative())
             {
-                // negative number
-                for (size_t i = nBytes; i < new_size; ++i)
-                    result.value[i] = 0b11111111;
-            }
-            else
-            {
-                // positive number
-                for (size_t i = nBytes; i < new_size; ++i)
-                    result.value[i] = 0b00000000;
+                for (size_t i = value.size(); i < new_size; ++i)
+                    result.value[i] = uint8_t(0xFF);
             }
 
             return result;
@@ -347,13 +299,13 @@ namespace cs
 
         VeryLongInteger operator-() const
         {
-            VeryLongInteger result(nBytes);
+            VeryLongInteger result(size());
 
-            for (size_t i = 0; i < nBytes; ++i)
-                result.value[i] ^= 0b11111111;
+            for (size_t i = 0; i < size(); ++i)
+                result.value[i] = value[i] ^ 0b11111111;
 
             uint8_t carry = 1;
-            for (size_t i = 0; i < nBytes; ++i)
+            for (size_t i = 0; i < size(); ++i)
             {
                 uint16_t sum = result.value[i] + carry;
                 result.value[i] = static_cast<uint8_t>(sum & 0xFF);
@@ -383,16 +335,16 @@ namespace cs
         std::string ToHexadecimal() const
         {
             std::ostringstream oss;
-            for (size_t i = 0; i < nBytes; ++i)
-                oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << (int)value[nBytes - 1 - i];
+            for (auto pbyte = value.rbegin(); pbyte != value.rend(); pbyte++)
+                oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << static_cast<int>(*pbyte);
             return oss.str();
         }
 
         std::string ToBinary() const
         {
             std::ostringstream oss;
-            for (size_t i = 0; i < nBytes; ++i)
-                oss << std::bitset<8>(value[nBytes - 1 - i]);
+            for (auto pbyte = value.rbegin(); pbyte != value.rend(); pbyte++)
+                oss << std::bitset<8>(*pbyte);
             return oss.str();
         }
 
@@ -428,22 +380,29 @@ namespace cs
             const VeryLongInteger& rhs);
     };
 
+    /**
+     * @brief Adds two VeryLongInteger numbers.
+     * @param lhs - the first number.
+     * @param rhs - the second number.
+     * @return The sum of the two numbers.
+     */
     inline VeryLongInteger operator+(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
         size_t maxSize = std::max(lhs.size(), rhs.size());
-        VeryLongInteger a = lhs.Extend(maxSize);
-        VeryLongInteger b = rhs.Extend(maxSize);
+        VeryLongInteger a = lhs.Extended(maxSize + 1);
+        VeryLongInteger b = rhs.Extended(maxSize + 1);
         VeryLongInteger result(maxSize + 1);
 
         uint8_t carry = 0;
-        for (size_t i = 0; i < maxSize; ++i)
+        for (size_t i = 0; i < result.size(); ++i)
         {
             uint16_t sum = a.value[i] + b.value[i] + carry;
             result.value[i] = static_cast<uint8_t>(sum & 0xFF);
             carry = sum >> 8;
         }
+        result.Prune();
 
         return result;
     }

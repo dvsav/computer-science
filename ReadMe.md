@@ -92,7 +92,9 @@ If the build is successful, you'll find the binary files in `build/GNUMake/bin` 
 ```bash
 ./cmake.sh
 ```
-If the build is successful, you'll find a binary executable `computer-science` in `build/CMake/gnumake` directory.
+If the build is successful, you'll find a binary executable `computer-science` in `build/CMake/gnumake` directory.  
+
+For more information about setting up development environment see [Development.md](docs/Development.md).
 
 ## Usage
 

@@ -133,3 +133,72 @@ Note that this task works under Windows only. Here's a detailed explanation of e
   ]
 }
 ```
+Note that this task works under Windows only. Here's a detailed explanation of each line in the above file:  
+
+- `"name": "WSL Debug"`
+  - Name shown in the Run and Debug panel in VS Code when selecting which debug configuration to run.
+
+- `"type": "cppdbg"`
+  - Debugger type, where cppdbg is for C++ using the Microsoft C/C++ debugger extension (ms-vscode.cpptools).
+
+- `"request": "launch"`
+  - This is a "launch" request (i.e., start the program), as opposed to an "attach" request (attach to a running process).
+
+- `"program": "${command:extension.vscode-wsl-workspaceFolder}/build/GNUMake/bin/test.exe"`
+  - Path to the executable you want to debug, here using: `${command:extension.vscode-wsl-workspaceFolder}` which resolves to the WSL-style path of your workspace folder (e.g., `/mnt/d/Projects/...`), even if VS Code is running in Windows mode. This avoids issues with backslashes in `${workspaceFolder}` when used across Windows/WSL boundaries.
+
+- `"args": []`
+  - An array of command-line arguments passed to the program being debugged.
+
+- `"stopAtEntry": false`
+  - If `true`, the debugger pauses at the program entry point (`main()`); if `false`, it runs until the first breakpoint or program termination.
+
+- `"cwd": "${command:extension.vscode-wsl-workspaceFolder}"`
+  - The current working directory of the launched program. Again, using the WSL path of the workspace.
+
+- `"environment": []`
+  - Set any environment variables to use during the debugging session. Empty means use the default environment.
+
+- `"externalConsole": false`
+  - If `true`, launches a new terminal window for input/output; false uses VS Code's built-in terminal.
+
+- `"MIMode": "gdb"`
+  - Specifies the debugger engine, `gdb` in this case.
+  - Enables the machine interface protocol (MI) that VS Code uses to communicate with GDB (i.e., structured messages, not plain CLI).
+  - Used with GDB in Linux/WSL environments.
+
+- `"miDebuggerPath": "/usr/bin/gdb"`
+  - Absolute path to GDB inside WSL.
+
+- 
+```json
+"pipeTransport": {
+  "pipeProgram": "C:\\Windows\\Sysnative\\bash.exe",
+  "pipeArgs": ["-c"],
+  "debuggerPath": "/usr/bin/gdb"
+}
+```
+  - This section tells VS Code to run GDB inside WSL, even if VS Code is running on Windows:
+  - `"pipeProgram": "C:\\Windows\\Sysnative\\bash.exe"`: This launches the WSL environment from Windows in a low-level way that works even from 32-bit VS Code.
+  - `"pipeArgs": ["-c"]`: Tells bash to treat the next string as a shell command.
+  - `"debuggerPath": "/usr/bin/gdb"`: The command `bash -c "/usr/bin/gdb"` gets executed in WSL to start the debugger.
+
+- 
+```json
+"setupCommands": [
+  {
+    "description": "Enable pretty-printing for gdb",
+    "text": "-enable-pretty-printing",
+    "ignoreFailures": true
+  }
+]
+```
+  - This sends a GDB command at startup to enable pretty-printing of STL containers, useful for C++ debugging.
+
+- 
+```json
+"sourceFileMap": {
+  "/mnt/d": "d:\\"
+}
+```
+  - Tells VS Code how to map paths between WSL (Linux) and Windows: When GDB says `"breakpoint at /mnt/d/Project/file.cpp"`, VS Code can find and open `d:\Project\file.cpp`.
