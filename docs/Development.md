@@ -98,41 +98,41 @@ Note that this task works under Windows only. Here's a detailed explanation of e
 1. Install [WSL workspaceFolder](https://marketplace.visualstudio.com/items?itemName=lfurzewaddock.vscode-wsl-workspacefolder) extension in VS Code to be able to convert `"${workspaceFolder}"` to Linux style path.
 
 2. Create `.vscode/launch.json` file inside your workspace with the following content:
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "WSL Debug",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${command:extension.vscode-wsl-workspaceFolder}/build/GNUMake/bin/test.exe",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${command:extension.vscode-wsl-workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "/usr/bin/gdb",
-      "pipeTransport": {
-        "pipeProgram": "C:\\Windows\\Sysnative\\bash.exe",
-        "pipeArgs": ["-c"],
-        "debuggerPath": "/usr/bin/gdb"
-      },
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
+  ```json
+  {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "WSL Debug",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${command:extension.vscode-wsl-workspaceFolder}/build/GNUMake/bin/test.exe",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${command:extension.vscode-wsl-workspaceFolder}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "miDebuggerPath": "/usr/bin/gdb",
+        "pipeTransport": {
+          "pipeProgram": "C:\\Windows\\Sysnative\\bash.exe",
+          "pipeArgs": ["-c"],
+          "debuggerPath": "/usr/bin/gdb"
+        },
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ],
+        "sourceFileMap": {
+          "/mnt/d": "d:\\"
         }
-      ],
-      "sourceFileMap": {
-        "/mnt/d": "d:\\"
       }
-    }
-  ]
-}
-```
+    ]
+  }
+  ```
 Note that this task works under Windows only. Here's a detailed explanation of each line in the above file:  
 
 - `"name": "WSL Debug"`
@@ -170,35 +170,32 @@ Note that this task works under Windows only. Here's a detailed explanation of e
 - `"miDebuggerPath": "/usr/bin/gdb"`
   - Absolute path to GDB inside WSL.
 
-- 
-```json
-"pipeTransport": {
-  "pipeProgram": "C:\\Windows\\Sysnative\\bash.exe",
-  "pipeArgs": ["-c"],
-  "debuggerPath": "/usr/bin/gdb"
-}
-```
+- ```json
+  "pipeTransport": {
+    "pipeProgram": "C:\\Windows\\Sysnative\\bash.exe",
+    "pipeArgs": ["-c"],
+    "debuggerPath": "/usr/bin/gdb"
+  }
+  ```
   - This section tells VS Code to run GDB inside WSL, even if VS Code is running on Windows:
   - `"pipeProgram": "C:\\Windows\\Sysnative\\bash.exe"`: This launches the WSL environment from Windows in a low-level way that works even from 32-bit VS Code.
   - `"pipeArgs": ["-c"]`: Tells bash to treat the next string as a shell command.
   - `"debuggerPath": "/usr/bin/gdb"`: The command `bash -c "/usr/bin/gdb"` gets executed in WSL to start the debugger.
 
-- 
-```json
-"setupCommands": [
-  {
-    "description": "Enable pretty-printing for gdb",
-    "text": "-enable-pretty-printing",
-    "ignoreFailures": true
-  }
-]
-```
+- ```json
+  "setupCommands": [
+    {
+      "description": "Enable pretty-printing for gdb",
+      "text": "-enable-pretty-printing",
+      "ignoreFailures": true
+    }
+  ]
+  ```
   - This sends a GDB command at startup to enable pretty-printing of STL containers, useful for C++ debugging.
 
-- 
-```json
-"sourceFileMap": {
-  "/mnt/d": "d:\\"
-}
-```
+- ```json
+  "sourceFileMap": {
+    "/mnt/d": "d:\\"
+  }
+  ```
   - Tells VS Code how to map paths between WSL (Linux) and Windows: When GDB says `"breakpoint at /mnt/d/Project/file.cpp"`, VS Code can find and open `d:\Project\file.cpp`.
