@@ -136,31 +136,31 @@ Note that this task works under Windows only. Here's a detailed explanation of e
 Note that this task works under Windows only. Here's a detailed explanation of each line in the above file:  
 
 - `"name": "WSL Debug"`
-  - Name shown in the Run and Debug panel in VS Code when selecting which debug configuration to run.
+  Name shown in the Run and Debug panel in VS Code when selecting which debug configuration to run.
 
 - `"type": "cppdbg"`
-  - Debugger type, where cppdbg is for C++ using the Microsoft C/C++ debugger extension (ms-vscode.cpptools).
+  Debugger type, where cppdbg is for C++ using the Microsoft C/C++ debugger extension (ms-vscode.cpptools).
 
 - `"request": "launch"`
-  - This is a "launch" request (i.e., start the program), as opposed to an "attach" request (attach to a running process).
+  This is a "launch" request (i.e., start the program), as opposed to an "attach" request (attach to a running process).
 
 - `"program": "${command:extension.vscode-wsl-workspaceFolder}/build/GNUMake/bin/test.exe"`
-  - Path to the executable you want to debug, here using: `${command:extension.vscode-wsl-workspaceFolder}` which resolves to the WSL-style path of your workspace folder (e.g., `/mnt/d/Projects/...`), even if VS Code is running in Windows mode. This avoids issues with backslashes in `${workspaceFolder}` when used across Windows/WSL boundaries.
+  Path to the executable you want to debug, here using: `${command:extension.vscode-wsl-workspaceFolder}` which resolves to the WSL-style path of your workspace folder (e.g., `/mnt/d/Projects/...`), even if VS Code is running in Windows mode. This avoids issues with backslashes in `${workspaceFolder}` when used across Windows/WSL boundaries.
 
 - `"args": []`
-  - An array of command-line arguments passed to the program being debugged.
+  An array of command-line arguments passed to the program being debugged.
 
 - `"stopAtEntry": false`
-  - If `true`, the debugger pauses at the program entry point (`main()`); if `false`, it runs until the first breakpoint or program termination.
+  If `true`, the debugger pauses at the program entry point (`main()`); if `false`, it runs until the first breakpoint or program termination.
 
 - `"cwd": "${command:extension.vscode-wsl-workspaceFolder}"`
-  - The current working directory of the launched program. Again, using the WSL path of the workspace.
+  The current working directory of the launched program. Again, using the WSL path of the workspace.
 
 - `"environment": []`
-  - Set any environment variables to use during the debugging session. Empty means use the default environment.
+  Set any environment variables to use during the debugging session. Empty means use the default environment.
 
 - `"externalConsole": false`
-  - If `true`, launches a new terminal window for input/output; false uses VS Code's built-in terminal.
+  If `true`, launches a new terminal window for input/output; false uses VS Code's built-in terminal.
 
 - `"MIMode": "gdb"`
   - Specifies the debugger engine, `gdb` in this case.
@@ -168,7 +168,7 @@ Note that this task works under Windows only. Here's a detailed explanation of e
   - Used with GDB in Linux/WSL environments.
 
 - `"miDebuggerPath": "/usr/bin/gdb"`
-  - Absolute path to GDB inside WSL.
+  Absolute path to GDB inside WSL.
 
 - ```json
   "pipeTransport": {
@@ -191,11 +191,11 @@ Note that this task works under Windows only. Here's a detailed explanation of e
     }
   ]
   ```
-  - This sends a GDB command at startup to enable pretty-printing of STL containers, useful for C++ debugging.
+  This sends a GDB command at startup to enable pretty-printing of STL containers, useful for C++ debugging.
 
 - ```json
   "sourceFileMap": {
     "/mnt/d": "d:\\"
   }
   ```
-  - Tells VS Code how to map paths between WSL (Linux) and Windows: When GDB says `"breakpoint at /mnt/d/Project/file.cpp"`, VS Code can find and open `d:\Project\file.cpp`.
+  Tells VS Code how to map paths between WSL (Linux) and Windows: When GDB says `"breakpoint at /mnt/d/Project/file.cpp"`, VS Code can find and open `d:\Project\file.cpp`.

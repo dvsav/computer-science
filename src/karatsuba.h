@@ -49,6 +49,13 @@ namespace cs
             value(/*count*/ size, /*val*/ 0)
         {}
 
+        /**
+         * @brief Removes redundant leading bytes from the value vector.
+         *
+         * This function trims the `value` vector by removing trailing bytes that are either 0x00 or 0xFF,
+         * as long as there is more than one byte remaining. This is typically used to eliminate unnecessary
+         * sign-extension bytes in a representation of a multi-byte integer.
+         */
         void Prune()
         {
             while ((value.back() == 0x00 || value.back() == 0xFF) && value.size() > 1)
@@ -110,23 +117,38 @@ namespace cs
             return *this;
         }
 
+        /**
+         * @brief Arithmetic shift left by a specified number @p N of bits.
+         * @param N - the number of bits to shift to the left.
+         * @return The shifted number.
+         */
         VeryLongInteger operator<<(size_t N) const
         {
-            const size_t newSize = (this->size() + 7) / 8;
+            const size_t newSize = (this->size() + N + 7) / 8;
             VeryLongInteger result(newSize);
+
+            // Shift every byte of the number to the left by the specified number of bits N.
+            // Most significant bits of an i-th byte get combined with (i+1)th byte.
 
             // result.value[0] = shiftLeft(this->value[0], N);
             // result.value[1] = shiftLeft(this->value[0], N - 8)  | shiftLeft(this->value[1], N);
             // result.value[2] = shiftLeft(this->value[0], N - 16) | shiftLeft(this->value[1], N - 8) | shiftLeft(this->value[2], N);
             // ...
 
+            // Iterate over all bytes of the number
             for (size_t i = 0; i < result.size(); ++i)
             {
-                for (size_t j = 0; j <= i; ++j)
+                // We consider only 2 bytes whose shifted bits can affect i-th byte of the resulting number:
+                // The 1st byte is (i - N / 8)th and the 2nd one is (i - N / 8 - 1)th.
+                const size_t j = N / 8;
+                if (j <= i)
                 {
                     result.value[i] |= shiftLeft(this->value[i - j], N - 8 * j);
+                    if (N % 8 && j + 1 <= i)
+                        result.value[i] |= shiftLeft(this->value[i - (j + 1)], N - 8 * (j + 1));
                 }
             }
+            result.Prune();
 
             return result;
         }
