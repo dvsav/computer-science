@@ -184,7 +184,7 @@ namespace cs
             size_t decIndex = cleaned.length();
             while (true)
             {
-                size_t start = std::max(decIndex - 9, 0ul);
+                size_t start = std::max(decIndex - 9, 0ull);
                 std::string str = cleaned.substr(start, decIndex - start);
                 unsigned long val = std::stoul(/*str*/ str, /*pos*/ nullptr, /*base*/ 10);
                 result = result +
@@ -215,7 +215,7 @@ namespace cs
             size_t hexIndex = cleaned.length();
             for (size_t i = 0; i < lenBytes; ++i)
             {
-                size_t start = std::max(hexIndex - 2, 0ul);
+                size_t start = std::max(hexIndex - 2, 0ull);
                 std::string byteStr = cleaned.substr(start, hexIndex - start);
                 // convert hex string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(

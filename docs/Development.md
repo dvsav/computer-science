@@ -34,8 +34,6 @@ In order to do that you need to create `.vscode/tasks.json` file inside your wor
 To create a single build task that runs our build script `make.sh` from WSL on Windows you can create the following `.vscode/tasks.json` file:
 ```json
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
@@ -68,7 +66,7 @@ Note that this task works under Windows only. Here's a detailed explanation of e
 
 - `"command": "wsl"`
   - Specifies the executable to run.
-  - In this case, it's the wsl command, which launches a process inside Windows Subsystem for Linux.
+  - In this case, it's the `wsl` command, which launches a process inside Windows Subsystem for Linux.
   - So, everything after this is interpreted inside the WSL environment.
 
 - `"args": [...]`
@@ -139,7 +137,7 @@ Note that this task works under Windows only. Here's a detailed explanation of e
   Name shown in the Run and Debug panel in VS Code when selecting which debug configuration to run.
 
 - `"type": "cppdbg"`
-  Debugger type, where cppdbg is for C++ using the Microsoft C/C++ debugger extension (ms-vscode.cpptools).
+  Debugger type (debugger backend to use), where `cppdbg` is for C++ using the Microsoft C/C++ debugger extension (ms-vscode.cpptools) which supports **gdb**, **lldb** and **Microsoft's C++ debugger**. 
 
 - `"request": "launch"`
   This is a "launch" request (i.e., start the program), as opposed to an "attach" request (attach to a running process).
