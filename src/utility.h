@@ -63,6 +63,22 @@ inline void skip_whitespace(std::istream& is)
 }
 
 /**
+ * @brief Removes leading spaces from the given string.
+ *
+ * This function modifies the input string by erasing all leading space characters.
+ * If the string consists entirely of spaces, it will be cleared and become empty.
+ *
+ * @param str Reference to the string to be trimmed.
+ */
+inline void trim_leading_spaces(std::string& str)
+{
+    if (size_t start = str.find_first_not_of(' ') != std::string::npos)
+        str.erase(0, start);
+    else // The string is all spaces
+        str.clear();
+}
+
+/**
  * @brief Reads and discards a single line beginning with specified string @p comment_begins_with.
  * @param is - input stream
  * @param comment_begins_with - the string that begins the comment

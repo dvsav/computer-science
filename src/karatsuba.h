@@ -4,10 +4,12 @@
 
 #include <algorithm>
 #include <bitset>
+#include <cctype>
 #include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <utility>
 
@@ -43,7 +45,7 @@ namespace cs
 
         /**
          * @brief Creates a VeryLongInteger and initializes it to 0.
-         * @param size - the number of bytes in the binary representation of the number.
+         * @param size the number of bytes in the binary representation of the number.
          */
         VeryLongInteger(size_t size) :
             value(/*count*/ size, /*val*/ 0)
@@ -79,7 +81,7 @@ namespace cs
 
             int index = 0;
             while (value >>= 1)
-                ++index;
+                index++;
 
             return index;
         }
@@ -120,7 +122,7 @@ namespace cs
         /**
          * @brief Arithmetic shift left by a specified number @p N of bits.
          * Preserves the sign of the number.
-         * @param N - the number of bits to shift to the left.
+         * @param N the number of bits to shift to the left.
          * @return The shifted number.
          */
         VeryLongInteger operator<<(size_t N) const
@@ -170,7 +172,7 @@ namespace cs
          *
          * @tparam T An integral type (e.g., int, long, uint64_t).
          * @param value The integral value to convert.
-         * @return VeryLongInteger The resulting VeryLongInteger object.
+         * @return The resulting VeryLongInteger object.
          *
          * @note A static assertion ensures that T is an integral type.
          */
@@ -187,17 +189,23 @@ namespace cs
 
         static VeryLongInteger FromDecimal(const std::string& decimal)
         {
-            std::string cleaned = decimal;
-            bool isPositive = true;
-            if (decimal.rfind("-", 0) == 0)
+            size_t startPosition = 0;
+
+            // exclude leading spaces
+            while (std::isspace(decimal[startPosition]))
+                startPosition++;
+
+            // search for the sign
+            bool isNegative = false;
+            if (decimal.rfind('-', startPosition) == startPosition)
             {
-                cleaned = decimal.substr(1);
-                isPositive = false;
+                isNegative = true;
+                startPosition++;
             }
-            else if (decimal.rfind("+", 0) == 0)
-            {
-                cleaned = decimal.substr(1);
-            }
+            else if (decimal.rfind('+', startPosition) == startPosition)
+                startPosition++;
+
+            std::string cleaned = decimal.substr(startPosition);
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             VeryLongInteger result(1);
@@ -215,15 +223,31 @@ namespace cs
                     break;
             }
 
-            return isPositive ? result : -result;
+            return isNegative ? -result : result;
         }
 
+        /**
+         * @brief Constructs a VeryLongInteger from a string
+         * representing the number in hexadecimal format.
+         * The string may optionally have a prefix "0x" or "0X".
+         * The string is always interpreted as an unsigned integer.
+         * @param hex the string representing the number in hexadecimal format.
+         * @return The resulting VeryLongInteger object.
+         */
         static VeryLongInteger FromHexadecimal(const std::string& hex)
         {
-            // number with removed prefix "0x" or "OX"
-            std::string cleaned = hex;
-            if (hex.rfind("0x", 0) == 0 || hex.rfind("0X", 0) == 0)
-                cleaned = hex.substr(2);
+            size_t startPosition = 0;
+
+            // exclude leading spaces
+            while (std::isspace(hex[startPosition]))
+                startPosition++;
+
+            // search for prefix "0x" or "OX"
+            if (hex.rfind("0x", startPosition) == startPosition || hex.rfind("0X", startPosition) == startPosition)
+                startPosition += 2;
+
+            // string containing only hex digits
+            std::string cleaned = hex.substr(startPosition);
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             // total number of bytes required to store the number
