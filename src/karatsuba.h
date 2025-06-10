@@ -270,12 +270,28 @@ namespace cs
             return result;
         }
 
+        /**
+         * @brief Constructs a VeryLongInteger from a string
+         * representing the number in binary format.
+         * The string may optionally have a prefix "0b" or "0B".
+         * The string is always interpreted as an unsigned integer.
+         * @param bin the string representing the number in binary format.
+         * @return The resulting VeryLongInteger object.
+         */
         static VeryLongInteger FromBinary(const std::string& bin)
         {
-            // number with removed prefix "0b" or "0B"
-            std::string cleaned = bin;
-            if (bin.rfind("0b", 0) == 0 || bin.rfind("0B", 0) == 0)
-                cleaned = bin.substr(2);
+            size_t startPosition = 0;
+
+            // exclude leading spaces
+            while (std::isspace(bin[startPosition]))
+                startPosition++;
+
+            // search for prefix "0b" or "0B"
+            if (bin.rfind("0b", startPosition) == startPosition || bin.rfind("0B", startPosition) == startPosition)
+                startPosition += 2;
+
+            // string containing only binary digits
+            std::string cleaned = bin.substr(startPosition);
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             // total number of bytes required to store the number
@@ -307,17 +323,26 @@ namespace cs
             return value.size();
         }
 
+        /**
+         * @brief Returns true if the number is non-negative.
+         */
         bool IsNonNegative() const
         {
             return !IsNegative();
         }
 
+        /**
+         * @brief Returns true if the number is negative.
+         */
         bool IsNegative() const
         {
             // Check the most significant (sign) bit
             return (value.back() & 0x80) != 0;
         }
 
+        /**
+         * @brief Returns true if the number is zero.
+         */
         bool IsZero() const
         {
             for (const auto byte : value)
@@ -328,11 +353,20 @@ namespace cs
             return true;
         }
 
+        /**
+         * @brief Returns true if the number is positive.
+         */
         bool IsPositive() const
         {
             return !IsNegative() && !IsZero();
         }
 
+        /**
+         * @brief Returns a sign-extended copy of the number.
+         * @param new_size The size of extended number
+         * (must be greater or equal to the size of the original number).
+         * @return The extended number.
+         */
         VeryLongInteger Extended(size_t new_size) const
         {
             Requires::That(new_size >= size(), FUNCTION_INFO);
@@ -342,12 +376,13 @@ namespace cs
 
             VeryLongInteger result(new_size);
             std::copy(
-                /*First*/ value.cbegin(),
-                /*Last*/  value.cend(),
+                /*First*/ this->value.cbegin(),
+                /*Last*/  this->value.cend(),
                 /*Dest*/  result.value.begin());
 
-            if (IsNegative())
+            if (this->IsNegative())
             {
+                // Fill the most significant bytes of the result with 1's
                 for (size_t i = value.size(); i < new_size; ++i)
                     result.value[i] = uint8_t(0xFF);
             }
@@ -355,6 +390,9 @@ namespace cs
             return result;
         }
 
+        /**
+         * @brief Returns the absoulute value of the number.
+         */
         VeryLongInteger Abs() const
         {
             if (this->IsNonNegative())
@@ -363,6 +401,9 @@ namespace cs
                 return -(*this);
         }
 
+        /**
+         * @brief Returns the negated copy of the number.
+         */
         VeryLongInteger operator-() const
         {
             VeryLongInteger result(size());
@@ -398,6 +439,11 @@ namespace cs
             return result;
         }
 
+        /**
+         * @brief Returns a string representing the number in hex format.
+         * The number is always treated as unsigned
+         * (no "-" sign is added even if the unmber is negative).
+         */
         std::string ToHexadecimal() const
         {
             std::ostringstream oss;
@@ -406,6 +452,11 @@ namespace cs
             return oss.str();
         }
 
+        /**
+         * @brief Returns a string representing the number in binary format.
+         * The number is always treated as unsigned.
+         * (no "-" sign is added even if the unmber is negative).
+         */
         std::string ToBinary() const
         {
             std::ostringstream oss;
@@ -414,16 +465,26 @@ namespace cs
             return oss.str();
         }
 
+        /**
+         * @brief Sets a specified bit of the number to 1.
+         * @param bit The position of the bit to be set to 1.
+         */
         void SetBit(size_t bit)
         {
             const size_t byteNum = bit / 8;
+            Requires::That(byteNum < size(), FUNCTION_INFO);
             const size_t bitNum = bit % 8;
             this->value[byteNum] |= (1 << bitNum);
         }
 
+        /**
+         * @brief Sets a specified bit of the number to 0.
+         * @param bit The position of the bit to be set to 0.
+         */
         void ClearBit(size_t bit)
         {
             const size_t byteNum = bit / 8;
+            Requires::That(byteNum < size(), FUNCTION_INFO);
             const size_t bitNum = bit % 8;
             this->value[byteNum] &= ~(1 << bitNum);
         }
@@ -448,8 +509,8 @@ namespace cs
 
     /**
      * @brief Adds two VeryLongInteger numbers.
-     * @param lhs - the first number.
-     * @param rhs - the second number.
+     * @param lhs the first number.
+     * @param rhs the second number.
      * @return The sum of the two numbers.
      */
     inline VeryLongInteger operator+(
@@ -473,6 +534,12 @@ namespace cs
         return result;
     }
 
+    /**
+     * @brief Subtracts @p rhs from @p lhs.
+     * @param lhs The minuend.
+     * @param rhs The subtrahend.
+     * @return The difference of the minuend and the subtrahend.
+     */
     inline VeryLongInteger operator-(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
@@ -484,16 +551,17 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        VeryLongInteger smaller = lhs.size() < rhs.size() ? lhs : rhs;
-        VeryLongInteger larger = lhs.size() >= rhs.size() ? lhs : rhs;
+        const VeryLongInteger& smaller = lhs.size() < rhs.size() ? lhs : rhs;
+        const VeryLongInteger& larger = lhs.size() >= rhs.size() ? lhs : rhs;
         VeryLongInteger result(smaller.size() + larger.size());
+        // Iterate over the bytes of the smaller number
         for (size_t i = 0; i < smaller.size(); ++i)
         {
             for (size_t bitNum = 0; bitNum < 8; ++bitNum)
             {
                 uint8_t smallerBit = (smaller.value[i] >> bitNum) & 0x01;
                 if (smallerBit)
-                    result = result + (result << (bitNum + 8 * i));
+                    result = result + (larger << (8 * i + bitNum));
             }
         }
         return result;
