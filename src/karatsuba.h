@@ -60,8 +60,15 @@ namespace cs
          */
         void Prune()
         {
-            while ((value.back() == 0x00 || value.back() == 0xFF) && value.size() > 1)
-                value.pop_back();
+            while (value.size() > 1)
+            {
+                if ( value[size() - 1] == 0x00 && ( (value[size() - 2] & 0b10000000) == 0 ) )
+                    value.pop_back();
+                else if ( value[size() - 1] == 0xFF && ( (value[size() - 2] & 0b10000000) != 0 ) )
+                    value.pop_back();
+                else
+                    break;
+            }
         }
 
         static uint8_t shiftLeft(uint8_t val, int offset)
@@ -205,19 +212,20 @@ namespace cs
             else if (decimal.rfind('+', startPosition) == startPosition)
                 startPosition++;
 
+            // string containing only decimal digits
             std::string cleaned = decimal.substr(startPosition);
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
-            VeryLongInteger result(1);
+            VeryLongInteger result = FromInteger<uint8_t>(0);
             size_t decIndex = cleaned.length();
             while (true)
             {
-                size_t start = std::max<size_t>(decIndex - 9, 0);
+                int start = std::max<int>(decIndex - 9, 0);
                 std::string str = cleaned.substr(start, decIndex - start);
                 unsigned long val = std::stoul(/*str*/ str, /*pos*/ nullptr, /*base*/ 10);
                 result = result +
                     VeryLongInteger::FromInteger(val) *
-                        Power(/*val*/ VeryLongInteger::FromInteger(10ul), /*power*/ cleaned.length() - decIndex);
+                        Power(/*val*/ VeryLongInteger::FromInteger<uint8_t>(10), /*power*/ cleaned.length() - decIndex);
                 decIndex = start;
                 if (decIndex <= 0)
                     break;
@@ -425,13 +433,14 @@ namespace cs
         std::string ToDecimal() const
         {
             VeryLongInteger copy = *this;
-            const VeryLongInteger zero = FromInteger(0);
+            const VeryLongInteger zero = FromInteger<uint8_t>(0);
+            const VeryLongInteger ten = FromInteger<uint8_t>(10);
             std::string result = "";
 
             while (copy.IsPositive())
             {
-                VeryLongInteger quotient = copy / FromInteger(10);
-                VeryLongInteger remainder = copy - quotient * FromInteger(10);
+                VeryLongInteger quotient = copy / ten;
+                VeryLongInteger remainder = copy - quotient * ten;
                 result.insert(/*pos*/ 0, /*str*/ std::to_string(value[0]));
                 copy = quotient;
             }
@@ -547,6 +556,12 @@ namespace cs
         return lhs + (-rhs);
     }
 
+    /**
+     * @brief Multiplies @p lhs by @p rhs.
+     * @param lhs The mutiplicand.
+     * @param rhs The multiplier.
+     * @return The product of the mutiplicand and the multiplier.
+     */
     inline VeryLongInteger operator*(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
@@ -629,12 +644,23 @@ namespace cs
         return !(lhs == rhs);
     }
 
+    /**
+     * @brief Computes the power of a VeryLongInteger raised to a non-negative integer exponent.
+     *
+     * This function calculates @p val raised to the power of @p power (i.e., val^power).
+     * The exponent must be non-negative; otherwise, an exception is thrown.
+     *
+     * @param val The base value as a VeryLongInteger.
+     * @param power The non-negative integer exponent.
+     * @return The result of val raised to the power of 'power'.
+     * @throws std::invalid_argument if 'power' is negative.
+     */
     inline VeryLongInteger Power(
         const VeryLongInteger& val,
         size_t power)
     {
         Requires::ArgumentNotNegative(power, NAMEOF(power), FUNCTION_INFO);
-        VeryLongInteger result = VeryLongInteger::FromInteger(1);
+        VeryLongInteger result = VeryLongInteger::FromInteger<uint8_t>(1);
         for (size_t i = 0; i < power; ++i)
             result = result * val;
         return result;

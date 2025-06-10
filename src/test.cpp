@@ -183,6 +183,44 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE(z.ToBinary() == "11011101");
         REQUIRE(z.ToHexadecimal() == "DD");
     }
+
+    SECTION("x * y")
+    {
+        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(5);
+        cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(70);
+        cs::VeryLongInteger z = x * y; // 5 * 70 = 350
+
+        REQUIRE(z.size() == 2 * sizeof(uint8_t));
+        REQUIRE_FALSE(z.IsNegative());
+        REQUIRE(z.IsNonNegative());
+        REQUIRE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "0000000101011110");
+        REQUIRE(z.ToHexadecimal() == "015E");
+    }
+
+    SECTION("Power")
+    {
+        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger<uint8_t>(10);
+
+        REQUIRE(cs::Power(x, 0) == cs::VeryLongInteger::FromInteger<uint8_t>(1));
+        REQUIRE(cs::Power(x, 1) == cs::VeryLongInteger::FromInteger<uint8_t>(10));
+        REQUIRE(cs::Power(x, 2) == cs::VeryLongInteger::FromInteger<uint8_t>(100));
+        REQUIRE(cs::Power(x, 3) == cs::VeryLongInteger::FromInteger<uint16_t>(1000));
+    }
+
+    SECTION("FromDecimal")
+    {
+        cs::VeryLongInteger z = cs::VeryLongInteger::FromDecimal("123");
+
+        REQUIRE(z.size() == sizeof(uint8_t));
+        REQUIRE_FALSE(z.IsNegative());
+        REQUIRE(z.IsNonNegative());
+        REQUIRE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "01111011");
+        REQUIRE(z.ToHexadecimal() == "7B");
+    }
 }
 
 TEST_CASE("Vectors are sorted", "[sort]")
