@@ -67,7 +67,7 @@ namespace cs
             if (offset > 0)
                 return static_cast<uint8_t>(val << offset);
             else if (offset < 0)
-                return static_cast<uint8_t>(val >> offset);
+                return static_cast<uint8_t>(val >> (-offset));
             else
                 return val;
         }
@@ -119,34 +119,41 @@ namespace cs
 
         /**
          * @brief Arithmetic shift left by a specified number @p N of bits.
+         * Preserves the sign of the number.
          * @param N - the number of bits to shift to the left.
          * @return The shifted number.
          */
         VeryLongInteger operator<<(size_t N) const
         {
-            const size_t newSize = (this->size() + N + 7) / 8;
+            Requires::ArgumentNotNegative(N, NAMEOF(N), FUNCTION_INFO);
+            if (N == 0)
+                return *this;
+
+            const size_t newSize = (this->size() * 8 + N + 7) / 8;
             VeryLongInteger result(newSize);
 
             // Shift every byte of the number to the left by the specified number of bits N.
-            // Most significant bits of an i-th byte get combined with (i+1)th byte.
-
-            // result.value[0] = shiftLeft(this->value[0], N);
-            // result.value[1] = shiftLeft(this->value[0], N - 8)  | shiftLeft(this->value[1], N);
-            // result.value[2] = shiftLeft(this->value[0], N - 16) | shiftLeft(this->value[1], N - 8) | shiftLeft(this->value[2], N);
-            // ...
 
             // Iterate over all bytes of the number
             for (size_t i = 0; i < result.size(); ++i)
             {
                 // We consider only 2 bytes whose shifted bits can affect i-th byte of the resulting number:
-                // The 1st byte is (i - N / 8)th and the 2nd one is (i - N / 8 - 1)th.
-                const size_t j = N / 8;
-                if (j <= i)
-                {
-                    result.value[i] |= shiftLeft(this->value[i - j], N - 8 * j);
-                    if (N % 8 && j + 1 <= i)
-                        result.value[i] |= shiftLeft(this->value[i - (j + 1)], N - 8 * (j + 1));
-                }
+
+                // The 1st byte is (i - N/8)th ...
+                int j = i - N / 8;
+                if (j >= 0 && j < (int)this->size())
+                    result.value[i] |= shiftLeft(this->value[j], N % 8);
+
+                // The 2nd byte is (i - N/8 - 1)th.
+                j = j - 1;
+                if (N % 8 && j >= 0 && j < (int)this->size())
+                    result.value[i] |= shiftLeft(this->value[j], N % 8 - 8);
+            }
+            
+            if (this->IsNegative())
+            {
+                // Fill the most significant bits of the result with 1's
+                result.value.back() |= (0xFF << (N % 8));
             }
             result.Prune();
 
@@ -154,6 +161,19 @@ namespace cs
         }
 
     public:
+        /**
+         * @brief Constructs a VeryLongInteger from an integral value.
+         *
+         * This static template function creates a VeryLongInteger instance by converting
+         * the given integral value into its byte representation. The bytes are stored in
+         * little-endian order (least significant byte first).
+         *
+         * @tparam T An integral type (e.g., int, long, uint64_t).
+         * @param value The integral value to convert.
+         * @return VeryLongInteger The resulting VeryLongInteger object.
+         *
+         * @note A static assertion ensures that T is an integral type.
+         */
         template <typename T>
         static VeryLongInteger FromInteger(T value)
         {
@@ -184,7 +204,7 @@ namespace cs
             size_t decIndex = cleaned.length();
             while (true)
             {
-                size_t start = std::max(decIndex - 9, 0ull);
+                size_t start = std::max<size_t>(decIndex - 9, 0);
                 std::string str = cleaned.substr(start, decIndex - start);
                 unsigned long val = std::stoul(/*str*/ str, /*pos*/ nullptr, /*base*/ 10);
                 result = result +
@@ -215,7 +235,7 @@ namespace cs
             size_t hexIndex = cleaned.length();
             for (size_t i = 0; i < lenBytes; ++i)
             {
-                size_t start = std::max(hexIndex - 2, 0ull);
+                size_t start = std::max<size_t>(hexIndex - 2, 0);
                 std::string byteStr = cleaned.substr(start, hexIndex - start);
                 // convert hex string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(
@@ -293,7 +313,7 @@ namespace cs
         {
             Requires::That(new_size >= size(), FUNCTION_INFO);
 
-            if (new_size == size())
+            if (new_size == this->size())
                 return *this;
 
             VeryLongInteger result(new_size);

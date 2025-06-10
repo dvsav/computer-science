@@ -50,75 +50,96 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     REQUIRE(y.ToBinary() == "00000001");
     REQUIRE(y.ToHexadecimal() == "01");
 
-    cs::VeryLongInteger z = x.Extended(2 * sizeof(uint8_t));
+    SECTION("Extend x")
+    {
+        cs::VeryLongInteger z = x.Extended(2 * sizeof(uint8_t));
 
-    REQUIRE(z.size() == 2 * sizeof(uint8_t));
-    REQUIRE(z.IsNegative());
-    REQUIRE_FALSE(z.IsNonNegative());
-    REQUIRE_FALSE(z.IsPositive());
-    REQUIRE_FALSE(z.IsZero());
-    REQUIRE(z.ToBinary() == "1111111111111111");
-    REQUIRE(z.ToHexadecimal() == "FFFF");
+        REQUIRE(z.size() == 2 * sizeof(uint8_t));
+        REQUIRE(z.IsNegative());
+        REQUIRE_FALSE(z.IsNonNegative());
+        REQUIRE_FALSE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "1111111111111111");
+        REQUIRE(z.ToHexadecimal() == "FFFF");
+    }
 
-    z = y.Extended(2 * sizeof(uint8_t));
+    SECTION("Extend y")
+    {
+        cs::VeryLongInteger z = y.Extended(2 * sizeof(uint8_t));
 
-    REQUIRE(z.size() == 2 * sizeof(uint8_t));
-    REQUIRE_FALSE(z.IsNegative());
-    REQUIRE(z.IsNonNegative());
-    REQUIRE(z.IsPositive());
-    REQUIRE_FALSE(z.IsZero());
-    REQUIRE(z.ToBinary() == "0000000000000001");
-    REQUIRE(z.ToHexadecimal() == "0001");
+        REQUIRE(z.size() == 2 * sizeof(uint8_t));
+        REQUIRE_FALSE(z.IsNegative());
+        REQUIRE(z.IsNonNegative());
+        REQUIRE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "0000000000000001");
+        REQUIRE(z.ToHexadecimal() == "0001");
+    }
 
-    z = x + y;
+    SECTION("x + y")
+    {
+        cs::VeryLongInteger z = x + y;
 
-    REQUIRE(z.size() == sizeof(uint8_t));
-    REQUIRE_FALSE(z.IsNegative());
-    REQUIRE(z.IsNonNegative());
-    REQUIRE_FALSE(z.IsPositive());
-    REQUIRE(z.IsZero());
-    REQUIRE(z.ToBinary() == "00000000");
-    REQUIRE(z.ToHexadecimal() == "00");
+        REQUIRE(z.size() == sizeof(uint8_t));
+        REQUIRE_FALSE(z.IsNegative());
+        REQUIRE(z.IsNonNegative());
+        REQUIRE_FALSE(z.IsPositive());
+        REQUIRE(z.IsZero());
+        REQUIRE(z.ToBinary() == "00000000");
+        REQUIRE(z.ToHexadecimal() == "00");
+    }
 
-    cs::VeryLongInteger minus_y = -y;
+    SECTION("-y")
+    {
+        cs::VeryLongInteger z = -y;
 
-    REQUIRE(minus_y.size() == sizeof(int8_t));
-    REQUIRE(minus_y.IsNegative());
-    REQUIRE_FALSE(minus_y.IsNonNegative());
-    REQUIRE_FALSE(minus_y.IsPositive());
-    REQUIRE_FALSE(minus_y.IsZero());
-    REQUIRE(minus_y.ToBinary() == "11111111");
-    REQUIRE(minus_y.ToHexadecimal() == "FF");
+        REQUIRE(z.size() == sizeof(int8_t));
+        REQUIRE(z.IsNegative());
+        REQUIRE_FALSE(z.IsNonNegative());
+        REQUIRE_FALSE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "11111111");
+        REQUIRE(z.ToHexadecimal() == "FF");
+    }
 
-    z = x - y;
+    SECTION("x - y")
+    {
+        cs::VeryLongInteger z = x - y;
 
-    REQUIRE(z.size() == sizeof(uint8_t));
-    REQUIRE(z.IsNegative());
-    REQUIRE_FALSE(z.IsNonNegative());
-    REQUIRE_FALSE(z.IsPositive());
-    REQUIRE_FALSE(z.IsZero());
-    REQUIRE(z.ToBinary() == "11111110");
-    REQUIRE(z.ToHexadecimal() == "FE");
+        REQUIRE(z.size() == sizeof(uint8_t));
+        REQUIRE(z.IsNegative());
+        REQUIRE_FALSE(z.IsNonNegative());
+        REQUIRE_FALSE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "11111110");
+        REQUIRE(z.ToHexadecimal() == "FE");
+    }
 
-    z = x << 1; // (-1) << 1 = -2
+    SECTION("x << 1")
+    {
+        cs::VeryLongInteger z = x << 1; // (-1) << 1 = -2
 
-    REQUIRE(z.size() == sizeof(uint8_t));
-    REQUIRE(z.IsNegative());
-    REQUIRE_FALSE(z.IsNonNegative());
-    REQUIRE_FALSE(z.IsPositive());
-    REQUIRE_FALSE(z.IsZero());
-    REQUIRE(z.ToBinary() == "11111110");
-    REQUIRE(z.ToHexadecimal() == "FE");
+        REQUIRE(z.size() == sizeof(uint8_t));
+        REQUIRE(z.IsNegative());
+        REQUIRE_FALSE(z.IsNonNegative());
+        REQUIRE_FALSE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "11111110");
+        REQUIRE(z.ToHexadecimal() == "FE");
+    }
 
-    z = y << 1; // 1 << 1 = 2
+    SECTION("y << 1")
+    {
+        cs::VeryLongInteger z = y << 1; // 1 << 1 = 2
 
-    REQUIRE(z.size() == sizeof(uint8_t));
-    REQUIRE_FALSE(z.IsNegative());
-    REQUIRE(z.IsNonNegative());
-    REQUIRE(z.IsPositive());
-    REQUIRE_FALSE(z.IsZero());
-    REQUIRE(z.ToBinary() == "00000010");
-    REQUIRE(z.ToHexadecimal() == "02");
+        REQUIRE(z.size() == sizeof(uint8_t));
+        REQUIRE_FALSE(z.IsNegative());
+        REQUIRE(z.IsNonNegative());
+        REQUIRE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "00000010");
+        REQUIRE(z.ToHexadecimal() == "02");
+    }
 }
 
 TEST_CASE("Vectors are sorted", "[sort]")
