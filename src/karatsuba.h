@@ -15,10 +15,8 @@
 #include <utility>
 
 /*
-TODO
-1. Implement bitwise operators (&, |).
-2. Check where const and move can be applied.
-3. Cleanup and optimize unit tests.
+1. Check where const and move can be applied.
+2. Cleanup and optimize unit tests.
 */
 
 namespace cs
@@ -160,6 +158,22 @@ namespace cs
             }
             result.Prune();
 
+            return result;
+        }
+
+        /**
+         * @brief Bitwise NOT operator for VeryLongInteger.
+         *
+         * Creates a copy of the current VeryLongInteger and applies the bitwise NOT operation
+         * to each byte in its internal value representation. Returns the resulting VeryLongInteger.
+         *
+         * @return A new VeryLongInteger with each byte inverted.
+         */
+        VeryLongInteger operator~() const
+        {
+            VeryLongInteger result(*this);
+            for (auto byte : result.value)
+                byte = ~byte;
             return result;
         }
 
@@ -515,6 +529,18 @@ namespace cs
         friend VeryLongInteger operator/(
             const VeryLongInteger& lhs,
             const VeryLongInteger& rhs);
+
+        friend VeryLongInteger operator|(
+            const VeryLongInteger& lhs,
+            const VeryLongInteger& rhs);
+
+        friend VeryLongInteger operator&(
+            const VeryLongInteger& lhs,
+            const VeryLongInteger& rhs);
+
+        friend VeryLongInteger operator^(
+            const VeryLongInteger& lhs,
+            const VeryLongInteger& rhs);
     };
 
     /**
@@ -618,6 +644,90 @@ namespace cs
             }
         }
         return resultIsNegative ? -result : result;
+    }
+
+    /**
+     * @brief Bitwise OR operator for VeryLongInteger objects.
+     *
+     * Performs a bitwise OR operation between two VeryLongInteger instances.
+     * The operands are first extended to the same size (the maximum of their sizes plus one)
+     * to ensure correct bitwise operation across all digits. The result is a new VeryLongInteger
+     * containing the bitwise OR of the corresponding digits.
+     *
+     * @param lhs The left-hand side VeryLongInteger operand.
+     * @param rhs The right-hand side VeryLongInteger operand.
+     * @return VeryLongInteger The result of the bitwise OR operation.
+     */
+    inline VeryLongInteger operator|(
+        const VeryLongInteger& lhs,
+        const VeryLongInteger& rhs)
+    {
+        size_t maxSize = std::max(lhs.size(), rhs.size());
+        VeryLongInteger a = lhs.Extended(maxSize + 1);
+        VeryLongInteger b = rhs.Extended(maxSize + 1);
+        VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
+
+        for (size_t i = 0; i < result.size(); i++)
+        {
+            result.value[i] = a.value[i] | b.value[i];
+        }
+        return result;
+    }
+
+    /**
+     * @brief Bitwise AND operator for VeryLongInteger objects.
+     *
+     * Performs a bitwise AND operation between two VeryLongInteger instances.
+     * The operands are first extended to the same size (the maximum of their sizes plus one)
+     * to ensure correct bitwise operation across all digits. The result is a new VeryLongInteger
+     * containing the bitwise AND of the corresponding digits.
+     *
+     * @param lhs The left-hand side VeryLongInteger operand.
+     * @param rhs The right-hand side VeryLongInteger operand.
+     * @return VeryLongInteger The result of the bitwise AND operation.
+     */
+    inline VeryLongInteger operator&(
+        const VeryLongInteger& lhs,
+        const VeryLongInteger& rhs)
+    {
+        size_t maxSize = std::max(lhs.size(), rhs.size());
+        VeryLongInteger a = lhs.Extended(maxSize + 1);
+        VeryLongInteger b = rhs.Extended(maxSize + 1);
+        VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
+
+        for (size_t i = 0; i < result.size(); i++)
+        {
+            result.value[i] = a.value[i] & b.value[i];
+        }
+        return result;
+    }
+
+    /**
+     * @brief Bitwise XOR operator for VeryLongInteger objects.
+     *
+     * Performs a bitwise XOR operation between two VeryLongInteger instances.
+     * The operands are first extended to the same size (the maximum of their sizes plus one)
+     * to ensure correct bitwise operation across all digits. The result is a new VeryLongInteger
+     * containing the bitwise XOR of the corresponding digits.
+     *
+     * @param lhs The left-hand side VeryLongInteger operand.
+     * @param rhs The right-hand side VeryLongInteger operand.
+     * @return VeryLongInteger The result of the bitwise XOR operation.
+     */
+    inline VeryLongInteger operator^(
+        const VeryLongInteger& lhs,
+        const VeryLongInteger& rhs)
+    {
+        size_t maxSize = std::max(lhs.size(), rhs.size());
+        VeryLongInteger a = lhs.Extended(maxSize + 1);
+        VeryLongInteger b = rhs.Extended(maxSize + 1);
+        VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
+
+        for (size_t i = 0; i < result.size(); i++)
+        {
+            result.value[i] = a.value[i] ^ b.value[i];
+        }
+        return result;
     }
 
     /**
