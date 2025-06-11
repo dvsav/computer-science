@@ -193,7 +193,8 @@ Note that this task works under Windows only. Here's a detailed explanation of e
 
 - ```json
   "sourceFileMap": {
+    "/mnt/c": "c:\\",
     "/mnt/d": "d:\\"
   }
   ```
-  Tells VS Code how to map paths between WSL (Linux) and Windows: When GDB says `"breakpoint at /mnt/d/Project/file.cpp"`, VS Code can find and open `d:\Project\file.cpp`.
+  Tells VS Code how to map paths between WSL (Linux) and Windows. For example, when GDB says `"breakpoint at /mnt/d/Project/file.cpp"`, VS Code can find and open `d:\Project\file.cpp`.

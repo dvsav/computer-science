@@ -1,6 +1,7 @@
 #pragma once
 
 #include "requires.h"
+#include "utility.h"
 
 #include <algorithm>
 #include <bitset>
@@ -19,6 +20,7 @@ TODO
 2. Implement bitwise operators (&, |).
 3. Add doxygen comments to all methods.
 4. Check where const and move can be applied.
+5. Cleanup and optimize unit tests.
 */
 
 namespace cs
@@ -69,28 +71,6 @@ namespace cs
                 else
                     break;
             }
-        }
-
-        static uint8_t shiftLeft(uint8_t val, int offset)
-        {
-            if (offset > 0)
-                return static_cast<uint8_t>(val << offset);
-            else if (offset < 0)
-                return static_cast<uint8_t>(val >> (-offset));
-            else
-                return val;
-        }
-
-        static int highestBit(uint8_t value)
-        {
-            if (value == 0)
-                return -1;
-
-            int index = 0;
-            while (value >>= 1)
-                index++;
-
-            return index;
         }
 
     public:
@@ -194,6 +174,13 @@ namespace cs
             return result;
         }
 
+        /**
+         * @brief Constructs a VeryLongInteger from a string
+         * representing the number in decimal format.
+         * The string may optionally contain a sign "+" or "-".
+         * @param decimal the string representing the number in decimal format.
+         * @return The resulting VeryLongInteger object.
+         */
         static VeryLongInteger FromDecimal(const std::string& decimal)
         {
             size_t startPosition = 0;
@@ -329,6 +316,25 @@ namespace cs
         size_t size() const
         {
             return value.size();
+        }
+
+        /**
+         * @brief Returns the index of the highest nonzero bit of the number.
+         * 
+         * This function computes the position of the most significant bit set to 1 in the number
+         * If the number equals 0, the function returns -1.
+         * 
+         * @return int The index (0-based) of the highest set bit, or -1 if the number is 0.
+         */
+        int HighestBit() const
+        {
+            for (int i = size() - 1; i >= 0; i--)
+            {
+                const int bit = highestBit(value[i]);
+                if (bit >= 0)
+                    return bit + i * 8;
+            }
+            return -1;
         }
 
         /**
@@ -582,24 +588,41 @@ namespace cs
         return result;
     }
 
+    /**
+     * @brief Divides @p lhs by @p rhs (integral division).
+     * The quatient is always truncated towards zero,
+     * e.g. 10 / 3 = 3, -10 / 3 = -3, 10 / -3 = -3.
+     * @param lhs The dividend.
+     * @param rhs The divisor.
+     * @return The quatient of the dividend and the divisor.
+     */
     inline VeryLongInteger operator/(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        int lhsHighestBit = VeryLongInteger::highestBit(lhs.value[lhs.size() - 1]);
-        int rhsHighestBit = VeryLongInteger::highestBit(rhs.value[lhs.size() - 1]);
+        bool resultIsNegative = lhs.IsNegative() ^ rhs.IsNegative();
+
+        VeryLongInteger lhs_copy = lhs.Abs();
+        VeryLongInteger rhs_copy = rhs.Abs();
+
+        int lhsHighestBit = lhs_copy.HighestBit();
+        int rhsHighestBit = rhs_copy.HighestBit();
+
         if (lhsHighestBit < rhsHighestBit)
             return VeryLongInteger::FromInteger(0);
 
         VeryLongInteger result((lhsHighestBit - rhsHighestBit + 7) / 8);
-        VeryLongInteger copy = lhs;
+
         for (int i = lhsHighestBit - rhsHighestBit; i >= 0; --i)
         {
-            copy = copy - (rhs << i);
-            if (copy.IsPositive())
+            VeryLongInteger remainder = lhs_copy - (rhs_copy << i);
+            if (remainder.IsNonNegative())
+            {
                 result.SetBit(i);
+                lhs_copy = remainder;
+            }
         }
-        return result;
+        return resultIsNegative ? -result : result;
     }
 
     bool operator>(

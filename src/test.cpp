@@ -221,6 +221,20 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE(z.ToBinary() == "01111011");
         REQUIRE(z.ToHexadecimal() == "7B");
     }
+
+    SECTION("x / y")
+    {
+        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(15);
+        cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(3);
+        REQUIRE(x / y == cs::VeryLongInteger::FromInteger<uint8_t>(5));;
+    }
+
+    SECTION("x / y")
+    {
+        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(17);
+        cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(-3);
+        REQUIRE(x / y == cs::VeryLongInteger::FromInteger<int8_t>(-5));;
+    }
 }
 
 TEST_CASE("Vectors are sorted", "[sort]")
