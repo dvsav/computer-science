@@ -534,6 +534,10 @@ namespace cs
             const VeryLongInteger& lhs,
             const VeryLongInteger& rhs);
 
+        friend VeryLongInteger Karatsuba(
+            const VeryLongInteger& lhs,
+            const VeryLongInteger& rhs);
+
         friend VeryLongInteger operator/(
             const VeryLongInteger& lhs,
             const VeryLongInteger& rhs);
@@ -593,6 +597,7 @@ namespace cs
 
     /**
      * @brief Multiplies @p lhs by @p rhs.
+     * Time complexity: O(N^2) where N is the number of binary digits in the mupltiplied numbers.
      * @param lhs The mutiplicand.
      * @param rhs The multiplier.
      * @return The product of the mutiplicand and the multiplier.
@@ -615,6 +620,27 @@ namespace cs
             }
         }
         return result;
+    }
+
+    /**
+     * @brief Multiplies @p lhs by @p rhs using Karatsuba algorithm.
+     * Time complexity: O(N^log2(3)) ~ O(N^1.585) where N is the number of
+     * binary digits in the numbers being mupltiplied.
+     * @param lhs The mutiplicand.
+     * @param rhs The multiplier.
+     * @return The product of the mutiplicand and the multiplier.
+     */
+    inline VeryLongInteger Karatsuba(
+        const VeryLongInteger& lhs,
+        const VeryLongInteger& rhs)
+    {
+        // lhs = a * 2^(N/2) + b
+        // rhs = c * 2^(N/2) + d
+        // lhs * rhs = ac * 2^N + (ad + bc) * 2^(N/2) + bd
+        // 1. Compute: ac
+        // 2. Compute: bd
+        // 3. Compute: (ad + bc) = (a + b)(c + d) - ac - bd
+        throw std::runtime_error("This function is not implemented yet.");
     }
 
     /**
