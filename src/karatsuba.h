@@ -15,8 +15,8 @@
 #include <utility>
 
 /*
-1. Check where const and move can be applied.
-2. Cleanup and optimize unit tests.
+TODO:
+Cleanup and optimize unit tests.
 */
 
 namespace cs
@@ -38,17 +38,19 @@ namespace cs
         // E.g. value[0] represents the least significant 8 bits of the number (0...7),
         // value[1] represents the next 8 bits (8...15), etc.
         // The sign of the number is stored in its most significant bit.
-        // If the number is negative 
+        // If the number is negative it's stored in two's complement format.
         std::vector<uint8_t> value;
 
         /**
-         * @brief Creates a VeryLongInteger and initializes it to 0.
+         * @brief Creates a VeryLongInteger with @p size bytes and initializes all of its bytes to a specified value @p val.
          * @param size The number of bytes in the binary representation of the number.
          * @param val The value used to intialize each byte in the binary representation of the number.
          */
         VeryLongInteger(size_t size, uint8_t val) :
             value(/*count*/ size, /*val*/ val)
-        {}
+        {
+            Requires::ArgumentPositive(size, NAMEOF(size), FUNCTION_INFO);
+        }
 
         /**
          * @brief Removes redundant leading bytes from the value vector.
@@ -136,7 +138,7 @@ namespace cs
             // Shift every byte of the number to the left by the specified number of bits N.
 
             // Iterate over all bytes of the number
-            for (size_t i = 0; i < result.size(); ++i)
+            for (size_t i = 0; i < result.size(); i++)
             {
                 // We consider only 2 bytes whose shifted bits can affect i-th byte of the resulting number:
 
@@ -172,7 +174,7 @@ namespace cs
         VeryLongInteger operator~() const
         {
             VeryLongInteger result(*this);
-            for (auto byte : result.value)
+            for (auto& byte : result.value)
                 byte = ~byte;
             return result;
         }
@@ -204,13 +206,14 @@ namespace cs
                 startPosition++;
 
             // string containing only decimal digits
-            std::string cleaned = decimal.substr(startPosition);
+            const std::string cleaned = decimal.substr(startPosition);
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             VeryLongInteger result{uint8_t(0)};
             size_t decIndex = cleaned.length();
             while (true)
             {
+                // Convert groups of 9 decimal digits (less than 1 billion which fits to a 32 bit integer) to a number and add to the result.
                 int start = std::max<int>(decIndex - 9, 0);
                 std::string str = cleaned.substr(start, decIndex - start);
                 unsigned long val = std::stoul(/*str*/ str, /*pos*/ nullptr, /*base*/ 10);
@@ -246,19 +249,19 @@ namespace cs
                 startPosition += 2;
 
             // string containing only hex digits
-            std::string cleaned = hex.substr(startPosition);
+            const std::string cleaned = hex.substr(startPosition);
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             // total number of bytes required to store the number
-            size_t lenBytes = (cleaned.length() + 1) / 2;
+            const size_t lenBytes = (cleaned.length() + 1) / 2;
             VeryLongInteger result(/*size*/ lenBytes, /*val*/ 0);
 
             // iterate over the 2-hex digits (1 byte) groups of symbols in the string
             // moving from the end towards the beginning of the string
             size_t hexIndex = cleaned.length();
-            for (size_t i = 0; i < lenBytes; ++i)
+            for (size_t i = 0; i < lenBytes; i++)
             {
-                size_t start = std::max<size_t>(hexIndex - 2, 0);
+                const size_t start = std::max<size_t>(hexIndex - 2, 0);
                 std::string byteStr = cleaned.substr(start, hexIndex - start);
                 // convert hex string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(
@@ -290,19 +293,19 @@ namespace cs
                 startPosition += 2;
 
             // string containing only binary digits
-            std::string cleaned = bin.substr(startPosition);
+            const std::string cleaned = bin.substr(startPosition);
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             // total number of bytes required to store the number
-            size_t lenBytes = (cleaned.length() + 7) / 8;
+            const size_t lenBytes = (cleaned.length() + 7) / 8;
             VeryLongInteger result(/*size*/ lenBytes, /*val*/ 0);
 
             // iterate over the 8-bit (1 byte) groups of symbols in the string
             // moving from the end towards the beginning of the string
             size_t bitIndex = cleaned.length();
-            for (size_t i = 0; i < lenBytes; ++i)
+            for (size_t i = 0; i < lenBytes; i++)
             {
-                size_t start = std::max(static_cast<int>(bitIndex) - 8, 0);
+                const size_t start = std::max(static_cast<int>(bitIndex) - 8, 0);
                 std::string byteStr = cleaned.substr(start, bitIndex - start);
                 // convert binary string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(
@@ -355,7 +358,7 @@ namespace cs
         bool IsNegative() const
         {
             // Check the most significant (sign) bit
-            return (value.back() & 0x80) != 0;
+            return (value.back() & 0b10000000) != 0;
         }
 
         /**
@@ -401,7 +404,7 @@ namespace cs
             if (this->IsNegative())
             {
                 // Fill the most significant bytes of the result with 1's
-                for (size_t i = value.size(); i < new_size; ++i)
+                for (size_t i = value.size(); i < new_size; i++)
                     result.value[i] = uint8_t(0xFF);
             }
 
@@ -426,13 +429,13 @@ namespace cs
         {
             VeryLongInteger result(/*size*/ size(), /*val*/ 0);
 
-            for (size_t i = 0; i < size(); ++i)
+            for (size_t i = 0; i < size(); i++)
                 result.value[i] = value[i] ^ 0b11111111;
 
             uint8_t carry = 1;
-            for (size_t i = 0; i < size(); ++i)
+            for (size_t i = 0; i < size(); i++)
             {
-                uint16_t sum = result.value[i] + carry;
+                const uint16_t sum = result.value[i] + carry;
                 result.value[i] = static_cast<uint8_t>(sum & 0xFF);
                 carry = sum >> 8;
             }
@@ -442,23 +445,28 @@ namespace cs
 
         /**
          * @brief Returns a string representing the number in decimal format.
-         * The number is always treated as unsigned
-         * (no "-" sign is added even if the unmber is negative).
+         * The number is always treated as signed.
+         * "-" is added at the front if the number is negative.
          */
         std::string ToDecimal() const
         {
+            if (this->IsZero())
+                return "0";
+
             VeryLongInteger copy = this->Abs();
-            const VeryLongInteger zero{uint8_t(0)};
             const VeryLongInteger ten{uint8_t(10)};
-            std::string result = this->IsNegative() ? "-" : "";
+            std::string result = "";
 
             while (copy.IsPositive())
             {
                 VeryLongInteger quotient = copy / ten;
-                VeryLongInteger remainder = copy - quotient * ten;
-                result.insert(/*pos*/ 0, /*str*/ std::to_string(value[0]));
-                copy = quotient;
+                const VeryLongInteger remainder = copy - quotient * ten;
+                result.insert(/*pos*/ 0, /*str*/ std::to_string(remainder.value[0]));
+                copy = std::move(quotient);
             }
+
+            if (this->IsNegative())
+                result.insert(/*pos*/ result.begin(), /*char*/ '-');
 
             return result;
         }
@@ -471,7 +479,7 @@ namespace cs
         std::string ToHexadecimal() const
         {
             std::ostringstream oss;
-            for (auto pbyte = value.rbegin(); pbyte != value.rend(); pbyte++)
+            for (auto pbyte = value.rbegin(); pbyte != value.rend(); ++pbyte)
                 oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << static_cast<int>(*pbyte);
             return oss.str();
         }
@@ -484,7 +492,7 @@ namespace cs
         std::string ToBinary() const
         {
             std::ostringstream oss;
-            for (auto pbyte = value.rbegin(); pbyte != value.rend(); pbyte++)
+            for (auto pbyte = value.rbegin(); pbyte != value.rend(); ++pbyte)
                 oss << std::bitset<8>(*pbyte);
             return oss.str();
         }
@@ -553,15 +561,15 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        size_t maxSize = std::max(lhs.size(), rhs.size());
-        VeryLongInteger a = lhs.Extended(maxSize + 1);
-        VeryLongInteger b = rhs.Extended(maxSize + 1);
+        const size_t maxSize = std::max(lhs.size(), rhs.size());
+        const VeryLongInteger a = lhs.Extended(maxSize + 1);
+        const VeryLongInteger b = rhs.Extended(maxSize + 1);
         VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
 
         uint8_t carry = 0;
-        for (size_t i = 0; i < result.size(); ++i)
+        for (size_t i = 0; i < result.size(); i++)
         {
-            uint16_t sum = a.value[i] + b.value[i] + carry;
+            const uint16_t sum = a.value[i] + b.value[i] + carry;
             result.value[i] = static_cast<uint8_t>(sum & 0xFF);
             carry = sum >> 8;
         }
@@ -597,11 +605,11 @@ namespace cs
         const VeryLongInteger& larger = lhs.size() >= rhs.size() ? lhs : rhs;
         VeryLongInteger result(/*size*/ smaller.size() + larger.size(), /*val*/ 0);
         // Iterate over the bytes of the smaller number
-        for (size_t i = 0; i < smaller.size(); ++i)
+        for (size_t i = 0; i < smaller.size(); i++)
         {
-            for (size_t bitNum = 0; bitNum < 8; ++bitNum)
+            for (size_t bitNum = 0; bitNum < 8; bitNum++)
             {
-                uint8_t smallerBit = (smaller.value[i] >> bitNum) & 0x01;
+                const uint8_t smallerBit = (smaller.value[i] >> bitNum) & 0x01;
                 if (smallerBit)
                     result = result + (larger << (8 * i + bitNum));
             }
@@ -621,18 +629,20 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        bool resultIsNegative = lhs.IsNegative() ^ rhs.IsNegative();
+        const bool resultIsNegative = lhs.IsNegative() ^ rhs.IsNegative();
 
         VeryLongInteger lhs_copy = lhs.Abs();
         VeryLongInteger rhs_copy = rhs.Abs();
 
-        int lhsHighestBit = lhs_copy.HighestBit();
-        int rhsHighestBit = rhs_copy.HighestBit();
+        const int lhsHighestBit = lhs_copy.HighestBit();
+        const int rhsHighestBit = rhs_copy.HighestBit();
 
         if (lhsHighestBit < rhsHighestBit)
             return VeryLongInteger{uint8_t(0)};
 
-        VeryLongInteger result(/*size*/ (lhsHighestBit - rhsHighestBit + 7) / 8, /*val*/ 0);
+        VeryLongInteger result(
+            /*size*/ std::max((lhsHighestBit - rhsHighestBit + 7) / 8, 1),
+            /*val*/ 0);
 
         for (int i = lhsHighestBit - rhsHighestBit; i >= 0; --i)
         {
@@ -640,7 +650,7 @@ namespace cs
             if (remainder.IsNonNegative())
             {
                 result.SetBit(i);
-                lhs_copy = remainder;
+                lhs_copy = std::move(remainder);
             }
         }
         return resultIsNegative ? -result : result;
@@ -662,9 +672,9 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        size_t maxSize = std::max(lhs.size(), rhs.size());
-        VeryLongInteger a = lhs.Extended(maxSize + 1);
-        VeryLongInteger b = rhs.Extended(maxSize + 1);
+        const size_t maxSize = std::max(lhs.size(), rhs.size());
+        const VeryLongInteger a = lhs.Extended(maxSize + 1);
+        const VeryLongInteger b = rhs.Extended(maxSize + 1);
         VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
 
         for (size_t i = 0; i < result.size(); i++)
@@ -690,9 +700,9 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        size_t maxSize = std::max(lhs.size(), rhs.size());
-        VeryLongInteger a = lhs.Extended(maxSize + 1);
-        VeryLongInteger b = rhs.Extended(maxSize + 1);
+        const size_t maxSize = std::max(lhs.size(), rhs.size());
+        const VeryLongInteger a = lhs.Extended(maxSize + 1);
+        const VeryLongInteger b = rhs.Extended(maxSize + 1);
         VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
 
         for (size_t i = 0; i < result.size(); i++)
@@ -718,9 +728,9 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        size_t maxSize = std::max(lhs.size(), rhs.size());
-        VeryLongInteger a = lhs.Extended(maxSize + 1);
-        VeryLongInteger b = rhs.Extended(maxSize + 1);
+        const size_t maxSize = std::max(lhs.size(), rhs.size());
+        const VeryLongInteger a = lhs.Extended(maxSize + 1);
+        const VeryLongInteger b = rhs.Extended(maxSize + 1);
         VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
 
         for (size_t i = 0; i < result.size(); i++)
@@ -849,7 +859,7 @@ namespace cs
     {
         Requires::ArgumentNotNegative(power, NAMEOF(power), FUNCTION_INFO);
         VeryLongInteger result = VeryLongInteger{uint8_t(1)};
-        for (size_t i = 0; i < power; ++i)
+        for (size_t i = 0; i < power; i++)
             result = result * val;
         return result;
     }

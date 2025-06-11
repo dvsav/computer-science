@@ -40,6 +40,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     REQUIRE_FALSE(x.IsZero());
     REQUIRE(x.ToBinary() == "11111111");
     REQUIRE(x.ToHexadecimal() == "FF");
+    REQUIRE(x.ToDecimal() == "-1");
 
     cs::VeryLongInteger y = cs::VeryLongInteger{int8_t(1)};
 
@@ -51,6 +52,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     REQUIRE_FALSE(y.IsZero());
     REQUIRE(y.ToBinary() == "00000001");
     REQUIRE(y.ToHexadecimal() == "01");
+    REQUIRE(y.ToDecimal() == "1");
 
     SECTION("Extend x")
     {
@@ -64,6 +66,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "1111111111111111");
         REQUIRE(z.ToHexadecimal() == "FFFF");
+        REQUIRE(z.ToDecimal() == "-1");
     }
 
     SECTION("Extend y")
@@ -78,6 +81,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "0000000000000001");
         REQUIRE(z.ToHexadecimal() == "0001");
+        REQUIRE(z.ToDecimal() == "1");
     }
 
     SECTION("x + y")
@@ -92,6 +96,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE(z.IsZero());
         REQUIRE(z.ToBinary() == "00000000");
         REQUIRE(z.ToHexadecimal() == "00");
+        REQUIRE(z.ToDecimal() == "0");
     }
 
     SECTION("-y")
@@ -106,6 +111,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "11111111");
         REQUIRE(z.ToHexadecimal() == "FF");
+        REQUIRE(z.ToDecimal() == "-1");
     }
 
     SECTION("x - y")
@@ -120,6 +126,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "11111110");
         REQUIRE(z.ToHexadecimal() == "FE");
+        REQUIRE(z.ToDecimal() == "-2");
     }
 
     SECTION("x << 1")
@@ -134,6 +141,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "11111110");
         REQUIRE(z.ToHexadecimal() == "FE");
+        REQUIRE(z.ToDecimal() == "-2");
     }
 
     SECTION("y << 1")
@@ -148,6 +156,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "00000010");
         REQUIRE(z.ToHexadecimal() == "02");
+        REQUIRE(z.ToDecimal() == "2");
     }
 
     SECTION("x * y")
@@ -162,6 +171,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "11111111");
         REQUIRE(z.ToHexadecimal() == "FF");
+        REQUIRE(z.ToDecimal() == "-1");
     }
 
     SECTION("x * y")
@@ -178,6 +188,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "00100011");
         REQUIRE(z.ToHexadecimal() == "23");
+        REQUIRE(z.ToDecimal() == "35");
     }
 
     SECTION("x * y")
@@ -194,6 +205,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "11011101");
         REQUIRE(z.ToHexadecimal() == "DD");
+        REQUIRE(z.ToDecimal() == "-35");
     }
 
     SECTION("x * y")
@@ -210,6 +222,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "0000000101011110");
         REQUIRE(z.ToHexadecimal() == "015E");
+        REQUIRE(z.ToDecimal() == "350");
     }
 
     SECTION("Power")
@@ -234,6 +247,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE_FALSE(z.IsZero());
         REQUIRE(z.ToBinary() == "01111011");
         REQUIRE(z.ToHexadecimal() == "7B");
+        REQUIRE(z.ToDecimal() == "123");
     }
 
     SECTION("x / y")
