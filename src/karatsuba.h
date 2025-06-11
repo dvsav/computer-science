@@ -16,7 +16,6 @@
 
 /*
 TODO
-1. Create templated constructor to convert from any integral type to VeryLongInteger.
 2. Implement bitwise operators (&, |).
 3. Add doxygen comments to all methods.
 4. Check where const and move can be applied.
@@ -47,10 +46,11 @@ namespace cs
 
         /**
          * @brief Creates a VeryLongInteger and initializes it to 0.
-         * @param size the number of bytes in the binary representation of the number.
+         * @param size The number of bytes in the binary representation of the number.
+         * @param val The value used to intialize each byte in the binary representation of the number.
          */
-        VeryLongInteger(size_t size) :
-            value(/*count*/ size, /*val*/ 0)
+        VeryLongInteger(size_t size, uint8_t val) :
+            value(/*count*/ size, /*val*/ val)
         {}
 
         /**
@@ -74,6 +74,21 @@ namespace cs
         }
 
     public:
+        /**
+         * @brief Constructs a VeryLongInteger from an integral value @p val.
+         * @tparam T An integral type (e.g., int, long, uint64_t).
+         * @param val The integral value from which a VeryLongInteger is constructed.
+         * @note A static assertion ensures that T is an integral type.
+         */
+        template <typename T>
+        VeryLongInteger(T val) :
+            value(/*count*/ sizeof(T), /*val*/ 0)
+        {
+            static_assert(std::is_integral<T>::value, "T must be an integral type");
+            for (size_t i = 0; i < value.size(); i++)
+                value[i] = static_cast<uint8_t>(val >> (8 * i));
+        }
+
         /**
          * @brief Copy constructor
          */
@@ -119,7 +134,7 @@ namespace cs
                 return *this;
 
             const size_t newSize = (this->size() * 8 + N + 7) / 8;
-            VeryLongInteger result(newSize);
+            VeryLongInteger result(/*size*/ newSize, /*val*/ 0);
 
             // Shift every byte of the number to the left by the specified number of bits N.
 
@@ -151,30 +166,6 @@ namespace cs
 
     public:
         /**
-         * @brief Constructs a VeryLongInteger from an integral value.
-         *
-         * This static template function creates a VeryLongInteger instance by converting
-         * the given integral value into its byte representation. The bytes are stored in
-         * little-endian order (least significant byte first).
-         *
-         * @tparam T An integral type (e.g., int, long, uint64_t).
-         * @param value The integral value to convert.
-         * @return The resulting VeryLongInteger object.
-         *
-         * @note A static assertion ensures that T is an integral type.
-         */
-        template <typename T>
-        static VeryLongInteger FromInteger(T value)
-        {
-            static_assert(std::is_integral<T>::value, "T must be an integral type");
-            size_t nBytes = sizeof(T);
-            VeryLongInteger result(nBytes);
-            for (size_t i = 0; i < nBytes; ++i)
-                result.value[i] = static_cast<uint8_t>(value >> (8 * i));
-            return result;
-        }
-
-        /**
          * @brief Constructs a VeryLongInteger from a string
          * representing the number in decimal format.
          * The string may optionally contain a sign "+" or "-".
@@ -203,7 +194,7 @@ namespace cs
             std::string cleaned = decimal.substr(startPosition);
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
-            VeryLongInteger result = FromInteger<uint8_t>(0);
+            VeryLongInteger result{uint8_t(0)};
             size_t decIndex = cleaned.length();
             while (true)
             {
@@ -211,8 +202,8 @@ namespace cs
                 std::string str = cleaned.substr(start, decIndex - start);
                 unsigned long val = std::stoul(/*str*/ str, /*pos*/ nullptr, /*base*/ 10);
                 result = result +
-                    VeryLongInteger::FromInteger(val) *
-                        Power(/*val*/ VeryLongInteger::FromInteger<uint8_t>(10), /*power*/ cleaned.length() - decIndex);
+                    VeryLongInteger{val} *
+                        Power(/*val*/ VeryLongInteger{uint8_t(10)}, /*power*/ cleaned.length() - decIndex);
                 decIndex = start;
                 if (decIndex <= 0)
                     break;
@@ -247,7 +238,7 @@ namespace cs
 
             // total number of bytes required to store the number
             size_t lenBytes = (cleaned.length() + 1) / 2;
-            VeryLongInteger result(lenBytes);
+            VeryLongInteger result(/*size*/ lenBytes, /*val*/ 0);
 
             // iterate over the 2-hex digits (1 byte) groups of symbols in the string
             // moving from the end towards the beginning of the string
@@ -291,7 +282,7 @@ namespace cs
 
             // total number of bytes required to store the number
             size_t lenBytes = (cleaned.length() + 7) / 8;
-            VeryLongInteger result(lenBytes);
+            VeryLongInteger result(/*size*/ lenBytes, /*val*/ 0);
 
             // iterate over the 8-bit (1 byte) groups of symbols in the string
             // moving from the end towards the beginning of the string
@@ -388,7 +379,7 @@ namespace cs
             if (new_size == this->size())
                 return *this;
 
-            VeryLongInteger result(new_size);
+            VeryLongInteger result(/*size*/ new_size, /*val*/ 0);
             std::copy(
                 /*First*/ this->value.cbegin(),
                 /*Last*/  this->value.cend(),
@@ -420,7 +411,7 @@ namespace cs
          */
         VeryLongInteger operator-() const
         {
-            VeryLongInteger result(size());
+            VeryLongInteger result(/*size*/ size(), /*val*/ 0);
 
             for (size_t i = 0; i < size(); ++i)
                 result.value[i] = value[i] ^ 0b11111111;
@@ -436,12 +427,17 @@ namespace cs
             return result;
         }
 
+        /**
+         * @brief Returns a string representing the number in decimal format.
+         * The number is always treated as unsigned
+         * (no "-" sign is added even if the unmber is negative).
+         */
         std::string ToDecimal() const
         {
-            VeryLongInteger copy = *this;
-            const VeryLongInteger zero = FromInteger<uint8_t>(0);
-            const VeryLongInteger ten = FromInteger<uint8_t>(10);
-            std::string result = "";
+            VeryLongInteger copy = this->Abs();
+            const VeryLongInteger zero{uint8_t(0)};
+            const VeryLongInteger ten{uint8_t(10)};
+            std::string result = this->IsNegative() ? "-" : "";
 
             while (copy.IsPositive())
             {
@@ -535,7 +531,7 @@ namespace cs
         size_t maxSize = std::max(lhs.size(), rhs.size());
         VeryLongInteger a = lhs.Extended(maxSize + 1);
         VeryLongInteger b = rhs.Extended(maxSize + 1);
-        VeryLongInteger result(maxSize + 1);
+        VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
 
         uint8_t carry = 0;
         for (size_t i = 0; i < result.size(); ++i)
@@ -574,7 +570,7 @@ namespace cs
     {
         const VeryLongInteger& smaller = lhs.size() < rhs.size() ? lhs : rhs;
         const VeryLongInteger& larger = lhs.size() >= rhs.size() ? lhs : rhs;
-        VeryLongInteger result(smaller.size() + larger.size());
+        VeryLongInteger result(/*size*/ smaller.size() + larger.size(), /*val*/ 0);
         // Iterate over the bytes of the smaller number
         for (size_t i = 0; i < smaller.size(); ++i)
         {
@@ -609,9 +605,9 @@ namespace cs
         int rhsHighestBit = rhs_copy.HighestBit();
 
         if (lhsHighestBit < rhsHighestBit)
-            return VeryLongInteger::FromInteger(0);
+            return VeryLongInteger{uint8_t(0)};
 
-        VeryLongInteger result((lhsHighestBit - rhsHighestBit + 7) / 8);
+        VeryLongInteger result(/*size*/ (lhsHighestBit - rhsHighestBit + 7) / 8, /*val*/ 0);
 
         for (int i = lhsHighestBit - rhsHighestBit; i >= 0; --i)
         {
@@ -683,7 +679,7 @@ namespace cs
         size_t power)
     {
         Requires::ArgumentNotNegative(power, NAMEOF(power), FUNCTION_INFO);
-        VeryLongInteger result = VeryLongInteger::FromInteger<uint8_t>(1);
+        VeryLongInteger result = VeryLongInteger{uint8_t(1)};
         for (size_t i = 0; i < power; ++i)
             result = result * val;
         return result;

@@ -30,8 +30,9 @@
 
 TEST_CASE("Karatsuba", "[karatsuba]")
 {
-    cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(int8_t(-1));
+    cs::VeryLongInteger x = cs::VeryLongInteger{int8_t(-1)};
 
+    REQUIRE(x == -1);
     REQUIRE(x.size() == sizeof(int8_t));
     REQUIRE(x.IsNegative());
     REQUIRE_FALSE(x.IsNonNegative());
@@ -40,8 +41,9 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     REQUIRE(x.ToBinary() == "11111111");
     REQUIRE(x.ToHexadecimal() == "FF");
 
-    cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(int8_t(1));
+    cs::VeryLongInteger y = cs::VeryLongInteger{int8_t(1)};
 
+    REQUIRE(y == 1);
     REQUIRE(y.size() == sizeof(uint8_t));
     REQUIRE_FALSE(y.IsNegative());
     REQUIRE(y.IsNonNegative());
@@ -54,6 +56,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     {
         cs::VeryLongInteger z = x.Extended(2 * sizeof(uint8_t));
 
+        REQUIRE(z == x);
         REQUIRE(z.size() == 2 * sizeof(uint8_t));
         REQUIRE(z.IsNegative());
         REQUIRE_FALSE(z.IsNonNegative());
@@ -67,6 +70,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     {
         cs::VeryLongInteger z = y.Extended(2 * sizeof(uint8_t));
 
+        REQUIRE(z == y);
         REQUIRE(z.size() == 2 * sizeof(uint8_t));
         REQUIRE_FALSE(z.IsNegative());
         REQUIRE(z.IsNonNegative());
@@ -80,6 +84,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     {
         cs::VeryLongInteger z = x + y;
 
+        REQUIRE(z == 0);
         REQUIRE(z.size() == sizeof(uint8_t));
         REQUIRE_FALSE(z.IsNegative());
         REQUIRE(z.IsNonNegative());
@@ -91,8 +96,9 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("-y")
     {
-        cs::VeryLongInteger z = -y;
+        cs::VeryLongInteger z = -y; // z = -1
 
+        REQUIRE(z == -1);
         REQUIRE(z.size() == sizeof(int8_t));
         REQUIRE(z.IsNegative());
         REQUIRE_FALSE(z.IsNonNegative());
@@ -104,8 +110,9 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x - y")
     {
-        cs::VeryLongInteger z = x - y;
+        cs::VeryLongInteger z = x - y; // -1 - 1 = -2
 
+        REQUIRE(z == -2);
         REQUIRE(z.size() == sizeof(uint8_t));
         REQUIRE(z.IsNegative());
         REQUIRE_FALSE(z.IsNonNegative());
@@ -119,6 +126,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     {
         cs::VeryLongInteger z = x << 1; // (-1) << 1 = -2
 
+        REQUIRE(z == -2);
         REQUIRE(z.size() == sizeof(uint8_t));
         REQUIRE(z.IsNegative());
         REQUIRE_FALSE(z.IsNonNegative());
@@ -132,6 +140,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     {
         cs::VeryLongInteger z = y << 1; // 1 << 1 = 2
 
+        REQUIRE(z == 2);
         REQUIRE(z.size() == sizeof(uint8_t));
         REQUIRE_FALSE(z.IsNegative());
         REQUIRE(z.IsNonNegative());
@@ -145,6 +154,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     {
         cs::VeryLongInteger z = x * y; // 1 * (-1) = -1
 
+        REQUIRE(z == -1);
         REQUIRE(z.size() == sizeof(uint8_t));
         REQUIRE(z.IsNegative());
         REQUIRE_FALSE(z.IsNonNegative());
@@ -156,10 +166,11 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x * y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(5);
-        cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(7);
+        cs::VeryLongInteger x = cs::VeryLongInteger{uint8_t(5)};
+        cs::VeryLongInteger y = cs::VeryLongInteger{uint8_t(7)};
         cs::VeryLongInteger z = x * y; // 5 * 7 = 35
 
+        REQUIRE(z == 35);
         REQUIRE(z.size() == sizeof(uint8_t));
         REQUIRE_FALSE(z.IsNegative());
         REQUIRE(z.IsNonNegative());
@@ -171,10 +182,11 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x * y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(-5);
-        cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(7);
+        cs::VeryLongInteger x = cs::VeryLongInteger{int8_t(-5)};
+        cs::VeryLongInteger y = cs::VeryLongInteger{int8_t(7)};
         cs::VeryLongInteger z = x * y; // -5 * 7 = -35
 
+        REQUIRE(z == -35);
         REQUIRE(z.size() == sizeof(uint8_t));
         REQUIRE(z.IsNegative());
         REQUIRE_FALSE(z.IsNonNegative());
@@ -186,10 +198,11 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x * y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(5);
-        cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(70);
+        cs::VeryLongInteger x = cs::VeryLongInteger{uint8_t(5)};
+        cs::VeryLongInteger y = cs::VeryLongInteger{uint8_t(70)};
         cs::VeryLongInteger z = x * y; // 5 * 70 = 350
 
+        REQUIRE(z == 350);
         REQUIRE(z.size() == 2 * sizeof(uint8_t));
         REQUIRE_FALSE(z.IsNegative());
         REQUIRE(z.IsNonNegative());
@@ -201,18 +214,19 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("Power")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger<uint8_t>(10);
+        cs::VeryLongInteger x = cs::VeryLongInteger{uint8_t(10)};
 
-        REQUIRE(cs::Power(x, 0) == cs::VeryLongInteger::FromInteger<uint8_t>(1));
-        REQUIRE(cs::Power(x, 1) == cs::VeryLongInteger::FromInteger<uint8_t>(10));
-        REQUIRE(cs::Power(x, 2) == cs::VeryLongInteger::FromInteger<uint8_t>(100));
-        REQUIRE(cs::Power(x, 3) == cs::VeryLongInteger::FromInteger<uint16_t>(1000));
+        REQUIRE(cs::Power(x, 0) == cs::VeryLongInteger{uint8_t(1)});
+        REQUIRE(cs::Power(x, 1) == cs::VeryLongInteger{uint8_t(10)});
+        REQUIRE(cs::Power(x, 2) == cs::VeryLongInteger{uint8_t(100)});
+        REQUIRE(cs::Power(x, 3) == cs::VeryLongInteger{uint16_t(1000)});
     }
 
     SECTION("FromDecimal")
     {
         cs::VeryLongInteger z = cs::VeryLongInteger::FromDecimal("123");
 
+        REQUIRE(z == 123);
         REQUIRE(z.size() == sizeof(uint8_t));
         REQUIRE_FALSE(z.IsNegative());
         REQUIRE(z.IsNonNegative());
@@ -224,16 +238,16 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x / y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(15);
-        cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(3);
-        REQUIRE(x / y == cs::VeryLongInteger::FromInteger<uint8_t>(5));;
+        cs::VeryLongInteger x = cs::VeryLongInteger{uint8_t(15)};
+        cs::VeryLongInteger y = cs::VeryLongInteger{uint8_t(3)};
+        REQUIRE(x / y == 15 / 3);
     }
 
     SECTION("x / y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger::FromInteger(17);
-        cs::VeryLongInteger y = cs::VeryLongInteger::FromInteger(-3);
-        REQUIRE(x / y == cs::VeryLongInteger::FromInteger<int8_t>(-5));;
+        cs::VeryLongInteger x = cs::VeryLongInteger{int8_t(17)};
+        cs::VeryLongInteger y = cs::VeryLongInteger{int8_t(-3)};
+        REQUIRE(x / y == 17 / -3);
     }
 }
 
