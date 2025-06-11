@@ -16,10 +16,9 @@
 
 /*
 TODO
-2. Implement bitwise operators (&, |).
-3. Add doxygen comments to all methods.
-4. Check where const and move can be applied.
-5. Cleanup and optimize unit tests.
+1. Implement bitwise operators (&, |).
+2. Check where const and move can be applied.
+3. Cleanup and optimize unit tests.
 */
 
 namespace cs
@@ -621,6 +620,16 @@ namespace cs
         return resultIsNegative ? -result : result;
     }
 
+    /**
+     * @brief Compares two VeryLongInteger objects to determine if the left-hand side is greater than the right-hand side.
+     *
+     * This operator returns true if the result of subtracting rhs from lhs is positive,
+     * indicating that lhs is greater than rhs.
+     *
+     * @param lhs The left-hand side VeryLongInteger to compare.
+     * @param rhs The right-hand side VeryLongInteger to compare.
+     * @return true if lhs is greater than rhs, false otherwise.
+     */
     bool operator>(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
@@ -628,6 +637,16 @@ namespace cs
         return (lhs - rhs).IsPositive();
     }
 
+    /**
+     * @brief Compares two VeryLongInteger objects for less-than relation.
+     *
+     * Determines if the left-hand side (lhs) VeryLongInteger is less than the right-hand side (rhs)
+     * by subtracting lhs from rhs and checking if the result is positive.
+     *
+     * @param lhs The left-hand side VeryLongInteger to compare.
+     * @param rhs The right-hand side VeryLongInteger to compare.
+     * @return true if lhs is less than rhs, false otherwise.
+     */
     bool operator<(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
@@ -635,6 +654,16 @@ namespace cs
         return (rhs - lhs).IsPositive();
     }
 
+    /**
+     * @brief Compares two VeryLongInteger objects for greater than or equal to.
+     *
+     * Determines if the left-hand side (lhs) VeryLongInteger is greater than or equal to
+     * the right-hand side (rhs) by subtracting rhs from lhs and checking if the result is non-negative.
+     *
+     * @param lhs The left-hand side VeryLongInteger operand.
+     * @param rhs The right-hand side VeryLongInteger operand.
+     * @return true if lhs is greater than or equal to rhs, false otherwise.
+     */
     bool operator>=(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
@@ -642,6 +671,16 @@ namespace cs
         return (lhs - rhs).IsNonNegative();
     }
 
+    /**
+     * @brief Compares two VeryLongInteger objects for less than or equal to (<=).
+     *
+     * Determines if the left-hand side (lhs) VeryLongInteger is less than or equal to the right-hand side (rhs)
+     * by subtracting lhs from rhs and checking if the result is non-negative.
+     *
+     * @param lhs The left-hand side VeryLongInteger operand.
+     * @param rhs The right-hand side VeryLongInteger operand.
+     * @return true if lhs is less than or equal to rhs, false otherwise.
+     */
     bool operator<=(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
@@ -649,6 +688,16 @@ namespace cs
         return (rhs - lhs).IsNonNegative();
     }
 
+    /**
+     * @brief Equality operator for VeryLongInteger.
+     *
+     * Compares two VeryLongInteger objects for equality by subtracting one from the other
+     * and checking if the result is zero.
+     *
+     * @param lhs The left-hand side VeryLongInteger operand.
+     * @param rhs The right-hand side VeryLongInteger operand.
+     * @return true if both operands are equal, false otherwise.
+     */
     bool operator==(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
@@ -656,6 +705,16 @@ namespace cs
         return (lhs - rhs).IsZero();
     }
 
+    /**
+     * @brief Inequality operator for VeryLongInteger.
+     *
+     * Compares two VeryLongInteger objects for inequality.
+     * Returns true if the objects are not equal, false otherwise.
+     *
+     * @param lhs The left-hand side VeryLongInteger.
+     * @param rhs The right-hand side VeryLongInteger.
+     * @return true if lhs and rhs are not equal, false otherwise.
+     */
     bool operator!=(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
