@@ -293,6 +293,28 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         cs::VeryLongInteger y = cs::VeryLongInteger{int8_t(-3)};
         REQUIRE(x / y == 17 / -3);
     }
+
+    SECTION("cast")
+    {
+        REQUIRE(static_cast<int>(cs::VeryLongInteger{int8_t(17)}) == 17);
+        REQUIRE(static_cast<int>(cs::VeryLongInteger{int8_t(-17)}) == -17);
+    }
+
+    SECTION("Karatsuba")
+    {
+        cs::VeryLongInteger x = cs::VeryLongInteger{intmax_t(0x7FFFFFFFFFFFFFFF)};
+        cs::VeryLongInteger y = cs::VeryLongInteger{intmax_t(0x7FFFFFFFFFFFFFFF)};
+        cs::VeryLongInteger z = x * y; //Karatsuba(x, y); // 0x7FFFFFFFFFFFFFFF * 0x7FFFFFFFFFFFFFFF
+
+        REQUIRE(z.size() == 2 * sizeof(intmax_t));
+        REQUIRE_FALSE(z.IsNegative());
+        REQUIRE(z.IsNonNegative());
+        REQUIRE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "00111111111111111111111111111111111111111111111111111111111111110000000000000000000000000000000000000000000000000000000000000001");
+        REQUIRE(z.ToHexadecimal() == "3FFFFFFFFFFFFFFF0000000000000001");
+        REQUIRE(z.ToDecimal() == "85070591730234615847396907784232501249");
+    }
 }
 
 TEST_CASE("Vectors are sorted", "[sort]")

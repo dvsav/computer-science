@@ -58,8 +58,10 @@ namespace cs
          * This function trims the `value` vector by removing trailing bytes that are either 0x00 or 0xFF,
          * as long as there is more than one byte remaining. This is typically used to eliminate unnecessary
          * sign-extension bytes in a representation of a multi-byte integer.
+         * 
+         * @return Reference to this VeryLongInteger object.
          */
-        void Prune()
+        VeryLongInteger& Prune()
         {
             while (value.size() > 1)
             {
@@ -70,6 +72,7 @@ namespace cs
                 else
                     break;
             }
+            return *this;
         }
 
     public:
@@ -158,9 +161,7 @@ namespace cs
                 // Fill the most significant bits of the result with 1's
                 result.value.back() |= (0xFF << (N % 8));
             }
-            result.Prune();
-
-            return result;
+            return result.Prune();
         }
 
         /**
@@ -201,9 +202,7 @@ namespace cs
                 // Fill the most significant bits of the result with 1's
                 result.value.back() |= (0xFF << (8 - N % 8));
             }
-            result.Prune();
-
-            return result;
+            return result.Prune();
         }
 
         /**
@@ -447,7 +446,7 @@ namespace cs
             if (this->IsNegative())
             {
                 // Fill the most significant bytes of the result with 1's
-                for (size_t i = value.size(); i < new_size; i++)
+                for (size_t i = this->value.size(); i < new_size; i++)
                     result.value[i] = uint8_t(0xFF);
             }
 
@@ -541,6 +540,35 @@ namespace cs
         }
 
         /**
+         * @brief Converts the current object to an integral type T.
+         *
+         * This operator allows explicit conversion of the object to any integral type.
+         * It performs a static assertion to ensure that T is an integral type.
+         * Additionally, it checks that the size of the object's value is greater than or equal to the size of T.
+         * The conversion is performed by copying the underlying bytes of the object's value into the result variable.
+         *
+         * @tparam T The integral type to convert to.
+         * @return The value of the object as type T.
+         * @throws std::runtime_error If the size check fails.
+         */
+        template <typename T>
+        explicit operator T() const
+        {
+            static_assert(std::is_integral<T>::value, "T must be an integral type");
+            Requires::That(sizeof(T) >= this->size(), FUNCTION_INFO);
+            T val(0);
+            uint8_t* pDest = reinterpret_cast<uint8_t*>(&val);
+            std::copy(this->value.cbegin(), this->value.end(), pDest);
+            if (this->IsNegative())
+            {
+                // Fill the most significant bytes of the result with 1's
+                for (size_t i = this->value.size(); i < sizeof(T); i++)
+                    pDest[i] = uint8_t(0xFF);
+            }
+            return val;
+        }
+
+        /**
          * @brief Sets a specified bit of the number to 1.
          * @param bit The position of the bit to be set to 1.
          */
@@ -620,9 +648,7 @@ namespace cs
             result.value[i] = static_cast<uint8_t>(sum & 0xFF);
             carry = sum >> 8;
         }
-        result.Prune();
-
-        return result;
+        return result.Prune();
     }
 
     /**
@@ -650,6 +676,10 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
+        // Optimization: if the product fits into the largest supported integral type we can use hardware for multiplication.
+        if (lhs.size() + rhs.size() <= sizeof(intmax_t))
+            return VeryLongInteger(static_cast<intmax_t>(lhs) * static_cast<intmax_t>(rhs)).Prune();
+
         const VeryLongInteger& smaller = lhs.size() < rhs.size() ? lhs : rhs;
         const VeryLongInteger& larger = lhs.size() >= rhs.size() ? lhs : rhs;
         VeryLongInteger result(/*size*/ smaller.size() + larger.size(), /*val*/ 0);
@@ -678,8 +708,9 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        if (lhs.size() == 1 && rhs.size() == 1)
-            return lhs * rhs;
+        // Optimization: if the product fits into the largest supported integral type we can use hardware for multiplication.
+        if (lhs.size() + rhs.size() <= sizeof(intmax_t))
+            return VeryLongInteger(static_cast<intmax_t>(lhs) * static_cast<intmax_t>(rhs)).Prune();
 
         size_t maxSize = std::max(lhs.size(), rhs.size());
         if (maxSize % 2) maxSize++; // maxSize should be even
@@ -695,12 +726,10 @@ namespace cs
         // 3. Compute: (ad + bc) = (a + b)(c + d) - ac - bd
 
         VeryLongInteger a = x >> (N / 2);
-        VeryLongInteger b = y & VeryLongInteger(/*size*/ maxSize / 2, /*val*/ 0xFF);
-        b.Prune();
+        VeryLongInteger b = (y & VeryLongInteger(/*size*/ maxSize / 2, /*val*/ 0xFF)).Prune();
 
         VeryLongInteger c = y >> (N / 2);
-        VeryLongInteger d = y & VeryLongInteger(/*size*/ maxSize / 2, /*val*/ 0xFF);
-        d.Prune();
+        VeryLongInteger d = (y & VeryLongInteger(/*size*/ maxSize / 2, /*val*/ 0xFF)).Prune();
 
         VeryLongInteger ac = Karatsuba(a, c);
         VeryLongInteger bd = Karatsuba(b, d);
@@ -733,7 +762,7 @@ namespace cs
             return VeryLongInteger{uint8_t(0)};
 
         VeryLongInteger result(
-            /*size*/ std::max((lhsHighestBit - rhsHighestBit + 7) / 8, 1),
+            /*size*/ lhs.size(),
             /*val*/ 0);
 
         for (int i = lhsHighestBit - rhsHighestBit; i >= 0; --i)
@@ -745,17 +774,15 @@ namespace cs
                 lhs_copy = std::move(remainder);
             }
         }
+        result.Prune();
         return resultIsNegative ? -result : result;
     }
 
     /**
-     * @brief Bitwise OR operator for VeryLongInteger objects.
-     *
-     * Performs a bitwise OR operation between two VeryLongInteger instances.
-     * The operands are first extended to the same size (the maximum of their sizes plus one)
-     * to ensure correct bitwise operation across all digits. The result is a new VeryLongInteger
-     * containing the bitwise OR of the corresponding digits.
-     *
+     * @brief Bitwise OR operator for two VeryLongInteger objects.
+     * The arguments @p lhs and @p rhs are always treated as unsigned.
+     * If the two arguments have different sizes, the nonexistent bits
+     * in the smaller argument are considered to be 0's.
      * @param lhs The left-hand side VeryLongInteger operand.
      * @param rhs The right-hand side VeryLongInteger operand.
      * @return VeryLongInteger The result of the bitwise OR operation.
@@ -765,25 +792,22 @@ namespace cs
         const VeryLongInteger& rhs)
     {
         const size_t maxSize = std::max(lhs.size(), rhs.size());
-        const VeryLongInteger a = lhs.Extended(maxSize + 1);
-        const VeryLongInteger b = rhs.Extended(maxSize + 1);
-        VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
+        VeryLongInteger result(/*size*/ maxSize, /*val*/ 0);
 
-        for (size_t i = 0; i < result.size(); i++)
-        {
-            result.value[i] = a.value[i] | b.value[i];
-        }
+        for (size_t i = 0; i < lhs.size(); i++)
+            result.value[i] |= lhs.value[i];
+
+        for (size_t i = 0; i < rhs.size(); i++)
+            result.value[i] |= rhs.value[i];
+
         return result;
     }
 
     /**
-     * @brief Bitwise AND operator for VeryLongInteger objects.
-     *
-     * Performs a bitwise AND operation between two VeryLongInteger instances.
-     * The operands are first extended to the same size (the maximum of their sizes plus one)
-     * to ensure correct bitwise operation across all digits. The result is a new VeryLongInteger
-     * containing the bitwise AND of the corresponding digits.
-     *
+     * @brief Bitwise AND operator for two VeryLongInteger objects.
+     * The arguments @p lhs and @p rhs are always treated as unsigned.
+     * If the two arguments have different sizes, the nonexistent bits
+     * in the smaller argument are considered to be 0's.
      * @param lhs The left-hand side VeryLongInteger operand.
      * @param rhs The right-hand side VeryLongInteger operand.
      * @return VeryLongInteger The result of the bitwise AND operation.
@@ -792,43 +816,34 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        const size_t maxSize = std::max(lhs.size(), rhs.size());
-        const VeryLongInteger a = lhs.Extended(maxSize + 1);
-        const VeryLongInteger b = rhs.Extended(maxSize + 1);
-        VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
+        const size_t minSize = std::min(lhs.size(), rhs.size());
+        VeryLongInteger result(/*size*/ minSize, /*val*/ 0);
 
-        for (size_t i = 0; i < result.size(); i++)
-        {
-            result.value[i] = a.value[i] & b.value[i];
-        }
+        for (size_t i = 0; i < minSize; i++)
+            result.value[i] = lhs.value[i] & rhs.value[i];
+
         return result;
     }
 
     /**
      * @brief Bitwise XOR operator for VeryLongInteger objects.
-     *
-     * Performs a bitwise XOR operation between two VeryLongInteger instances.
-     * The operands are first extended to the same size (the maximum of their sizes plus one)
-     * to ensure correct bitwise operation across all digits. The result is a new VeryLongInteger
-     * containing the bitwise XOR of the corresponding digits.
-     *
+     * The arguments @p lhs and @p rhs are always treated as unsigned.
+     * The arguments must have the same size in bytes.
      * @param lhs The left-hand side VeryLongInteger operand.
      * @param rhs The right-hand side VeryLongInteger operand.
      * @return VeryLongInteger The result of the bitwise XOR operation.
+     * @throws std::runtime_error If the arguments have different sizes.
      */
     inline VeryLongInteger operator^(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        const size_t maxSize = std::max(lhs.size(), rhs.size());
-        const VeryLongInteger a = lhs.Extended(maxSize + 1);
-        const VeryLongInteger b = rhs.Extended(maxSize + 1);
-        VeryLongInteger result(/*size*/ maxSize + 1, /*val*/ 0);
+        Requires::That(lhs.size() == rhs.size(), FUNCTION_INFO);
 
-        for (size_t i = 0; i < result.size(); i++)
-        {
-            result.value[i] = a.value[i] ^ b.value[i];
-        }
+        VeryLongInteger result = lhs;
+        for (size_t i = 0; i < rhs.size(); i++)
+            result.value[i] ^= rhs.value[i];
+
         return result;
     }
 
