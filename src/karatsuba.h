@@ -164,6 +164,49 @@ namespace cs
         }
 
         /**
+         * @brief Arithmetic shift right by a specified number @p N of bits.
+         * Preserves the sign of the number.
+         * @param N the number of bits to shift to the right.
+         * @return The shifted number.
+         */
+        VeryLongInteger operator>>(size_t N) const
+        {
+            Requires::ArgumentNotNegative(N, NAMEOF(N), FUNCTION_INFO);
+            if (N == 0)
+                return *this;
+
+            const size_t newSize = (this->size() * 8 - N + 7) / 8;
+            VeryLongInteger result(/*size*/ newSize, /*val*/ 0);
+
+            // Shift every byte of the number to the right by the specified number of bits N.
+
+            // Iterate over all bytes of the number
+            for (size_t i = 0; i < result.size(); i++)
+            {
+                // We consider only 2 bytes whose shifted bits can affect i-th byte of the resulting number:
+
+                // The 1st byte is (i + N/8)th ...
+                int j = i + N / 8;
+                if (j >= 0 && j < (int)this->size())
+                    result.value[i] |= shiftRight(this->value[j], N % 8);
+
+                // The 2nd byte is (i + N/8 + 1)th.
+                j = j + 1;
+                if (N % 8 && j >= 0 && j < (int)this->size())
+                    result.value[i] |= shiftRight(this->value[j], N % 8 - 8);
+            }
+            
+            if (this->IsNegative())
+            {
+                // Fill the most significant bits of the result with 1's
+                result.value.back() |= (0xFF << (8 - N % 8));
+            }
+            result.Prune();
+
+            return result;
+        }
+
+        /**
          * @brief Bitwise NOT operator for VeryLongInteger.
          *
          * Creates a copy of the current VeryLongInteger and applies the bitwise NOT operation
@@ -597,7 +640,8 @@ namespace cs
 
     /**
      * @brief Multiplies @p lhs by @p rhs.
-     * Time complexity: O(N^2) where N is the number of binary digits in the mupltiplied numbers.
+     * Time complexity: O(N*M) where N, M are the count of
+     * binary digits in the numbers being mupltiplied.
      * @param lhs The mutiplicand.
      * @param rhs The multiplier.
      * @return The product of the mutiplicand and the multiplier.
@@ -625,7 +669,7 @@ namespace cs
     /**
      * @brief Multiplies @p lhs by @p rhs using Karatsuba algorithm.
      * Time complexity: O(N^log2(3)) ~ O(N^1.585) where N is the number of
-     * binary digits in the numbers being mupltiplied.
+     * binary digits in the largest of the numbers being mupltiplied.
      * @param lhs The mutiplicand.
      * @param rhs The multiplier.
      * @return The product of the mutiplicand and the multiplier.
@@ -634,13 +678,35 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        // lhs = a * 2^(N/2) + b
-        // rhs = c * 2^(N/2) + d
-        // lhs * rhs = ac * 2^N + (ad + bc) * 2^(N/2) + bd
+        if (lhs.size() == 1 && rhs.size() == 1)
+            return lhs * rhs;
+
+        size_t maxSize = std::max(lhs.size(), rhs.size());
+        if (maxSize % 2) maxSize++; // maxSize should be even
+        const size_t N = maxSize * 8;
+        const VeryLongInteger x = lhs.Extended(maxSize);
+        const VeryLongInteger y = rhs.Extended(maxSize);
+
+        // x = a * 2^(N/2) + b
+        // y = c * 2^(N/2) + d
+        // x * y = ac * 2^N + (ad + bc) * 2^(N/2) + bd
         // 1. Compute: ac
         // 2. Compute: bd
         // 3. Compute: (ad + bc) = (a + b)(c + d) - ac - bd
-        throw std::runtime_error("This function is not implemented yet.");
+
+        VeryLongInteger a = x >> (N / 2);
+        VeryLongInteger b = y & VeryLongInteger(/*size*/ maxSize / 2, /*val*/ 0xFF);
+        b.Prune();
+
+        VeryLongInteger c = y >> (N / 2);
+        VeryLongInteger d = y & VeryLongInteger(/*size*/ maxSize / 2, /*val*/ 0xFF);
+        d.Prune();
+
+        VeryLongInteger ac = Karatsuba(a, c);
+        VeryLongInteger bd = Karatsuba(b, d);
+        VeryLongInteger ad_bc = Karatsuba(a + b, c + d) - ac - bd;
+
+        return (ac << N) + (ad_bc << (N/2)) + bd;
     }
 
     /**

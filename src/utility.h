@@ -169,9 +169,9 @@ inline std::size_t hash_combine(std::size_t seed, const T& v)
 }
 
 /**
- * @brief Shifts an integral value left or right by a specified offset.
+ * @brief Shifts an integral value left by a specified offset.
  *
- * This function shifts the given value @p val by @p offset bits.
+ * This function shifts the given value @p val left by @p offset bits.
  * - If `offset` is positive, the value is shifted left.
  * - If `offset` is negative, the value is shifted right.
  * - If `offset` is zero, the value is returned unchanged.
@@ -192,6 +192,34 @@ inline T shiftLeft(T val, int offset)
         return static_cast<T>(val << offset);
     else if (offset < 0)
         return static_cast<T>(val >> (-offset));
+    else
+        return val;
+}
+
+/**
+ * @brief Shifts an integral value right by a specified offset.
+ *
+ * This function shifts the given value @p val right by @p offset bits.
+ * - If `offset` is positive, the value is shifted right.
+ * - If `offset` is negative, the value is shifted left.
+ * - If `offset` is zero, the value is returned unchanged.
+ *
+ * @tparam T An integral type.
+ * @param val The value to shift.
+ * @param offset The number of bits to shift. Positive for right shift, negative for left shift.
+ * @return The shifted value.
+ *
+ * @note A static assertion ensures that T is an integral type.
+ */
+template <class T>
+inline T shiftRight(T val, int offset)
+{
+    static_assert(std::is_integral<T>::value, "T must be an integral type");
+
+    if (offset > 0)
+        return static_cast<T>(val >> offset);
+    else if (offset < 0)
+        return static_cast<T>(val << (-offset));
     else
         return val;
 }

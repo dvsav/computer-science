@@ -159,6 +159,36 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE(z.ToDecimal() == "2");
     }
 
+    SECTION("x >> 1")
+    {
+        cs::VeryLongInteger z = cs::VeryLongInteger{int8_t(-6)} >> 1; // (-6) >> 1 = -3
+
+        REQUIRE(z == -3);
+        REQUIRE(z.size() == sizeof(uint8_t));
+        REQUIRE(z.IsNegative());
+        REQUIRE_FALSE(z.IsNonNegative());
+        REQUIRE_FALSE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "11111101");
+        REQUIRE(z.ToHexadecimal() == "FD");
+        REQUIRE(z.ToDecimal() == "-3");
+    }
+
+    SECTION("y >> 1")
+    {
+        cs::VeryLongInteger z = cs::VeryLongInteger{int8_t(6)} >> 1; // 6 >> 1 = 3
+
+        REQUIRE(z == 3);
+        REQUIRE(z.size() == sizeof(uint8_t));
+        REQUIRE_FALSE(z.IsNegative());
+        REQUIRE(z.IsNonNegative());
+        REQUIRE(z.IsPositive());
+        REQUIRE_FALSE(z.IsZero());
+        REQUIRE(z.ToBinary() == "00000011");
+        REQUIRE(z.ToHexadecimal() == "03");
+        REQUIRE(z.ToDecimal() == "3");
+    }
+
     SECTION("x * y")
     {
         cs::VeryLongInteger z = x * y; // 1 * (-1) = -1
