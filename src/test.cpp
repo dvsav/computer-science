@@ -304,7 +304,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     {
         cs::VeryLongInteger x = cs::VeryLongInteger{intmax_t(0x7FFFFFFFFFFFFFFF)};
         cs::VeryLongInteger y = cs::VeryLongInteger{intmax_t(0x7FFFFFFFFFFFFFFF)};
-        cs::VeryLongInteger z = x * y; //Karatsuba(x, y); // 0x7FFFFFFFFFFFFFFF * 0x7FFFFFFFFFFFFFFF
+        cs::VeryLongInteger z = Karatsuba(x, y); // 0x7FFFFFFFFFFFFFFF * 0x7FFFFFFFFFFFFFFF
 
         REQUIRE(z.size() == 2 * sizeof(intmax_t));
         REQUIRE_FALSE(z.IsNegative());

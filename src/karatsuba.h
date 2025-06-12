@@ -708,6 +708,8 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
+        const bool isNegative = (lhs.IsNegative() ^ rhs.IsNegative());
+
         // Optimization: if the product fits into the largest supported integral type we can use hardware for multiplication.
         if (lhs.size() + rhs.size() <= sizeof(intmax_t))
             return VeryLongInteger(static_cast<intmax_t>(lhs) * static_cast<intmax_t>(rhs)).Prune();
@@ -715,8 +717,8 @@ namespace cs
         size_t maxSize = std::max(lhs.size(), rhs.size());
         if (maxSize % 2) maxSize++; // maxSize should be even
         const size_t N = maxSize * 8;
-        const VeryLongInteger x = lhs.Extended(maxSize);
-        const VeryLongInteger y = rhs.Extended(maxSize);
+        const VeryLongInteger x = lhs.Abs().Extended(maxSize);
+        const VeryLongInteger y = rhs.Abs().Extended(maxSize);
 
         // x = a * 2^(N/2) + b
         // y = c * 2^(N/2) + d
@@ -726,16 +728,19 @@ namespace cs
         // 3. Compute: (ad + bc) = (a + b)(c + d) - ac - bd
 
         VeryLongInteger a = x >> (N / 2);
-        VeryLongInteger b = (y & VeryLongInteger(/*size*/ maxSize / 2, /*val*/ 0xFF)).Prune();
+        VeryLongInteger b = x & VeryLongInteger(/*size*/ maxSize / 2 + 1, /*val*/ 0xFF);
+        b.value.back() = 0x00;
 
         VeryLongInteger c = y >> (N / 2);
-        VeryLongInteger d = (y & VeryLongInteger(/*size*/ maxSize / 2, /*val*/ 0xFF)).Prune();
+        VeryLongInteger d = y & VeryLongInteger(/*size*/ maxSize / 2 + 1, /*val*/ 0xFF);
+        d.value.back() = 0x00;
 
         VeryLongInteger ac = Karatsuba(a, c);
         VeryLongInteger bd = Karatsuba(b, d);
         VeryLongInteger ad_bc = Karatsuba(a + b, c + d) - ac - bd;
 
-        return (ac << N) + (ad_bc << (N/2)) + bd;
+        VeryLongInteger result = (ac << N) + (ad_bc << (N/2)) + bd;
+        return isNegative ? -result : result;
     }
 
     /**
