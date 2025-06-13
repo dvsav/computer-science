@@ -51,18 +51,21 @@ The list of implemented algorithms.
 - Dynamic programming
   - Knapsack problem ([knapsack.h](src/knapsack.h))
 - Divide and conquer algorithms
-  - Karatsuba multiplication algorithm (to be implemented)
+  - Karatsuba multiplication algorithm ([karatsuba.h](src/karatsuba.h))
   - Strassen's matrix multiplication algorithm (to be implemented)
 - NP-hard problems
   - Travelling salesman problem (to be implemented)
 
 ## Prerequisites
 
+- This project is written in C++, so it needs a C++ compiler like GCC or Clang.
+- The project showcases the usage of several build systems (you may use whichever you want): GNU Make, CMake and MSBuild (MS Visual Studio).
+
 On Linux install development tools (GCC, GDB, etc.), GNU Make and CMake build systems (example below is given for APT package manager which is used by default in Debian based Linux, e.g. Ubuntu and Linux Mint):
 
 ```bash
 sudo apt update
-sudo apt install build-essential gdb make cmake
+sudo apt install build-essential clang gdb make cmake
 ```
 
 On Windows install CMake build system using [Chocolatey](https://chocolatey.org/) package manager:

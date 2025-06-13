@@ -30,7 +30,7 @@
 
 TEST_CASE("Karatsuba", "[karatsuba]")
 {
-    cs::VeryLongInteger x = cs::VeryLongInteger{int8_t(-1)};
+    cs::VeryLongInteger x{int8_t(-1)};
 
     REQUIRE(x == -1);
     REQUIRE(x.size() == sizeof(int8_t));
@@ -42,7 +42,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
     REQUIRE(x.ToHexadecimal() == "FF");
     REQUIRE(x.ToDecimal() == "-1");
 
-    cs::VeryLongInteger y = cs::VeryLongInteger{int8_t(1)};
+    cs::VeryLongInteger y{int8_t(1)};
 
     REQUIRE(y == 1);
     REQUIRE(y.size() == sizeof(uint8_t));
@@ -206,8 +206,8 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x * y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger{uint8_t(5)};
-        cs::VeryLongInteger y = cs::VeryLongInteger{uint8_t(7)};
+        cs::VeryLongInteger x{uint8_t(5)};
+        cs::VeryLongInteger y{uint8_t(7)};
         cs::VeryLongInteger z = x * y; // 5 * 7 = 35
 
         REQUIRE(z == 35);
@@ -223,8 +223,8 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x * y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger{int8_t(-5)};
-        cs::VeryLongInteger y = cs::VeryLongInteger{int8_t(7)};
+        cs::VeryLongInteger x{int8_t(-5)};
+        cs::VeryLongInteger y{int8_t(7)};
         cs::VeryLongInteger z = x * y; // -5 * 7 = -35
 
         REQUIRE(z == -35);
@@ -240,8 +240,8 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x * y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger{uint8_t(5)};
-        cs::VeryLongInteger y = cs::VeryLongInteger{uint8_t(70)};
+        cs::VeryLongInteger x{uint8_t(5)};
+        cs::VeryLongInteger y{uint8_t(70)};
         cs::VeryLongInteger z = x * y; // 5 * 70 = 350
 
         REQUIRE(z == 350);
@@ -257,7 +257,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("Power")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger{uint8_t(10)};
+        cs::VeryLongInteger x{uint8_t(10)};
 
         REQUIRE(cs::Power(x, 0) == cs::VeryLongInteger{uint8_t(1)});
         REQUIRE(cs::Power(x, 1) == cs::VeryLongInteger{uint8_t(10)});
@@ -282,15 +282,15 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x / y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger{uint8_t(15)};
-        cs::VeryLongInteger y = cs::VeryLongInteger{uint8_t(3)};
+        cs::VeryLongInteger x{uint8_t(15)};
+        cs::VeryLongInteger y{uint8_t(3)};
         REQUIRE(x / y == 15 / 3);
     }
 
     SECTION("x / y")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger{int8_t(17)};
-        cs::VeryLongInteger y = cs::VeryLongInteger{int8_t(-3)};
+        cs::VeryLongInteger x{int8_t(17)};
+        cs::VeryLongInteger y{int8_t(-3)};
         REQUIRE(x / y == 17 / -3);
     }
 
@@ -302,8 +302,8 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("Karatsuba")
     {
-        cs::VeryLongInteger x = cs::VeryLongInteger{intmax_t(0x7FFFFFFFFFFFFFFF)};
-        cs::VeryLongInteger y = cs::VeryLongInteger{intmax_t(0x7FFFFFFFFFFFFFFF)};
+        cs::VeryLongInteger x{intmax_t(0x7FFFFFFFFFFFFFFF)};
+        cs::VeryLongInteger y{intmax_t(0x7FFFFFFFFFFFFFFF)};
         cs::VeryLongInteger z = Karatsuba(x, y); // 0x7FFFFFFFFFFFFFFF * 0x7FFFFFFFFFFFFFFF
 
         REQUIRE(z.size() == 2 * sizeof(intmax_t));

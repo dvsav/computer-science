@@ -43,6 +43,18 @@ namespace Requires
         #endif
     }
 
+    template<class TValue>
+    static inline void ArgumentNotZero(
+        const TValue value,
+        const std::string& argument_name,
+        const std::string& function)
+    {
+        #ifdef USE_REQUIRES
+        if (value == 0)
+            throw std::invalid_argument(function + ":\n    " + argument_name + " should not be zero");
+        #endif
+    }
+
     static inline void That(
         bool condition,
         const std::string& function)

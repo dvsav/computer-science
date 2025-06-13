@@ -30,6 +30,9 @@ namespace cs
     /**
      * @class VeryLongInteger
      * @brief Class representing an arbitrarily long signed integer number.
+     * @note Most of the time VeryLongInteger behaves as a signed number but some functions
+     * treat it as unsigned (e.g. bitwise logical operators) - see comments for
+     * particular methods.
      */
     class VeryLongInteger
     {
@@ -755,6 +758,8 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
+        Requires::ArgumentNotZero(rhs, NAMEOF(rhs), FUNCTION_INFO);
+
         const bool resultIsNegative = lhs.IsNegative() ^ rhs.IsNegative();
 
         VeryLongInteger lhs_copy = lhs.Abs();
