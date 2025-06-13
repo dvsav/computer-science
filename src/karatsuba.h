@@ -753,12 +753,17 @@ namespace cs
      * @param lhs The dividend.
      * @param rhs The divisor.
      * @return The quatient of the dividend and the divisor.
+     * @throws std::invalid_argument If the divisor is zero.
      */
     inline VeryLongInteger operator/(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
         Requires::ArgumentNotZero(rhs, NAMEOF(rhs), FUNCTION_INFO);
+
+        // Optimization: if the arguments fit into the largest supported integral type we can use hardware for division.
+        if (lhs.size() <= sizeof(intmax_t) &&  rhs.size() <= sizeof(intmax_t))
+            return VeryLongInteger(static_cast<intmax_t>(lhs) / static_cast<intmax_t>(rhs)).Prune();
 
         const bool resultIsNegative = lhs.IsNegative() ^ rhs.IsNegative();
 
@@ -786,6 +791,23 @@ namespace cs
         }
         result.Prune();
         return resultIsNegative ? -result : result;
+    }
+
+    /**
+     * @brief Computes the remainder of the division of two VeryLongInteger values.
+     *
+     * This operator returns the result of lhs modulo rhs, equivalent to the mathematical operation:
+     *     lhs - (lhs / rhs) * rhs
+     *
+     * @param lhs The dividend as a VeryLongInteger.
+     * @param rhs The divisor as a VeryLongInteger.
+     * @return The remainder after dividing lhs by rhs as a VeryLongInteger.
+     */
+    inline VeryLongInteger operator%(
+        const VeryLongInteger& lhs,
+        const VeryLongInteger& rhs)
+    {
+        return lhs - (lhs / rhs) * rhs;
     }
 
     /**

@@ -8,7 +8,7 @@
       "program": "${command:extension.vscode-wsl-workspaceFolder}/build/GNUMake/bin/test.exe",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "${command:extension.vscode-wsl-workspaceFolder}",
+      "cwd": "${command:extension.vscode-wsl-workspaceFolder}/test",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",

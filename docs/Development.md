@@ -151,7 +151,7 @@ Note that this task works under Windows only. Here's a detailed explanation of e
 - `"stopAtEntry": false`
   If `true`, the debugger pauses at the program entry point (`main()`); if `false`, it runs until the first breakpoint or program termination.
 
-- `"cwd": "${command:extension.vscode-wsl-workspaceFolder}"`
+- `"cwd": "${command:extension.vscode-wsl-workspaceFolder}/test"`
   The current working directory of the launched program. Again, using the WSL path of the workspace.
 
 - `"environment": []`

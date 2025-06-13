@@ -60,12 +60,13 @@ The list of implemented algorithms.
 
 - This project is written in C++, so it needs a C++ compiler like GCC or Clang.
 - The project showcases the usage of several build systems (you may use whichever you want): GNU Make, CMake and MSBuild (MS Visual Studio).
+- Python is used to generate test vectors, so you might want to install it as well.
 
 On Linux install development tools (GCC, GDB, etc.), GNU Make and CMake build systems (example below is given for APT package manager which is used by default in Debian based Linux, e.g. Ubuntu and Linux Mint):
 
 ```bash
 sudo apt update
-sudo apt install build-essential clang gdb make cmake
+sudo apt install build-essential clang gdb make cmake python3
 ```
 
 On Windows install CMake build system using [Chocolatey](https://chocolatey.org/) package manager:
