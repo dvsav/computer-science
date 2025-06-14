@@ -1,5 +1,15 @@
+#!/usr/bin/env python3
+
 import json
 import random
+
+def cpp_div(a: int, b: int) -> int:
+    """Returns the result of integral division a / b that aligns with C++ integral division behavior"""
+    return int(a / b)
+
+def cpp_mod(a: int, b: int) -> int:
+    """Returns the result of modulo operation a % b that aligns with C++ modulo operation behavior"""
+    return a % b if a * b >= 0 else (a % b) - b
 
 def random_bigint(bitlen: int = 128) -> int:
     """Generate a random signed integer of up to 'bitlen' bits."""
@@ -7,11 +17,29 @@ def random_bigint(bitlen: int = 128) -> int:
     n = random.getrandbits(bitlen)
     return n if random.random() < 0.5 else -n
 
+def twos_complement(num: int):
+    if (num < 0):
+        n_tetrades = len(hex(num)) - 3
+        n_tetrades += n_tetrades % 2 # round up to the closest even number
+        n_bytes = n_tetrades // 2
+        N = n_bytes * 8
+        num = num & ((1 << N) - 1)
+    return num
+
+def format_number(num: int, format: str) -> str:
+    if format == "hex":
+        return hex(twos_complement(num))[2:].upper()
+    elif format == "bin":
+        return bin(twos_complement(num))[2:].upper()
+    else:
+        return str(num)
+
 def gen_binary_ops(
     op_name: str,
     py_op: callable,
     count: int = 10,
-    allow_zero_rhs: bool = True) -> list[dict]:
+    allow_zero_rhs: bool = True,
+    format = "dec") -> list[dict]:
     """
     Generates a list of test vectors for a binary operation.
 
@@ -38,11 +66,11 @@ def gen_binary_ops(
             result = py_op(a, b)
             vectors.append({
                 "function": op_name,
-                "format" : "dec",
-                "args": [str(a), str(b)],
-                "expected": str(result)
+                "format" : format,
+                "args": [format_number(a, format), format_number(b, format)],
+                "expected": format_number(result, format)
             })
-        except Exception:
+        except Exception as ex:
             continue
     return vectors
 
@@ -50,16 +78,16 @@ def main():
     test_vectors = []
 
     # Arithmetic
-    test_vectors += gen_binary_ops("+", lambda a, b: a + b)
-    test_vectors += gen_binary_ops("-", lambda a, b: a - b)
-    test_vectors += gen_binary_ops("*", lambda a, b: a * b)
-    test_vectors += gen_binary_ops("/", lambda a, b: a // b, allow_zero_rhs=False)
-    test_vectors += gen_binary_ops("%", lambda a, b: a % b,  allow_zero_rhs=False)
+    test_vectors += gen_binary_ops(op_name = "+", py_op = lambda a, b: a + b)
+    test_vectors += gen_binary_ops(op_name = "-", py_op = lambda a, b: a - b)
+    test_vectors += gen_binary_ops(op_name = "*", py_op = lambda a, b: a * b)
+    test_vectors += gen_binary_ops(op_name = "/", py_op = lambda a, b: cpp_div(a, b), allow_zero_rhs=False)
+    test_vectors += gen_binary_ops(op_name = "%", py_op = lambda a, b: cpp_mod(a, b), allow_zero_rhs=False)
 
     # Bitwise
-    test_vectors += gen_binary_ops("&", lambda a, b: a & b)
-    test_vectors += gen_binary_ops("|", lambda a, b: a | b)
-    test_vectors += gen_binary_ops("^", lambda a, b: a | b)
+    test_vectors += gen_binary_ops(op_name = "&", py_op = lambda a, b: a & b, format = "hex")
+    test_vectors += gen_binary_ops(op_name = "|", py_op = lambda a, b: a | b, format = "hex")
+    test_vectors += gen_binary_ops(op_name = "^", py_op = lambda a, b: a ^ b, format = "hex")
 
     # Save to JSON
     with open("very_long_integer_test_vectors.json", "w") as f:

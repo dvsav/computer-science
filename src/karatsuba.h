@@ -277,7 +277,8 @@ namespace cs
          * @brief Constructs a VeryLongInteger from a string
          * representing the number in hexadecimal format.
          * The string may optionally have a prefix "0x" or "0X".
-         * The string is always interpreted as an unsigned integer.
+         * The string is always interpreted as an unsigned integer
+         * (negative integers are assumed to be in two's complement format).
          * @param hex the string representing the number in hexadecimal format.
          * @return The resulting VeryLongInteger object.
          */
@@ -321,7 +322,8 @@ namespace cs
          * @brief Constructs a VeryLongInteger from a string
          * representing the number in binary format.
          * The string may optionally have a prefix "0b" or "0B".
-         * The string is always interpreted as an unsigned integer.
+         * The string is always interpreted as an unsigned integer
+         * (negative integers are assumed to be in two's complement format).
          * @param bin the string representing the number in binary format.
          * @return The resulting VeryLongInteger object.
          */
@@ -683,8 +685,10 @@ namespace cs
         if (lhs.size() + rhs.size() <= sizeof(intmax_t))
             return VeryLongInteger(static_cast<intmax_t>(lhs) * static_cast<intmax_t>(rhs)).Prune();
 
-        const VeryLongInteger& smaller = lhs.size() < rhs.size() ? lhs : rhs;
-        const VeryLongInteger& larger = lhs.size() >= rhs.size() ? lhs : rhs;
+        const bool resultIsNegative = lhs.IsNegative() ^ rhs.IsNegative();
+
+        const VeryLongInteger& smaller = lhs.size() < rhs.size() ? lhs.Abs() : rhs.Abs();
+        const VeryLongInteger& larger = lhs.size() >= rhs.size() ? lhs.Abs() : rhs.Abs();
         VeryLongInteger result(/*size*/ smaller.size() + larger.size(), /*val*/ 0);
         // Iterate over the bytes of the smaller number
         for (size_t i = 0; i < smaller.size(); i++)
@@ -696,7 +700,7 @@ namespace cs
                     result = result + (larger << (8 * i + bitNum));
             }
         }
-        return result;
+        return resultIsNegative ? -result : result;
     }
 
     /**
@@ -711,11 +715,11 @@ namespace cs
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        const bool isNegative = (lhs.IsNegative() ^ rhs.IsNegative());
-
         // Optimization: if the product fits into the largest supported integral type we can use hardware for multiplication.
         if (lhs.size() + rhs.size() <= sizeof(intmax_t))
             return VeryLongInteger(static_cast<intmax_t>(lhs) * static_cast<intmax_t>(rhs)).Prune();
+
+        const bool isNegative = (lhs.IsNegative() ^ rhs.IsNegative());
 
         size_t maxSize = std::max(lhs.size(), rhs.size());
         if (maxSize % 2) maxSize++; // maxSize should be even

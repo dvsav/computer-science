@@ -108,32 +108,38 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         test_binary_operation(function, format, lhs, rhs, result);
     }
 
-    cs::VeryLongInteger x{int8_t(-1)};
+    SECTION("x")
+    {
+        cs::VeryLongInteger x{int8_t(-1)};
 
-    REQUIRE(x == -1);
-    REQUIRE(x.size() == sizeof(int8_t));
-    REQUIRE(x.IsNegative());
-    REQUIRE_FALSE(x.IsNonNegative());
-    REQUIRE_FALSE(x.IsPositive());
-    REQUIRE_FALSE(x.IsZero());
-    REQUIRE(x.ToBinary() == "11111111");
-    REQUIRE(x.ToHexadecimal() == "FF");
-    REQUIRE(x.ToDecimal() == "-1");
+        REQUIRE(x == -1);
+        REQUIRE(x.size() == sizeof(int8_t));
+        REQUIRE(x.IsNegative());
+        REQUIRE_FALSE(x.IsNonNegative());
+        REQUIRE_FALSE(x.IsPositive());
+        REQUIRE_FALSE(x.IsZero());
+        REQUIRE(x.ToBinary() == "11111111");
+        REQUIRE(x.ToHexadecimal() == "FF");
+        REQUIRE(x.ToDecimal() == "-1");
+    }
 
-    cs::VeryLongInteger y{int8_t(1)};
+    SECTION("y")
+    {
+        cs::VeryLongInteger y{int8_t(1)};
 
-    REQUIRE(y == 1);
-    REQUIRE(y.size() == sizeof(uint8_t));
-    REQUIRE_FALSE(y.IsNegative());
-    REQUIRE(y.IsNonNegative());
-    REQUIRE(y.IsPositive());
-    REQUIRE_FALSE(y.IsZero());
-    REQUIRE(y.ToBinary() == "00000001");
-    REQUIRE(y.ToHexadecimal() == "01");
-    REQUIRE(y.ToDecimal() == "1");
+        REQUIRE(y == 1);
+        REQUIRE(y.size() == sizeof(uint8_t));
+        REQUIRE_FALSE(y.IsNegative());
+        REQUIRE(y.IsNonNegative());
+        REQUIRE(y.IsPositive());
+        REQUIRE_FALSE(y.IsZero());
+        REQUIRE(y.ToBinary() == "00000001");
+        REQUIRE(y.ToHexadecimal() == "01");
+    }
 
     SECTION("Extend x")
     {
+        cs::VeryLongInteger x{int8_t(-1)};
         cs::VeryLongInteger z = x.Extended(2 * sizeof(uint8_t));
 
         REQUIRE(z == x);
@@ -149,6 +155,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("Extend y")
     {
+        cs::VeryLongInteger y{int8_t(1)};
         cs::VeryLongInteger z = y.Extended(2 * sizeof(uint8_t));
 
         REQUIRE(z == y);
@@ -164,6 +171,8 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x + y")
     {
+        cs::VeryLongInteger x{int8_t(-1)};
+        cs::VeryLongInteger y{int8_t(1)};
         cs::VeryLongInteger z = x + y;
 
         REQUIRE(z == 0);
@@ -179,6 +188,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("-y")
     {
+        cs::VeryLongInteger y{int8_t(1)};
         cs::VeryLongInteger z = -y; // z = -1
 
         REQUIRE(z == -1);
@@ -194,6 +204,8 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x - y")
     {
+        cs::VeryLongInteger x{int8_t(-1)};
+        cs::VeryLongInteger y{int8_t(1)};
         cs::VeryLongInteger z = x - y; // -1 - 1 = -2
 
         REQUIRE(z == -2);
@@ -209,6 +221,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x << 1")
     {
+        cs::VeryLongInteger x{int8_t(-1)};
         cs::VeryLongInteger z = x << 1; // (-1) << 1 = -2
 
         REQUIRE(z == -2);
@@ -224,6 +237,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("y << 1")
     {
+        cs::VeryLongInteger y{int8_t(1)};
         cs::VeryLongInteger z = y << 1; // 1 << 1 = 2
 
         REQUIRE(z == 2);
@@ -269,6 +283,8 @@ TEST_CASE("Karatsuba", "[karatsuba]")
 
     SECTION("x * y")
     {
+        cs::VeryLongInteger x{int8_t(-1)};
+        cs::VeryLongInteger y{int8_t(1)};
         cs::VeryLongInteger z = x * y; // 1 * (-1) = -1
 
         REQUIRE(z == -1);
