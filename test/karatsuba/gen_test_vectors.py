@@ -20,17 +20,22 @@ def random_bigint(bitlen: int = 128) -> int:
 def twos_complement(num: int):
     if (num < 0):
         n_tetrades = len(hex(num)) - 3
-        n_tetrades += n_tetrades % 2 # round up to the closest even number
-        n_bytes = n_tetrades // 2
+        n_bytes = (n_tetrades + 1) // 2
         N = n_bytes * 8
         num = num & ((1 << N) - 1)
     return num
 
 def format_number(num: int, format: str) -> str:
     if format == "hex":
-        return hex(twos_complement(num))[2:].upper()
+        string = hex(twos_complement(num))[2:].upper()
+        for i in range((2 - len(string)) % 2):
+            string = "0" + string
+        return string
     elif format == "bin":
-        return bin(twos_complement(num))[2:].upper()
+        string = bin(twos_complement(num))[2:].upper()
+        for i in range((8 - len(string)) % 8):
+            string = "0" + string
+        return string
     else:
         return str(num)
 

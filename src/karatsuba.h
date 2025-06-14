@@ -255,11 +255,11 @@ namespace cs
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             VeryLongInteger result{uint8_t(0)};
-            size_t decIndex = cleaned.length();
+            int decIndex = cleaned.length();
             while (true)
             {
                 // Convert groups of 9 decimal digits (less than 1 billion which fits to a 32 bit integer) to a number and add to the result.
-                int start = std::max<int>(decIndex - 9, 0);
+                int start = std::max(decIndex - 9, 0);
                 std::string str = cleaned.substr(start, decIndex - start);
                 unsigned long val = std::stoul(/*str*/ str, /*pos*/ nullptr, /*base*/ 10);
                 result = result +
@@ -304,10 +304,10 @@ namespace cs
 
             // iterate over the 2-hex digits (1 byte) groups of symbols in the string
             // moving from the end towards the beginning of the string
-            size_t hexIndex = cleaned.length();
+            int hexIndex = cleaned.length();
             for (size_t i = 0; i < lenBytes; i++)
             {
-                const size_t start = std::max<size_t>(hexIndex - 2, 0);
+                const size_t start = std::max(hexIndex - 2, 0);
                 std::string byteStr = cleaned.substr(start, hexIndex - start);
                 // convert hex string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(
@@ -349,10 +349,10 @@ namespace cs
 
             // iterate over the 8-bit (1 byte) groups of symbols in the string
             // moving from the end towards the beginning of the string
-            size_t bitIndex = cleaned.length();
+            int bitIndex = cleaned.length();
             for (size_t i = 0; i < lenBytes; i++)
             {
-                const size_t start = std::max(static_cast<int>(bitIndex) - 8, 0);
+                const int start = std::max(bitIndex - 8, 0);
                 std::string byteStr = cleaned.substr(start, bitIndex - start);
                 // convert binary string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(

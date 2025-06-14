@@ -33,79 +33,82 @@
 
 TEST_CASE("Karatsuba", "[karatsuba]")
 {
-    auto test_binary_operation = [](
-        const std::string& function,
-        const std::string& format,
-        const std::string& lhs,
-        const std::string& rhs,
-        const std::string& result)
+    SECTION("xy")
     {
-        cs::VeryLongInteger x{uint8_t(0)};
-        cs::VeryLongInteger y{uint8_t(0)};
-        cs::VeryLongInteger z{uint8_t(0)};
-        if (format == "dec")
+        auto test_binary_operation = [](
+            const std::string& function,
+            const std::string& format,
+            const std::string& lhs,
+            const std::string& rhs,
+            const std::string& result)
         {
-            x = cs::VeryLongInteger::FromDecimal(lhs);
-            REQUIRE(x.ToDecimal() == lhs);
-            y = cs::VeryLongInteger::FromDecimal(rhs);
-            REQUIRE(y.ToDecimal() == rhs);
-            z = cs::VeryLongInteger::FromDecimal(result);
-            REQUIRE(z.ToDecimal() == result);
-        }
-        else if (format == "hex")
+            cs::VeryLongInteger x{uint8_t(0)};
+            cs::VeryLongInteger y{uint8_t(0)};
+            cs::VeryLongInteger z{uint8_t(0)};
+            if (format == "dec")
+            {
+                x = cs::VeryLongInteger::FromDecimal(lhs);
+                REQUIRE(x.ToDecimal() == lhs);
+                y = cs::VeryLongInteger::FromDecimal(rhs);
+                REQUIRE(y.ToDecimal() == rhs);
+                z = cs::VeryLongInteger::FromDecimal(result);
+                REQUIRE(z.ToDecimal() == result);
+            }
+            else if (format == "hex")
+            {
+                x = cs::VeryLongInteger::FromHexadecimal(lhs);
+                REQUIRE(x.ToHexadecimal() == lhs);
+                y = cs::VeryLongInteger::FromHexadecimal(rhs);
+                REQUIRE(y.ToHexadecimal() == rhs);
+                z = cs::VeryLongInteger::FromHexadecimal(result);
+                REQUIRE(z.ToHexadecimal() == result);
+            }
+            else if (format == "bin")
+            {
+                x = cs::VeryLongInteger::FromBinary(lhs);
+                REQUIRE(x.ToBinary() == lhs);
+                y = cs::VeryLongInteger::FromBinary(rhs);
+                REQUIRE(y.ToBinary() == rhs);
+                z = cs::VeryLongInteger::FromBinary(result);
+                REQUIRE(z.ToBinary() == result);
+            }
+            else
+                REQUIRE(false);
+
+            if (function == "+")
+                REQUIRE((x + y) == z);
+            else if (function == "-")
+                REQUIRE((x - y) == z);
+            else if (function == "*")
+                REQUIRE((x * y) == z);
+            else if (function == "/")
+                REQUIRE((x / y) == z);
+            else if (function == "&")
+                REQUIRE((x & y) == z);
+            else if (function == "|")
+                REQUIRE((x | y) == z);
+            else if (function == "^")
+                REQUIRE((x ^ y) == z);
+            else if (function == "<<")
+                REQUIRE((x << static_cast<size_t>(y)) == z);
+            else if (function == ">>")
+                REQUIRE((x >> static_cast<size_t>(y)) == z);
+        };
+
+        std::ifstream ifs("./karatsuba/very_long_integer_test_vectors.json");
+        REQUIRE(ifs);
+        nlohmann::json json_data = nlohmann::json::parse(ifs);
+        for (const auto& test_case : json_data)
         {
-            x = cs::VeryLongInteger::FromHexadecimal(lhs);
-            REQUIRE(x.ToHexadecimal() == lhs);
-            y = cs::VeryLongInteger::FromHexadecimal(rhs);
-            REQUIRE(y.ToHexadecimal() == rhs);
-            z = cs::VeryLongInteger::FromHexadecimal(result);
-            REQUIRE(z.ToHexadecimal() == result);
+            std::string function = test_case["function"];
+            std::string format = test_case["format"];
+            std::string lhs = test_case["args"][0];
+            std::string rhs = test_case["args"][1];
+            std::string result = test_case["expected"];
+            //std::cout << lhs << ' ' << function << ' ' << rhs << " = " << result << std::endl;
+
+            test_binary_operation(function, format, lhs, rhs, result);
         }
-        else if (format == "bin")
-        {
-            x = cs::VeryLongInteger::FromBinary(lhs);
-            REQUIRE(x.ToBinary() == lhs);
-            y = cs::VeryLongInteger::FromBinary(rhs);
-            REQUIRE(y.ToBinary() == rhs);
-            z = cs::VeryLongInteger::FromBinary(result);
-            REQUIRE(z.ToBinary() == result);
-        }
-        else
-            REQUIRE(false);
-
-        if (function == "+")
-            REQUIRE(x + y == z);
-        else if (function == "-")
-            REQUIRE(x - y == z);
-        else if (function == "*")
-            REQUIRE(x * y == z);
-        else if (function == "/")
-            REQUIRE(x / y == z);
-        else if (function == "&")
-            REQUIRE(x & y == z);
-        else if (function == "|")
-            REQUIRE(x | y == z);
-        else if (function == "^")
-            REQUIRE(x ^ y == z);
-        else if (function == "<<")
-            REQUIRE(x << static_cast<size_t>(y) == z);
-        else if (function == ">>")
-            REQUIRE(x >> static_cast<size_t>(y) == z);
-    };
-
-    std::ifstream ifs("./karatsuba/very_long_integer_test_vectors.json");
-    REQUIRE(ifs);
-    nlohmann::json json_data = nlohmann::json::parse(ifs);
-    for (const auto& test_case : json_data)
-    {
-        std::string function = test_case["function"];
-        std::string format = test_case["format"];
-        std::string lhs = test_case["args"][0];
-        std::string rhs = test_case["args"][1];
-        std::string result = test_case["expected"];
-        std::cout << lhs << ' ' << function << ' ' << rhs << " = " << result << std::endl;
-
-        test_binary_operation(function, format, lhs, rhs, result);
     }
 
     SECTION("x")
