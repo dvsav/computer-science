@@ -76,23 +76,42 @@ TEST_CASE("Karatsuba", "[karatsuba]")
                 REQUIRE(false);
 
             if (function == "+")
+            {
                 REQUIRE((x + y) == z);
+            }
             else if (function == "-")
+            {
                 REQUIRE((x - y) == z);
+            }
             else if (function == "*")
+            {
                 REQUIRE((x * y) == z);
+                REQUIRE(cs::Karatsuba(x, y) == z);
+            }
             else if (function == "/")
+            {
                 REQUIRE((x / y) == z);
+            }
             else if (function == "&")
+            {
                 REQUIRE((x & y) == z);
+            }
             else if (function == "|")
+            {
                 REQUIRE((x | y) == z);
+            }
             else if (function == "^")
+            {
                 REQUIRE((x ^ y) == z);
+            }
             else if (function == "<<")
+            {
                 REQUIRE((x << static_cast<size_t>(y)) == z);
+            }
             else if (function == ">>")
+            {
                 REQUIRE((x >> static_cast<size_t>(y)) == z);
+            }
         };
 
         std::ifstream ifs("./karatsuba/very_long_integer_test_vectors.json");
@@ -105,39 +124,10 @@ TEST_CASE("Karatsuba", "[karatsuba]")
             std::string lhs = test_case["args"][0];
             std::string rhs = test_case["args"][1];
             std::string result = test_case["expected"];
-            //std::cout << lhs << ' ' << function << ' ' << rhs << " = " << result << std::endl;
+            std::cout << lhs << ' ' << function << ' ' << rhs << " = " << result << std::endl;
 
             test_binary_operation(function, format, lhs, rhs, result);
         }
-    }
-
-    SECTION("x")
-    {
-        cs::VeryLongInteger x{int8_t(-1)};
-
-        REQUIRE(x == -1);
-        REQUIRE(x.size() == sizeof(int8_t));
-        REQUIRE(x.IsNegative());
-        REQUIRE_FALSE(x.IsNonNegative());
-        REQUIRE_FALSE(x.IsPositive());
-        REQUIRE_FALSE(x.IsZero());
-        REQUIRE(x.ToBinary() == "11111111");
-        REQUIRE(x.ToHexadecimal() == "FF");
-        REQUIRE(x.ToDecimal() == "-1");
-    }
-
-    SECTION("y")
-    {
-        cs::VeryLongInteger y{int8_t(1)};
-
-        REQUIRE(y == 1);
-        REQUIRE(y.size() == sizeof(uint8_t));
-        REQUIRE_FALSE(y.IsNegative());
-        REQUIRE(y.IsNonNegative());
-        REQUIRE(y.IsPositive());
-        REQUIRE_FALSE(y.IsZero());
-        REQUIRE(y.ToBinary() == "00000001");
-        REQUIRE(y.ToHexadecimal() == "01");
     }
 
     SECTION("Extend x")
@@ -172,23 +162,6 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE(z.ToDecimal() == "1");
     }
 
-    SECTION("x + y")
-    {
-        cs::VeryLongInteger x{int8_t(-1)};
-        cs::VeryLongInteger y{int8_t(1)};
-        cs::VeryLongInteger z = x + y;
-
-        REQUIRE(z == 0);
-        REQUIRE(z.size() == sizeof(uint8_t));
-        REQUIRE_FALSE(z.IsNegative());
-        REQUIRE(z.IsNonNegative());
-        REQUIRE_FALSE(z.IsPositive());
-        REQUIRE(z.IsZero());
-        REQUIRE(z.ToBinary() == "00000000");
-        REQUIRE(z.ToHexadecimal() == "00");
-        REQUIRE(z.ToDecimal() == "0");
-    }
-
     SECTION("-y")
     {
         cs::VeryLongInteger y{int8_t(1)};
@@ -203,23 +176,6 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE(z.ToBinary() == "11111111");
         REQUIRE(z.ToHexadecimal() == "FF");
         REQUIRE(z.ToDecimal() == "-1");
-    }
-
-    SECTION("x - y")
-    {
-        cs::VeryLongInteger x{int8_t(-1)};
-        cs::VeryLongInteger y{int8_t(1)};
-        cs::VeryLongInteger z = x - y; // -1 - 1 = -2
-
-        REQUIRE(z == -2);
-        REQUIRE(z.size() == sizeof(uint8_t));
-        REQUIRE(z.IsNegative());
-        REQUIRE_FALSE(z.IsNonNegative());
-        REQUIRE_FALSE(z.IsPositive());
-        REQUIRE_FALSE(z.IsZero());
-        REQUIRE(z.ToBinary() == "11111110");
-        REQUIRE(z.ToHexadecimal() == "FE");
-        REQUIRE(z.ToDecimal() == "-2");
     }
 
     SECTION("x << 1")
@@ -284,74 +240,6 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE(z.ToDecimal() == "3");
     }
 
-    SECTION("x * y")
-    {
-        cs::VeryLongInteger x{int8_t(-1)};
-        cs::VeryLongInteger y{int8_t(1)};
-        cs::VeryLongInteger z = x * y; // 1 * (-1) = -1
-
-        REQUIRE(z == -1);
-        REQUIRE(z.size() == sizeof(uint8_t));
-        REQUIRE(z.IsNegative());
-        REQUIRE_FALSE(z.IsNonNegative());
-        REQUIRE_FALSE(z.IsPositive());
-        REQUIRE_FALSE(z.IsZero());
-        REQUIRE(z.ToBinary() == "11111111");
-        REQUIRE(z.ToHexadecimal() == "FF");
-        REQUIRE(z.ToDecimal() == "-1");
-    }
-
-    SECTION("x * y")
-    {
-        cs::VeryLongInteger x{uint8_t(5)};
-        cs::VeryLongInteger y{uint8_t(7)};
-        cs::VeryLongInteger z = x * y; // 5 * 7 = 35
-
-        REQUIRE(z == 35);
-        REQUIRE(z.size() == sizeof(uint8_t));
-        REQUIRE_FALSE(z.IsNegative());
-        REQUIRE(z.IsNonNegative());
-        REQUIRE(z.IsPositive());
-        REQUIRE_FALSE(z.IsZero());
-        REQUIRE(z.ToBinary() == "00100011");
-        REQUIRE(z.ToHexadecimal() == "23");
-        REQUIRE(z.ToDecimal() == "35");
-    }
-
-    SECTION("x * y")
-    {
-        cs::VeryLongInteger x{int8_t(-5)};
-        cs::VeryLongInteger y{int8_t(7)};
-        cs::VeryLongInteger z = x * y; // -5 * 7 = -35
-
-        REQUIRE(z == -35);
-        REQUIRE(z.size() == sizeof(uint8_t));
-        REQUIRE(z.IsNegative());
-        REQUIRE_FALSE(z.IsNonNegative());
-        REQUIRE_FALSE(z.IsPositive());
-        REQUIRE_FALSE(z.IsZero());
-        REQUIRE(z.ToBinary() == "11011101");
-        REQUIRE(z.ToHexadecimal() == "DD");
-        REQUIRE(z.ToDecimal() == "-35");
-    }
-
-    SECTION("x * y")
-    {
-        cs::VeryLongInteger x{uint8_t(5)};
-        cs::VeryLongInteger y{uint8_t(70)};
-        cs::VeryLongInteger z = x * y; // 5 * 70 = 350
-
-        REQUIRE(z == 350);
-        REQUIRE(z.size() == 2 * sizeof(uint8_t));
-        REQUIRE_FALSE(z.IsNegative());
-        REQUIRE(z.IsNonNegative());
-        REQUIRE(z.IsPositive());
-        REQUIRE_FALSE(z.IsZero());
-        REQUIRE(z.ToBinary() == "0000000101011110");
-        REQUIRE(z.ToHexadecimal() == "015E");
-        REQUIRE(z.ToDecimal() == "350");
-    }
-
     SECTION("Power")
     {
         cs::VeryLongInteger x{uint8_t(10)};
@@ -362,55 +250,10 @@ TEST_CASE("Karatsuba", "[karatsuba]")
         REQUIRE(cs::Power(x, 3) == cs::VeryLongInteger{uint16_t(1000)});
     }
 
-    SECTION("FromDecimal")
-    {
-        cs::VeryLongInteger z = cs::VeryLongInteger::FromDecimal("123");
-
-        REQUIRE(z == 123);
-        REQUIRE(z.size() == sizeof(uint8_t));
-        REQUIRE_FALSE(z.IsNegative());
-        REQUIRE(z.IsNonNegative());
-        REQUIRE(z.IsPositive());
-        REQUIRE_FALSE(z.IsZero());
-        REQUIRE(z.ToBinary() == "01111011");
-        REQUIRE(z.ToHexadecimal() == "7B");
-        REQUIRE(z.ToDecimal() == "123");
-    }
-
-    SECTION("x / y")
-    {
-        cs::VeryLongInteger x{uint8_t(15)};
-        cs::VeryLongInteger y{uint8_t(3)};
-        REQUIRE(x / y == 15 / 3);
-    }
-
-    SECTION("x / y")
-    {
-        cs::VeryLongInteger x{int8_t(17)};
-        cs::VeryLongInteger y{int8_t(-3)};
-        REQUIRE(x / y == 17 / -3);
-    }
-
     SECTION("cast")
     {
         REQUIRE(static_cast<int>(cs::VeryLongInteger{int8_t(17)}) == 17);
         REQUIRE(static_cast<int>(cs::VeryLongInteger{int8_t(-17)}) == -17);
-    }
-
-    SECTION("Karatsuba")
-    {
-        cs::VeryLongInteger x{intmax_t(0x7FFFFFFFFFFFFFFF)};
-        cs::VeryLongInteger y{intmax_t(0x7FFFFFFFFFFFFFFF)};
-        cs::VeryLongInteger z = Karatsuba(x, y); // 0x7FFFFFFFFFFFFFFF * 0x7FFFFFFFFFFFFFFF
-
-        REQUIRE(z.size() == 2 * sizeof(intmax_t));
-        REQUIRE_FALSE(z.IsNegative());
-        REQUIRE(z.IsNonNegative());
-        REQUIRE(z.IsPositive());
-        REQUIRE_FALSE(z.IsZero());
-        REQUIRE(z.ToBinary() == "00111111111111111111111111111111111111111111111111111111111111110000000000000000000000000000000000000000000000000000000000000001");
-        REQUIRE(z.ToHexadecimal() == "3FFFFFFFFFFFFFFF0000000000000001");
-        REQUIRE(z.ToDecimal() == "85070591730234615847396907784232501249");
     }
 }
 

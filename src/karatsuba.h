@@ -8,16 +8,12 @@
 #include <cctype>
 #include <cstdint>
 #include <iomanip>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
 #include <utility>
-
-/*
-TODO:
-Cleanup and optimize unit tests.
-*/
 
 namespace cs
 {
@@ -864,21 +860,23 @@ namespace cs
     /**
      * @brief Bitwise XOR operator for VeryLongInteger objects.
      * The arguments @p lhs and @p rhs are always treated as unsigned.
-     * The arguments must have the same size in bytes.
+     * If the two arguments have different sizes, the nonexistent bits
+     * in the smaller argument are considered to be 0's.
      * @param lhs The left-hand side VeryLongInteger operand.
      * @param rhs The right-hand side VeryLongInteger operand.
      * @return VeryLongInteger The result of the bitwise XOR operation.
-     * @throws std::runtime_error If the arguments have different sizes.
      */
     inline VeryLongInteger operator^(
         const VeryLongInteger& lhs,
         const VeryLongInteger& rhs)
     {
-        Requires::That(lhs.size() == rhs.size(), FUNCTION_INFO);
+        const VeryLongInteger& smaller = lhs.size() < rhs.size() ? lhs : rhs;
+        const VeryLongInteger& larger = lhs.size() >= rhs.size() ? lhs : rhs;
 
-        VeryLongInteger result = lhs;
-        for (size_t i = 0; i < rhs.size(); i++)
-            result.value[i] ^= rhs.value[i];
+        VeryLongInteger result = larger;
+
+        for (size_t i = 0; i < smaller.size(); i++)
+            result.value[i] ^= smaller.value[i];
 
         return result;
     }
@@ -1005,5 +1003,18 @@ namespace cs
         for (size_t i = 0; i < power; i++)
             result = result * val;
         return result;
+    }
+
+    /**
+     * @brief Output operator.
+     * @param os Output stream.
+     * @param val Number.
+     * @return Output stream.
+     */
+    inline std::ostream& operator<<(
+        std::ostream& os,
+        const VeryLongInteger& val)
+    {
+        return os << val.ToDecimal();
     }
 }
