@@ -718,7 +718,7 @@ namespace cs
         const bool isNegative = (lhs.IsNegative() ^ rhs.IsNegative());
 
         size_t maxSize = std::max(lhs.size(), rhs.size());
-        if (maxSize % 2) maxSize++; // maxSize should be even
+        maxSize += maxSize % 2; // maxSize should be even
         const size_t N = maxSize * 8;
         const VeryLongInteger x = lhs.Abs().Extended(maxSize);
         const VeryLongInteger y = rhs.Abs().Extended(maxSize);
@@ -730,13 +730,26 @@ namespace cs
         // 2. Compute: bd
         // 3. Compute: (ad + bc) = (a + b)(c + d) - ac - bd
 
-        VeryLongInteger a = x >> (N / 2);
-        VeryLongInteger b = x & VeryLongInteger(/*size*/ maxSize / 2 + 1, /*val*/ 0xFF);
-        b.value.back() = 0x00;
+        auto splitNumber = [](const VeryLongInteger& src) -> std::pair<VeryLongInteger, VeryLongInteger>
+        {
+            VeryLongInteger high(/*size*/ src.size() - src.size() / 2, /*val*/ 0x00);
+            VeryLongInteger low(/*size*/ src.size() / 2 + 1, /*val*/ 0x00);
 
-        VeryLongInteger c = y >> (N / 2);
-        VeryLongInteger d = y & VeryLongInteger(/*size*/ maxSize / 2 + 1, /*val*/ 0xFF);
-        d.value.back() = 0x00;
+            std::copy(
+                /*first*/ &src.value[0],
+                /*last*/ &src.value[src.size() / 2],
+                /*dest*/ &low.value[0]);
+
+            std::copy(
+                /*first*/ &src.value[src.size() / 2],
+                /*last*/ &src.value[src.size()],
+                /*dest*/ &high.value[0]);
+
+            return {high, low};
+        };
+
+        auto [a, b] = splitNumber(x);
+        auto [c, d] = splitNumber(y);
 
         VeryLongInteger ac = Karatsuba(a, c);
         VeryLongInteger bd = Karatsuba(b, d);
@@ -814,7 +827,8 @@ namespace cs
      * @brief Bitwise OR operator for two VeryLongInteger objects.
      * The arguments @p lhs and @p rhs are always treated as unsigned.
      * If the two arguments have different sizes, the nonexistent bits
-     * in the smaller argument are considered to be 0's.
+     * in the smaller argument are considered to be 0's; the size of
+     * the return value is equal to the size of the larger argument.
      * @param lhs The left-hand side VeryLongInteger operand.
      * @param rhs The right-hand side VeryLongInteger operand.
      * @return VeryLongInteger The result of the bitwise OR operation.
@@ -824,7 +838,7 @@ namespace cs
         const VeryLongInteger& rhs)
     {
         const size_t maxSize = std::max(lhs.size(), rhs.size());
-        VeryLongInteger result(/*size*/ maxSize, /*val*/ 0);
+        VeryLongInteger result(/*size*/ maxSize, /*val*/ 0x00);
 
         for (size_t i = 0; i < lhs.size(); i++)
             result.value[i] |= lhs.value[i];
@@ -839,7 +853,8 @@ namespace cs
      * @brief Bitwise AND operator for two VeryLongInteger objects.
      * The arguments @p lhs and @p rhs are always treated as unsigned.
      * If the two arguments have different sizes, the nonexistent bits
-     * in the smaller argument are considered to be 0's.
+     * in the smaller argument are considered to be 0's; the size of
+     * the return value is equal to the size of the larger argument.
      * @param lhs The left-hand side VeryLongInteger operand.
      * @param rhs The right-hand side VeryLongInteger operand.
      * @return VeryLongInteger The result of the bitwise AND operation.
@@ -849,7 +864,8 @@ namespace cs
         const VeryLongInteger& rhs)
     {
         const size_t minSize = std::min(lhs.size(), rhs.size());
-        VeryLongInteger result(/*size*/ minSize, /*val*/ 0);
+        const size_t maxSize = std::max(lhs.size(), rhs.size());
+        VeryLongInteger result(/*size*/ maxSize, /*val*/ 0x00);
 
         for (size_t i = 0; i < minSize; i++)
             result.value[i] = lhs.value[i] & rhs.value[i];

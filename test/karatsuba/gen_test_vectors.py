@@ -31,18 +31,14 @@ def unsigned(num: int) -> int:
 def format_number(num: int, format: str) -> str:
     assert format in ["hex", "bin", "dec"], "'format' must be 'hex', 'bin' or 'dec'"
     if format == "hex":
-        string = hex(unsigned(num))[2:].upper()
-        for i in range((2 - len(string)) % 2):
+        string = hex(unsigned(num))[2:].upper() # cut out '0x' prefix
+        for i in range((2 - len(string)) % 2):  # add leading zeroes
             string = "0" + string
-        if (num > 0):
-            string = "0"*2 + string
         return string
     elif format == "bin":
-        string = bin(unsigned(num))[2:].upper()
-        for i in range((8 - len(string)) % 8):
+        string = bin(unsigned(num))[2:].upper() # cut out '0b' prefix
+        for i in range((8 - len(string)) % 8):  # add leading zeroes
             string = "0" + string
-        if (num > 0):
-            string = "0"*8 + string
         return string
     else:
         return str(num)
@@ -84,6 +80,7 @@ def gen_binary_ops(
                 "expected": format_number(result, format)
             })
         except Exception as ex:
+            print(ex)
             continue
     return vectors
 
@@ -108,6 +105,7 @@ def gen_unary_ops(
                 "expected": format_number(result, format)
             })
         except Exception as ex:
+            print(ex)
             continue
     return vectors
 
@@ -115,11 +113,11 @@ def main():
     test_vectors = []
 
     # Arithmetic
-    test_vectors += gen_binary_ops(op_name = "+", py_op = lambda a, b: a + b)
-    test_vectors += gen_binary_ops(op_name = "-", py_op = lambda a, b: a - b)
-    test_vectors += gen_binary_ops(op_name = "*", py_op = lambda a, b: a * b)
-    test_vectors += gen_binary_ops(op_name = "/", py_op = lambda a, b: cpp_div(a, b), allow_zero_rhs=False)
-    test_vectors += gen_binary_ops(op_name = "%", py_op = lambda a, b: cpp_mod(a, b), allow_zero_rhs=False)
+    test_vectors += gen_binary_ops(op_name = "+", py_op = lambda a, b: a + b, format = "dec")
+    test_vectors += gen_binary_ops(op_name = "-", py_op = lambda a, b: a - b, format = "dec")
+    test_vectors += gen_binary_ops(op_name = "*", py_op = lambda a, b: a * b, format = "dec")
+    test_vectors += gen_binary_ops(op_name = "/", py_op = lambda a, b: cpp_div(a, b), allow_zero_rhs=False, format = "dec")
+    test_vectors += gen_binary_ops(op_name = "%", py_op = lambda a, b: cpp_mod(a, b), allow_zero_rhs=False, format = "dec")
 
     # Bitwise logic
     test_vectors += gen_binary_ops(op_name = "&", py_op = lambda a, b: unsigned(a) & unsigned(b), format = "hex")
@@ -127,8 +125,8 @@ def main():
     test_vectors += gen_binary_ops(op_name = "^", py_op = lambda a, b: unsigned(a) ^ unsigned(b), format = "hex")
 
     # Arithmetic shift
-    test_vectors += gen_unary_ops(op_name = "<<", py_op = lambda a, b: unsigned(a) << b, b_range = (0, 16))
-    test_vectors += gen_unary_ops(op_name = ">>", py_op = lambda a, b: unsigned(a) >> b, b_range = (0, 16))
+    test_vectors += gen_unary_ops(op_name = "<<", py_op = lambda a, b: unsigned(a) << b, b_range = (0, 16), format = "hex")
+    test_vectors += gen_unary_ops(op_name = ">>", py_op = lambda a, b: unsigned(a) >> b, b_range = (0, 16), format = "hex")
 
     # Save to JSON
     with open("very_long_integer_test_vectors.json", "w") as f:
