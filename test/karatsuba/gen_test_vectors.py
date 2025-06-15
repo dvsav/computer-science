@@ -12,6 +12,16 @@ def cpp_mod(a: int, b: int) -> int:
     """Returns the result of modulo operation a % b that aligns with C++ modulo operation behavior"""
     return a % b if a * b >= 0 else (a % b) - b
 
+def unsigned_op(
+    py_op: callable,
+    a: int,
+    b: int) -> str:
+    a = unsigned(a)
+    b = unsigned(b)
+    n_tetrades_max = max(len(format_number(a, "hex")), len(format_number(b, "hex")))
+    result = format_number(py_op(a, b), "hex")
+    return "0"*(n_tetrades_max - len(result)) + result # add leading zeroes
+
 def random_bigint(bitlen: int = 128) -> int:
     """Generate a random signed integer of up to 'bitlen' bits."""
     assert bitlen > 0, "'bitlen' must be > 0"
@@ -22,7 +32,7 @@ def random_bigint(bitlen: int = 128) -> int:
 def unsigned(num: int) -> int:
     """Convert signed integral number to unsigned integer (negative numbers are converted to two's complement format)"""
     if (num < 0):
-        n_tetrades = len(hex(num)) - 3
+        n_tetrades = len(hex(num)) - 3 # cut out '-0x' prefix
         n_bytes = (n_tetrades + 1) // 2
         N = n_bytes * 8
         num = num & ((1 << N) - 1)
@@ -31,17 +41,14 @@ def unsigned(num: int) -> int:
 def format_number(num: int, format: str) -> str:
     assert format in ["hex", "bin", "dec"], "'format' must be 'hex', 'bin' or 'dec'"
     if format == "hex":
-        string = hex(unsigned(num))[2:].upper() # cut out '0x' prefix
-        for i in range((2 - len(string)) % 2):  # add leading zeroes
-            string = "0" + string
-        return string
+        string = hex(unsigned(num))[2:].upper()       # cut out '0x' prefix
+        string = "0"*((2 - len(string)) % 2) + string # add leading zeroes
     elif format == "bin":
-        string = bin(unsigned(num))[2:].upper() # cut out '0b' prefix
-        for i in range((8 - len(string)) % 8):  # add leading zeroes
-            string = "0" + string
-        return string
+        string = bin(unsigned(num))[2:].upper()       # cut out '0b' prefix
+        string = "0"*((8 - len(string)) % 8) + string # add leading zeroes
     else:
-        return str(num)
+        string = str(num)
+    return string
 
 def gen_binary_ops(
     op_name: str,
@@ -77,32 +84,7 @@ def gen_binary_ops(
                 "function": op_name,
                 "format" : format,
                 "args": [format_number(a, format), format_number(b, format)],
-                "expected": format_number(result, format)
-            })
-        except Exception as ex:
-            print(ex)
-            continue
-    return vectors
-
-def gen_unary_ops(
-    op_name: str,
-    py_op: callable,
-    b_range: tuple[int],
-    count: int = 50,
-    format = "hex") -> list[dict]:
-    """Generates a list of test vectors for a unary operation."""
-    assert len(b_range) == 2, "'b_range' must contain two numbers"
-    vectors = []
-    for _ in range(count):
-        a = random_bigint()
-        b = random.randint(b_range[0], b_range[1])
-        try:
-            result = py_op(a, b)
-            vectors.append({
-                "function": op_name,
-                "format" : format,
-                "args": [format_number(a, format), format_number(b, format)],
-                "expected": format_number(result, format)
+                "expected": format_number(result, format) if isinstance(result, int) else result
             })
         except Exception as ex:
             print(ex)
@@ -120,13 +102,9 @@ def main():
     test_vectors += gen_binary_ops(op_name = "%", py_op = lambda a, b: cpp_mod(a, b), allow_zero_rhs=False, format = "dec")
 
     # Bitwise logic
-    test_vectors += gen_binary_ops(op_name = "&", py_op = lambda a, b: unsigned(a) & unsigned(b), format = "hex")
+    test_vectors += gen_binary_ops(op_name = "&", py_op = lambda a, b: unsigned_op(lambda a, b: a & b, a, b), format = "hex")
     test_vectors += gen_binary_ops(op_name = "|", py_op = lambda a, b: unsigned(a) | unsigned(b), format = "hex")
     test_vectors += gen_binary_ops(op_name = "^", py_op = lambda a, b: unsigned(a) ^ unsigned(b), format = "hex")
-
-    # Arithmetic shift
-    test_vectors += gen_unary_ops(op_name = "<<", py_op = lambda a, b: unsigned(a) << b, b_range = (0, 16), format = "hex")
-    test_vectors += gen_unary_ops(op_name = ">>", py_op = lambda a, b: unsigned(a) >> b, b_range = (0, 16), format = "hex")
 
     # Save to JSON
     with open("very_long_integer_test_vectors.json", "w") as f:

@@ -155,7 +155,7 @@ namespace cs
                     result.value[i] |= shiftLeft(this->value[j], N % 8 - 8);
             }
             
-            if (this->IsNegative())
+            if (this->IsNegative() && (N % 8))
             {
                 // Fill the most significant bits of the result with 1's
                 result.value.back() |= (0xFF << (N % 8));
@@ -196,7 +196,7 @@ namespace cs
                     result.value[i] |= shiftRight(this->value[j], N % 8 - 8);
             }
             
-            if (this->IsNegative())
+            if (this->IsNegative() && (N % 8))
             {
                 // Fill the most significant bits of the result with 1's
                 result.value.back() |= (0xFF << (8 - N % 8));
