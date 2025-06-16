@@ -63,6 +63,22 @@ inline void skip_whitespace(std::istream& is)
 }
 
 /**
+ * @brief Removes leading spaces from the given string.
+ *
+ * This function modifies the input string by erasing all leading space characters.
+ * If the string consists entirely of spaces, it will be cleared and become empty.
+ *
+ * @param str Reference to the string to be trimmed.
+ */
+inline void trim_leading_spaces(std::string& str)
+{
+    if (size_t start = str.find_first_not_of(' ') != std::string::npos)
+        str.erase(0, start);
+    else // The string is all spaces
+        str.clear();
+}
+
+/**
  * @brief Reads and discards a single line beginning with specified string @p comment_begins_with.
  * @param is - input stream
  * @param comment_begins_with - the string that begins the comment
@@ -78,7 +94,7 @@ bool skip_comment(
  * The reading stops when a newline character is encountered.
  */
 template<typename T>
-std::istream& operator>>(
+inline std::istream& operator>>(
     std::istream& is,
     std::vector<T>& vec)
 {
@@ -114,8 +130,13 @@ std::istream& operator>>(
     return is;
 }
 
+/**
+ * @brief Prints out a collection of elements specified by a 
+ * pair of iterators @p begin and @p end to a specified output stream @p os.
+ * The elements are separated by a specified @p delimeter.
+ */
 template <typename TIterator>
-void print(
+inline void print(
     std::ostream& os,
     TIterator begin,
     TIterator end,
@@ -125,8 +146,13 @@ void print(
         os << *i << delimeter;
 }
 
+/**
+ * @brief Prints out a collection of elements specified by a 
+ * pair of iterators @p begin and @p end to the standard output stream.
+ * The elements are separated by a specified @p delimeter.
+ */
 template <typename TIterator>
-void print(
+inline void print(
     TIterator begin,
     TIterator end,
     const std::string& delimeter)
@@ -140,4 +166,87 @@ inline std::size_t hash_combine(std::size_t seed, const T& v)
 {
     std::hash<T> hasher;
     return seed ^ (hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+}
+
+/**
+ * @brief Shifts an integral value left by a specified offset.
+ *
+ * This function shifts the given value @p val left by @p offset bits.
+ * - If `offset` is positive, the value is shifted left.
+ * - If `offset` is negative, the value is shifted right.
+ * - If `offset` is zero, the value is returned unchanged.
+ *
+ * @tparam T An integral type.
+ * @param val The value to shift.
+ * @param offset The number of bits to shift. Positive for left shift, negative for right shift.
+ * @return The shifted value.
+ *
+ * @note A static assertion ensures that T is an integral type.
+ */
+template <class T>
+inline T shiftLeft(T val, int offset)
+{
+    static_assert(std::is_integral<T>::value, "T must be an integral type");
+
+    if (offset > 0)
+        return static_cast<T>(val << offset);
+    else if (offset < 0)
+        return static_cast<T>(val >> (-offset));
+    else
+        return val;
+}
+
+/**
+ * @brief Shifts an integral value right by a specified offset.
+ *
+ * This function shifts the given value @p val right by @p offset bits.
+ * - If `offset` is positive, the value is shifted right.
+ * - If `offset` is negative, the value is shifted left.
+ * - If `offset` is zero, the value is returned unchanged.
+ *
+ * @tparam T An integral type.
+ * @param val The value to shift.
+ * @param offset The number of bits to shift. Positive for right shift, negative for left shift.
+ * @return The shifted value.
+ *
+ * @note A static assertion ensures that T is an integral type.
+ */
+template <class T>
+inline T shiftRight(T val, int offset)
+{
+    static_assert(std::is_integral<T>::value, "T must be an integral type");
+
+    if (offset > 0)
+        return static_cast<T>(val >> offset);
+    else if (offset < 0)
+        return static_cast<T>(val << (-offset));
+    else
+        return val;
+}
+
+/**
+ * @brief Returns the index of the highest nonzero bit in an integral value.
+ *
+ * This function computes the position of the most significant bit set to 1 in the given
+ * integral @p value. If the value is 0, the function returns -1.
+ *
+ * @tparam T An integral type (e.g., int, long, uint64_t).
+ * @param value The integral value to examine.
+ * @return int The index (0-based) of the highest set bit, or -1 if value is 0.
+ *
+ * @note A static assertion ensures that T is an integral type.
+ */
+template <class T>
+inline int highestBit(T value)
+{
+    static_assert(std::is_integral<T>::value, "T must be an integral type");
+
+    if (value == 0)
+        return -1;
+
+    int index = 0;
+    while (value >>= 1)
+        index++;
+
+    return index;
 }

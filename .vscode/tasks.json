@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "(WSL) build debug version",
+            "type": "process",
+            "command": "wsl",
+            "args": [
+                "bash", "-c",
+                "cd \"$(wslpath '${workspaceFolder}')\" && ./make.sh -B DEBUG=yes"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}

@@ -41,6 +41,9 @@ install/
 **/[Dd]ebug/
 **/[Rr]elease/
 
+# VS Code
+.vscode/settings.json
+
 # CMake
 !build/CMake/
 build/CMake/*
