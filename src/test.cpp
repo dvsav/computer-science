@@ -116,7 +116,7 @@ TEST_CASE("Karatsuba", "[karatsuba]")
             std::string lhs = test_case["args"][0];
             std::string rhs = test_case["args"][1];
             std::string result = test_case["expected"];
-            std::cout << lhs << ' ' << function << ' ' << rhs << " = " << result << std::endl;
+            //std::cout << lhs << ' ' << function << ' ' << rhs << " = " << result << std::endl;
 
             test_binary_operation(function, format, lhs, rhs, result);
         }
@@ -570,23 +570,31 @@ TEST_CASE("BinaryTreeNode", "[binarytree]")
 {
     using tree_node = cs::BinaryTreeNode<std::string, int>;
 
+    // root
+    // |--left1
+    // |  |--left2
+    // |  `--
+    // `--right1
+    //    |--
+    //    `--right2
+
     tree_node* root = new tree_node(
-        /*value*/ "root",
+        /*key*/ "root",
         /*left*/ new tree_node(
-            "left1",
-            new tree_node(
-                "left2",
-                nullptr,
-                nullptr),
-            nullptr
+            /*key*/ "left1",
+            /*left*/ new tree_node(
+                /*key*/ "left2",
+                /*left*/ nullptr,
+                /*right*/ nullptr),
+            /*right*/ nullptr
         ),
         /*right*/ new tree_node(
-            "right1",
-            nullptr,
-            new tree_node(
-                "right2",
-                nullptr,
-                nullptr)
+            /*key*/ "right1",
+            /*left*/ nullptr,
+            /*right*/ new tree_node(
+                /*key*/ "right2",
+                /*left*/ nullptr,
+                /*right*/nullptr)
         )
     );
 
@@ -601,7 +609,7 @@ TEST_CASE("BinaryTreeNode", "[binarytree]")
     REQUIRE(root->Left()->Left()->Key() == "left2");
     REQUIRE(root->Right()->Right()->Key() == "right2");
 
-    //cs::PrintTree<typename tree_node>(std::cout, root);
+    //cs::PrintTree<tree_node>(std::cout, root);
 
     cs::DeleteTree(root);
 }

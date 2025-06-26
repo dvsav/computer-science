@@ -7,9 +7,9 @@
 #include <algorithm>   // for std::max
 #include <functional>  // for std::function
 #include <iostream>    // for std::ostream
-#include <stack>       // for std::stack
 #include <string>      // for std::string
 #include <type_traits> // for std::is_same
+#include <queue>       // for std::queue
 #include <utility>     // for std::pair
 
 namespace cs
@@ -264,7 +264,8 @@ namespace cs
 
     /**
      * @brief Visits (calls @p visitor functor)
-     * nodes of a tree in a level-order fashion.
+     * nodes of a tree in a level-order fashion
+     * (breadth-first search starting from the root).
      *
      * @param root - tree root.
      * @param visitor - functor called for each visited node.
@@ -274,7 +275,7 @@ namespace cs
     template <typename TBinaryTreeNode>
     void LevelOrderTraverse(
         TBinaryTreeNode* root,
-        std::function<void(TBinaryTreeNode*)> visitor)
+        std::function<void(TBinaryTreeNode* /*node*/, size_t /*level*/)> visitor)
     {
         static_assert(
             std::is_same<TBinaryTreeNode, BinaryTreeNode<typename TBinaryTreeNode::key_type, typename TBinaryTreeNode::value_type>>::value,
@@ -283,22 +284,33 @@ namespace cs
         if (!root)
             return;
 
-        std::stack<TBinaryTreeNode*> level;
-        level.push(root);
+        std::queue<TBinaryTreeNode*> level_1;
+        std::queue<TBinaryTreeNode*> level_2;
+        std::queue<TBinaryTreeNode*>* prev_level = &level_1;
+        std::queue<TBinaryTreeNode*>* next_level = &level_2;
+        size_t level_index = 0;
 
-        while (!level.empty())
+        prev_level->push(root);
+
+        do
         {
-            TBinaryTreeNode* node = level.top();
-            level.pop();
+            while (!prev_level->empty())
+            {
+                TBinaryTreeNode* node = prev_level->front();
+                prev_level->pop();
 
-            if (node->Left())
-                level.push(node->Left());
-            if (node->Right())
-                level.push(node->Right());
+                if (node->Left())
+                    next_level->push(node->Left());
+                if (node->Right())
+                    next_level->push(node->Right());
 
-            // Visit after we are done with node's children
-            visitor(node);
+                // Visit after we are done with node's children
+                visitor(node, level_index);
+            }
+            level_index++;
+            std::swap(prev_level, next_level);
         }
+        while (!prev_level->empty());
     }
 
     /**
@@ -498,7 +510,7 @@ namespace cs
         TBinaryTreeNode* unbalanced_node = nullptr;
         LevelOrderTraverse<TBinaryTreeNode>(
             const_cast<TBinaryTreeNode*>(root),
-            [&unbalanced_node](TBinaryTreeNode* node) -> void
+            [&unbalanced_node](TBinaryTreeNode* node, size_t /*level*/) -> void
             {
                 if (std::abs(cs::BalanceFactor(node)) > 1)
                     unbalanced_node = node;
