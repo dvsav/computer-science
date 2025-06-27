@@ -736,14 +736,14 @@ namespace cs
             VeryLongInteger low(/*size*/ src.size() / 2 + 1, /*val*/ 0x00);
 
             std::copy(
-                /*first*/ &src.value[0],
-                /*last*/ &src.value[src.size() / 2],
-                /*dest*/ &low.value[0]);
+                /*first*/ src.value.cbegin(),
+                /*last*/ src.value.cbegin() + src.size() / 2,
+                /*dest*/ low.value.begin());
 
             std::copy(
-                /*first*/ &src.value[src.size() / 2],
-                /*last*/ &src.value[src.size()],
-                /*dest*/ &high.value[0]);
+                /*first*/ src.value.cbegin() + src.size() / 2,
+                /*last*/ src.value.cend(),
+                /*dest*/ high.value.begin());
 
             return {high, low};
         };

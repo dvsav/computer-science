@@ -27,6 +27,11 @@ project(computer-science
         DESCRIPTION "Computer Science (c) 2023-2025 Dmitry Savchenkov"
         LANGUAGES CXX)
 
+# Require at least C++17
+set(CMAKE_CXX_STANDARD 17) # Sets the desired C++ standard (e.g., 17 for C++17).
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # Ensures the compiler must support the specified standard, not an older one.
+set(CMAKE_CXX_EXTENSIONS OFF)  # Optional: disables compiler-specific extensions like GNU++17
+
 # the repository's root is two folders higher than this CMakeLists file
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}/../..")
 set(SRC_DIR "${ROOT_DIR}/src")
