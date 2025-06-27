@@ -145,7 +145,7 @@ namespace cs
                 // We consider only 2 bytes whose shifted bits can affect i-th byte of the resulting number:
 
                 // The 1st byte is (i - N/8)th ...
-                int j = i - N / 8;
+                int j = static_cast<int>(i) - static_cast<int>(N / 8);
                 if (j >= 0 && j < (int)this->size())
                     result.value[i] |= shiftLeft(this->value[j], N % 8);
 
@@ -186,7 +186,7 @@ namespace cs
                 // We consider only 2 bytes whose shifted bits can affect i-th byte of the resulting number:
 
                 // The 1st byte is (i + N/8)th ...
-                int j = i + N / 8;
+                int j = static_cast<int>(i) + static_cast<int>(N / 8);
                 if (j >= 0 && j < (int)this->size())
                     result.value[i] |= shiftRight(this->value[j], N % 8);
 
@@ -251,12 +251,12 @@ namespace cs
             Requires::That(cleaned.length() > 0, FUNCTION_INFO);
 
             VeryLongInteger result{uint8_t(0)};
-            int decIndex = cleaned.length();
+            int decIndex = static_cast<int>(cleaned.length());
             while (true)
             {
                 // Convert groups of 9 decimal digits (less than 1 billion which fits to a 32 bit integer) to a number and add to the result.
                 int start = std::max(decIndex - 9, 0);
-                std::string str = cleaned.substr(start, decIndex - start);
+                std::string str = cleaned.substr(start, static_cast<size_t>(decIndex) - static_cast<size_t>(start));
                 unsigned long val = std::stoul(/*str*/ str, /*pos*/ nullptr, /*base*/ 10);
                 result = result +
                     VeryLongInteger{val} *
@@ -300,11 +300,11 @@ namespace cs
 
             // iterate over the 2-hex digits (1 byte) groups of symbols in the string
             // moving from the end towards the beginning of the string
-            int hexIndex = cleaned.length();
+            int hexIndex = static_cast<int>(cleaned.length());
             for (size_t i = 0; i < lenBytes; i++)
             {
-                const size_t start = std::max(hexIndex - 2, 0);
-                std::string byteStr = cleaned.substr(start, hexIndex - start);
+                const int start = std::max(hexIndex - 2, 0);
+                std::string byteStr = cleaned.substr(start, static_cast<size_t>(hexIndex) - static_cast<size_t>(start));
                 // convert hex string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(
                     std::stoul(/*str*/ byteStr, /*pos*/ nullptr, /*base*/ 16)
@@ -345,11 +345,11 @@ namespace cs
 
             // iterate over the 8-bit (1 byte) groups of symbols in the string
             // moving from the end towards the beginning of the string
-            int bitIndex = cleaned.length();
+            int bitIndex = static_cast<int>(cleaned.length());
             for (size_t i = 0; i < lenBytes; i++)
             {
                 const int start = std::max(bitIndex - 8, 0);
-                std::string byteStr = cleaned.substr(start, bitIndex - start);
+                std::string byteStr = cleaned.substr(start, static_cast<size_t>(bitIndex) - static_cast<size_t>(start));
                 // convert binary string to unsigned integer
                 result.value[i] = static_cast<uint8_t>(
                     std::stoul(/*str*/ byteStr, /*pos*/ nullptr, /*base*/ 2)
@@ -378,7 +378,7 @@ namespace cs
          */
         int HighestBit() const
         {
-            for (int i = size() - 1; i >= 0; i--)
+            for (int i = static_cast<int>(size()) - 1; i >= 0; i--)
             {
                 const int bit = highestBit(value[i]);
                 if (bit >= 0)

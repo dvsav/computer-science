@@ -22,11 +22,13 @@ namespace cs
         TValue value;
 
         KnapsackItem(
-            size_t weight,
+            int weight,
             TValue value) :
             weight(weight),
             value(value)
-        {}
+        {
+            Requires::ArgumentPositive(weight, NAMEOF(weight), FUNCTION_INFO);
+        }
     };
 
     /**
@@ -57,7 +59,7 @@ namespace cs
         // We allocate an 2D array A with n rows and maxWeight columns.
         // A[i, x] where (i=0...n-1 and x=1...maxWeight) is the solution (total value)
         // of a subproblem for items={item[0]...item[i]} and max weight=x.
-        const int n = items.size();
+        const int n = static_cast<int>(items.size());
         std::unique_ptr<TValue> A(new TValue[maxWeight * n]);
 
         // Function that returns the A[i, x] element of array A (by value).

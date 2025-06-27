@@ -8,12 +8,12 @@ namespace cs
      * @param num - integer number tested for primality.
      * @return true if specified number @p num is prime, false otherwise.
      */
-    inline bool IsPrime(int num)
+    inline bool IsPrime(size_t num)
     {
         if (num <= 1)
             return false;
 
-        for (int i = 2; i * i <= num; ++i)
+        for (size_t i = 2; i * i <= num; ++i)
         {
             if (num % i == 0)
                 return false;
@@ -26,7 +26,7 @@ namespace cs
      * @param x
      * @return prime number greater than given @p x.
      */
-    inline int NextPrime(int x)
+    inline size_t NextPrime(size_t x)
     {
         while (true)
         {
@@ -40,7 +40,7 @@ namespace cs
      * @param x
      * @return prime number smaller than given @p x.
      */
-    inline int PreviousPrime(int x)
+    inline size_t PreviousPrime(size_t x)
     {
         while (x > 1)
         {

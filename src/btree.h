@@ -932,7 +932,7 @@ namespace cs
             auto iter = std::find(parent->children.begin(), parent->children.end(), this);
             Requires::That(iter != parent->children.end(), FUNCTION_INFO);
 
-            int child_index = iter - parent->children.begin();
+            int child_index = static_cast<int>(iter - parent->children.begin());
             int left_separator_index = child_index - 1;
             if (left_separator_index < 0)
             {
@@ -964,7 +964,7 @@ namespace cs
             auto iter = std::find(parent->children.begin(), parent->children.end(), this);
             Requires::That(iter != parent->children.end(), FUNCTION_INFO);
 
-            int child_index = iter - parent->children.begin();
+            int child_index = static_cast<int>(iter - parent->children.begin());
             int right_separator_index = child_index;
             if (right_separator_index + 1 == static_cast<int>(parent->ChildrenNumber()))
             {
