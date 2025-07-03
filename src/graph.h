@@ -94,7 +94,7 @@ namespace cs
          * @return Length of the edge.
          */
         TLen Length() const { return length; }
-    };
+    }; // class Edge
 
     /**
 	 * @class EdgeLengthGreater
@@ -112,7 +112,7 @@ namespace cs
 		{
 			return lhs->Length() > rhs->Length();
 		}
-	};
+	}; // class EdgeLengthGreater
 
     /**
      * @class Vertex
@@ -321,7 +321,7 @@ namespace cs
          */
         template<typename T>
         T*& AuxData() { return *reinterpret_cast<T**>(&auxData); }
-    };
+    }; // class Vertex
 
     /**
      * @brief Calls @p visitor functor for all in-neighbors of @p vertex.
@@ -631,7 +631,7 @@ namespace cs
         using length_type = TLen;
 
     private:
-        std::unordered_map<TId, vertex_type*> vertices; // unordered_map doesn't preserve memory addresses of its elements, which is why we cannot use std::unordered_map<vertex_type>
+        std::unordered_map<TId, vertex_type*> vertices; // unordered_map doesn't preserve memory addresses of its elements, which is why we cannot use std::unordered_map<TId, vertex_type>
         std::list<edge_type*> edges;                    // linked list doesn't preserve memory addresses of its elements, which is why we cannot use std::list<edge_type>
         bool is_disposed;
 
@@ -854,7 +854,7 @@ namespace cs
                 delete edge;
             edges.clear();
         }
-    };
+    }; // class Graph
 
     /**
      * @brief Resets to false the 'Discovered' flags of all vertices of a @p graph.
@@ -890,7 +890,9 @@ namespace cs
      * @return reference to @p os
      */
     template<typename TId, typename TLen>
-    std::ostream& write_adjacency_list(std::ostream& os, const cs::Graph<TId, TLen>& graph)
+    std::ostream& write_adjacency_list(
+        std::ostream& os,
+        const cs::Graph<TId, TLen>& graph)
     {
         using vertex_type = cs::Vertex<TId, TLen>;
 
@@ -928,7 +930,9 @@ namespace cs
      * @return reference to @p is
      */
     template<typename TId, typename TLen>
-    std::istream& read_adjacency_list(std::istream& is, cs::Graph<TId, TLen>& graph)
+    std::istream& read_adjacency_list(
+        std::istream& is,
+        cs::Graph<TId, TLen>& graph)
     {
         graph.Clear();
 
@@ -981,7 +985,7 @@ namespace cs
 
     /**
      * @brief Writes @p graph to an output stream @p os in 'vertex list, edge list' format
-     * meaning that the list of all edges is written first and then it's followed by the list of edges.
+     * meaning that the list of all vertices is written first and then it's followed by the list of all edges.
      *
      * @param os - output stream
      * @param graph
@@ -992,7 +996,9 @@ namespace cs
      * @return reference to @p os
      */
     template<typename TId, typename TLen>
-    std::ostream& write_vertex_edge_list(std::ostream& os, const cs::Graph<TId, TLen>& g)
+    std::ostream& write_vertex_edge_list(
+        std::ostream& os,
+        const cs::Graph<TId, TLen>& g)
     {
         using vertex_type = cs::Vertex<TId, TLen>;
         using edge_type = typename vertex_type::edge_type;
@@ -1037,7 +1043,11 @@ namespace cs
      * @return reference to @p is
      */
     template<typename TId, typename TLen>
-    std::istream& read_edge(std::istream& is, TId& from, TId& to, TLen& length)
+    std::istream& read_edge(
+        std::istream& is,
+        TId& from,
+        TId& to,
+        TLen& length)
     {
         // Skip all whitespace characters and check that the first
         // non-whitespace one is a digit
@@ -1072,9 +1082,9 @@ namespace cs
 
     /**
      * @brief Reads @p graph from an input stream @p is in 'vertex list, edge list' format
-     * meaning that the list of all edges is read first and then it's followed by the list of edges.
+     * meaning that the list of all vertices is read first and the list of all edges is read afterwards.
      *
-     * @param is - input stream
+     * @param is input stream
      * @param graph
      *
      * @tparam TId The data type of vertex Id.
@@ -1083,7 +1093,9 @@ namespace cs
      * @return reference to @p os
      */
     template<typename TId, typename TLen>
-    std::istream& read_vertex_edge_list(std::istream& is, cs::Graph<TId, TLen>& graph)
+    std::istream& read_vertex_edge_list(
+        std::istream& is,
+        cs::Graph<TId, TLen>& graph)
     {
         graph.Clear();
 

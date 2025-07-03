@@ -15,8 +15,8 @@ namespace cs
      * if @p visit_in_reverse_order is true). 'Topologically sorted order'
      * (suppose the sorted vertices go from left to right) assumes
      * that for each vertex v all v's incoming edges come from the left of v and
-     * all v's outgoing edges go to the right of v. Note that this is true for
-     * directed acyclic graphs only; however this sort is also used in graphs
+     * all v's outgoing edges go to the right of v. Note that this is applicable to
+     * directed acyclic graphs only; however, this sort is also used in graphs
      * having loops in Kosaraju's algorithm.
      *
      * @see VisitStronglyConnectedComponents_Kosaraju.
@@ -118,7 +118,7 @@ namespace cs
     /**
      * @brief Performs the Kosaraju's algorithm of finding strongly connected components (SCC).
      * Calls functor @p visit for each vertex passing it an identifier of SCC this vertex belongs to.
-     * SCC is a subgraph such that for each vertex v in that SCC there exists a path to all other
+     * SCC is a subgraph such that for each vertex v in that SCC there is a path to all other
      * vertices of that SCC.
      *
      * @param graph
@@ -138,6 +138,9 @@ namespace cs
             /*visit*/
             [&graph, visit](Vertex<TId, TLen>& vertex)
             {
+                // Since we are visiting the vertices in reverse-topological order,
+                // 'vertex' is the "sink" for a single SCC, meaning that you cannot
+                // reach any other SCCs from 'vertex'.
                 TId scc_id = vertex.Id();
                 DepthFirstSearch_Directed<TId, TLen>(
                     /*graph*/ graph,

@@ -234,10 +234,10 @@ namespace cs
     }
 
     /**
-     * @brief Performs depth-first search in inverse-topological order in directed @p graph starting from
-     * vertex with identifier @p root_id calling functor @p visitor for each visited vertex.
+     * @brief Performs depth-first search in inverse-topological order in a directed @p graph starting from
+     * the vertex with identifier @p root_id calling functor @p visitor for each visited vertex.
      * Sets 'Discovered' flag to true for each visited vertex. 'Inverse-topological order' assumes that
-     * every time a vertex is visited that doesn't have any undiscovered out-neighbors,
+     * every call of @p visitor visits a vertex that doesn't have any undiscovered out-neighbors,
      * beginning from the 'sink' vertex (the one that doesn't have any outgoing edges) all the way to the
      * root vertex.
      *

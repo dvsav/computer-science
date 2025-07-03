@@ -304,7 +304,7 @@ namespace cs
                 if (node->Right())
                     next_level->push(node->Right());
 
-                // Visit after we are done with node's children
+                // Visit the node after we are done with its children
                 visitor(node, level_index);
             }
             level_index++;
@@ -467,7 +467,7 @@ namespace cs
 
     /**
      * @brief Calculates the balance factor of a tree rooted in @p root node.
-     * Balance factor of a tree is the difference of the right height of the tree
+     * Balance factor of a tree is the difference between the right height of the tree
      * and the left height of the tree.
      *
      * @param root - tree root.
