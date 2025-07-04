@@ -72,7 +72,7 @@ namespace cs
     };
 
     /**
-     * @brief Finds the minimum-length path in directed @p graph
+     * @brief Finds the minimum-length path in a directed @p graph
      * from a vertex with identifier @p from_id to every other vertex in the @p graph.
      * For each vertex in the @p graph creates a structure DijkstraShortestPath_Data (containng
      * the shortest length to this vertex and the pointer to its predecessor in the shortest path)
