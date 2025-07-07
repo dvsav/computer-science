@@ -25,19 +25,34 @@ print_message("-------------------- COMPUTER SCIENCE --------------------")
 project(computer-science
         VERSION 1.0
         DESCRIPTION "Computer Science (c) 2023-2025 Dmitry Savchenkov"
+        HOMEPAGE_URL "https://github.com/dvsav/computer-science"
         LANGUAGES CXX)
 
-# Require at least C++17
-set(CMAKE_CXX_STANDARD 17) # Sets the desired C++ standard (e.g., 17 for C++17).
-set(CMAKE_CXX_STANDARD_REQUIRED ON) # Ensures the compiler must support the specified standard, not an older one.
-set(CMAKE_CXX_EXTENSIONS OFF)  # Optional: disables compiler-specific extensions like GNU++17
+# # Sets the required C++ standard (C++17 in our case) across all of the targets in this CMakeLists file
+# Sets the desired C++ standard (e.g., 17 for C++17)
+# (https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html#cmake-cxx-standard).
+set(CMAKE_CXX_STANDARD 17)
+ # Ensures the compiler must support the specified standard, not an older one
+# (https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD_REQUIRED.html).
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Optional: disables compiler-specific extensions like GNU++17
+# (https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_EXTENSIONS.html#cmake-cxx-extensions)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# the repository's root is two folders higher than this CMakeLists file
+# Alternatively we could have set the required C++ standard for a particular build target
+# target_compile_features(${PROJECT_NAME} PUBLIC c_std_17)
+
+# Store the paths to some interesting directories in variables
+# (the repository's root is two folders higher than this CMakeLists file)
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}/../..")
 set(SRC_DIR "${ROOT_DIR}/src")
 set(TEST_DIR "${ROOT_DIR}/test")
 
-# collect the source and header files
+# Collect the source and header files.
+# Without CONFIGURE_DEPENDS CMake doesn't rerun file globbing procedure during build time (cmake --build),
+# So without CONFIGURE_DEPENDS you need to manually regenerate (cmake -B) whenever you add any new source files
+# (https://cmake.org/cmake/help/latest/command/file.html).
+# Note that we are collecting both source and header files to be able to see them, for example, in Visual Studio project explorer.
 file(GLOB SOURCE_FILES CONFIGURE_DEPENDS
      "${SRC_DIR}/*.cpp"
      "${SRC_DIR}/*.h")
@@ -46,7 +61,7 @@ foreach (file ${SOURCE_FILES})
     print_message("source file = ${file}")
 endforeach()
 
-# defines the executable file name (target) and its dependencies
+# Defines a build target - the executable file and its dependencies (the source files collected above)
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 if (VISUAL_STUDIO)
