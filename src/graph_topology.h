@@ -133,6 +133,7 @@ namespace cs
         Graph<TId, TLen>& graph,
         std::function<void(Vertex<TId, TLen>& /*vertex*/, TId /*scc_id*/)> visit)
     {
+        // Visit the vertices of the graph in reverse-topological order
         TopologicalSort<TId, TLen>(
             /*graph*/ graph,
             /*visit*/

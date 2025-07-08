@@ -269,25 +269,36 @@ namespace cs
         while (!track.empty())
         {
             vertex_type& v = *track.top();
-            v.Discovered() = true;
-
-            bool no_outgoing_edges = true;
-            VisitOutNeighbors<TId, TLen>(
-                /*vertex*/ v,
-                [&no_outgoing_edges, &track](vertex_type& neighbor) -> void
-                {
-                    if (!neighbor.Discovered())
-                    {
-                        track.push(&neighbor);
-                        no_outgoing_edges = false;
-                    }
-                }
-            );
-
-            if (no_outgoing_edges)
+            if (v.Discovered())
             {
+                // If we've already discovered this vertex, that means that
+                // we've already discovered all its outgoing neighbors, so
+                // no need to try to discover them again.
                 visit(v);
                 track.pop();
+            }
+            else
+            {
+                v.Discovered() = true;
+
+                bool no_outgoing_edges = true;
+                VisitOutNeighbors<TId, TLen>(
+                    /*vertex*/ v,
+                    [&no_outgoing_edges, &track](vertex_type& neighbor) -> void
+                    {
+                        if (!neighbor.Discovered())
+                        {
+                            track.push(&neighbor);
+                            no_outgoing_edges = false;
+                        }
+                    }
+                );
+
+                if (no_outgoing_edges)
+                {
+                    visit(v);
+                    track.pop();
+                }
             }
         }
 
