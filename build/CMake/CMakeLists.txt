@@ -64,6 +64,26 @@ endforeach()
 # Defines a build target - the executable file and its dependencies (the source files collected above)
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
+# Include CMake's FetchContent module
+include(FetchContent)
+
+# Add a dependency: unit testing framework Catch2
+# (https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)
+
+# FetchContent_Declare declares where and how to fetch the content (e.g., Git URL, tarball, local path), but does not yet download or unpack it.
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.8.1)
+# FetchContent_MakeAvailable does the following:
+# 1. Download or copy the external content to a local directory (<binary_dir>/_deps/ by default).
+# 2. Extract/unpack it if it's an archive.
+# 3. Prepare it for inclusion in the build (e.g., by configuring it).
+# This step is what CMake refers to as "populating the content" — turning the declaration into actual usable files.
+FetchContent_MakeAvailable(Catch2)
+# Link to the Catch2 static library
+target_link_libraries(${PROJECT_NAME} PRIVATE Catch2::Catch2WithMain)
+
 if (VISUAL_STUDIO)
     # set our project as the startup project in the Visual Studio solution
     set_property(

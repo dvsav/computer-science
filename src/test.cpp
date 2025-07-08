@@ -27,9 +27,15 @@
 
 #include "nlohmann/json.hpp"  // JSON parser
 
-// Catch2 - a single header unit test framework
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include "Catch2/catch.hpp"
+// Catch2 - unit testing framework
+#ifdef CATCH2_SINGLE_HEADER
+    // Use the single header version of Catch2
+    #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+    #include "Catch2/catch.hpp"
+#else
+    // Use the static library version of Catch2
+    #include <catch2/catch_test_macros.hpp>
+#endif
 
 TEST_CASE("Karatsuba", "[karatsuba]")
 {

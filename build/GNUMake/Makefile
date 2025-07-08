@@ -50,6 +50,10 @@ ifeq ($(findstring CYGWIN,$(UNAME)),CYGWIN)
 	CXXFLAGS+=-Wa,-mbig-obj
 endif
 
+# Define CATCH2_SINGLE_HEADER macrodefinition to use the single-header
+# version of Catch2 unit testing framework (the macrodefinition is used in test.cpp file)
+CXXFLAGS+=-DCATCH2_SINGLE_HEADER
+
 # Linking to libstdc++fs is required for use of the Filesystem library extensions in <experimental/filesystem>
 STDLIBS= \
     -lstdc++fs
