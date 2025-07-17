@@ -60,7 +60,7 @@ namespace cs
         // A[i, x] where (i=0...n-1 and x=1...maxWeight) is the solution (total value)
         // of a subproblem for items={item[0]...item[i]} and max weight=x.
         const int n = static_cast<int>(items.size());
-        std::unique_ptr<TValue> A(new TValue[maxWeight * n]);
+        std::unique_ptr<TValue[]> A(new TValue[maxWeight * n]);
 
         // Function that returns the A[i, x] element of array A (by value).
         auto a = [&A, maxWeight](int i, int x) -> TValue
@@ -81,7 +81,7 @@ namespace cs
             return A.get()[i * maxWeight + x - 1];
         };
 
-        // Solve all the subproblens from smallest to the largest.
+        // Solve all the subproblems from smallest to the largest.
         for (int i = 0; i < n; ++i)
         {
             for (int x = 1; x <= maxWeight; ++x)

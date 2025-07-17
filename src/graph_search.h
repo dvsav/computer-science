@@ -239,7 +239,8 @@ namespace cs
      * Sets 'Discovered' flag to true for each visited vertex. 'Inverse-topological order' assumes that
      * every call of @p visitor visits a vertex that doesn't have any undiscovered out-neighbors,
      * beginning from the 'sink' vertex (the one that doesn't have any outgoing edges) all the way to the
-     * root vertex.
+     * root vertex. True (iverse-)topological order is achievable only for directed acyclic graphs,
+     * but the algorithm is still valid for directed graphs having loops in them (e.g. in Kosaraju algorithm).
      *
      * @param graph
      * @param root_id - identifier of the vertex from which the search begins.
@@ -273,7 +274,10 @@ namespace cs
             {
                 // If we've already discovered this vertex, that means that
                 // we've already discovered all its outgoing neighbors, so
-                // no need to try to discover them again.
+                // there's no need to try to discover them again.
+                // Why can't we pop the vertex BEFORE we discover its neighbors?
+                // Because we have to visit the vertex AFTER we've discovered
+                // its neighbors.
                 visit(v);
                 track.pop();
             }
@@ -296,6 +300,7 @@ namespace cs
 
                 if (no_outgoing_edges)
                 {
+                    // There's no undiscovered outgoing neighbors
                     visit(v);
                     track.pop();
                 }
