@@ -28,8 +28,7 @@ project(computer-science
         HOMEPAGE_URL "https://github.com/dvsav/computer-science"
         LANGUAGES CXX)
 
-# # Sets the required C++ standard (C++17 in our case) across all of the targets in this CMakeLists file
-# Sets the desired C++ standard (e.g., 17 for C++17)
+# Sets the required C++ standard (C++17 in our case) across all of the targets in this CMakeLists file
 # (https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html#cmake-cxx-standard).
 set(CMAKE_CXX_STANDARD 17)
  # Ensures the compiler must support the specified standard, not an older one
@@ -57,6 +56,7 @@ file(GLOB SOURCE_FILES CONFIGURE_DEPENDS
      "${SRC_DIR}/*.cpp"
      "${SRC_DIR}/*.h")
 
+# Print the list of source files
 foreach (file ${SOURCE_FILES})
     print_message("source file = ${file}")
 endforeach()

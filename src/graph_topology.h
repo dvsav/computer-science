@@ -22,7 +22,7 @@ namespace cs
      * @see VisitStronglyConnectedComponents_Kosaraju.
      *
      * @param graph
-     * @param visit - functor accepting reference to a vertex.
+     * @param visit functor accepting reference to a vertex.
      * @param visit_in_reverse_order - if true, visits the vertices in reverse topologically sorted order.
      *
      * @tparam TId The data type of vertex Id.
@@ -84,7 +84,7 @@ namespace cs
      *
      * @tparam TId The data type of vertex Id.
      * @tparam TLen The data type of edge length.
-     * @tparam TIterator - iterator dereferencing to a pointer to vertex.
+     * @tparam TIterator iterator dereferencing to a pointer to vertex.
      *
      * @return true if vertices are in topological order, false otherwise.
      */
@@ -122,7 +122,7 @@ namespace cs
      * vertices of that SCC.
      *
      * @param graph
-     * @param visit - functor accepting a reference to vertex and the identifier of
+     * @param visit functor accepting a reference to vertex and the identifier of
      * the strongly connected component (SCC) this vertex belongs to.
      *
      * @tparam TId The data type of vertex Id.
@@ -141,7 +141,7 @@ namespace cs
             {
                 // Since we are visiting the vertices in reverse-topological order,
                 // 'vertex' is the "sink" for a single SCC, meaning that you cannot
-                // reach any other SCCs from 'vertex'.
+                // reach any other SCCs from this 'vertex'.
                 TId scc_id = vertex.Id();
                 DepthFirstSearch_Directed<TId, TLen>(
                     /*graph*/ graph,
