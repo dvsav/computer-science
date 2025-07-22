@@ -39,7 +39,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Alternatively we could have set the required C++ standard for a particular build target
-# target_compile_features(${PROJECT_NAME} PUBLIC c_std_17)
+# target_compile_features(test-executable PUBLIC c_std_17)
 
 # Store the paths to some interesting directories in variables
 # (the repository's root is two folders higher than this CMakeLists file)
@@ -61,8 +61,9 @@ foreach (file ${SOURCE_FILES})
     print_message("source file = ${file}")
 endforeach()
 
-# Defines a build target - the executable file and its dependencies (the source files collected above)
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+# Defines a build target - the executable file and its dependencies (the source files collected above).
+# First argument to add_executable is the name of the target.
+add_executable(test-executable ${SOURCE_FILES})
 
 # Include CMake's FetchContent module
 include(FetchContent)
@@ -82,21 +83,21 @@ FetchContent_Declare(
 # This step is what CMake refers to as "populating the content" — turning the declaration into actual usable files.
 FetchContent_MakeAvailable(Catch2)
 # Link to the Catch2 static library
-target_link_libraries(${PROJECT_NAME} PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(test-executable PRIVATE Catch2::Catch2WithMain)
 
 if (VISUAL_STUDIO)
     # set our project as the startup project in the Visual Studio solution
     set_property(
         DIRECTORY "${PROJECT_SOURCE_DIR}"
-        PROPERTY VS_STARTUP_PROJECT "${PROJECT_NAME}")
+        PROPERTY VS_STARTUP_PROJECT "test-executable")
 
     # set Visual Studio Debug working directory to the repository's root directory
     set_target_properties(
-        ${PROJECT_NAME} PROPERTIES 
+        test-executable PROPERTIES 
         VS_DEBUGGER_WORKING_DIRECTORY "${ROOT_DIR}")
 else() # CYGWIN MSYS2 *NIX environment is assumed below
     # Linking to libstdc++fs is required for use of the Filesystem library extensions in <experimental/filesystem>
-    target_link_libraries(${PROJECT_NAME} PRIVATE "stdc++fs")
+    target_link_libraries(test-executable PRIVATE "stdc++fs")
 
     # extract standard libraries' search paths from the compiler
     execute_process(
@@ -111,15 +112,15 @@ else() # CYGWIN MSYS2 *NIX environment is assumed below
     print_message("CXX_STD_LIB_PATHS = ${CXX_STD_LIB_PATHS}")
 
     # embed library search directories into the executable
-    get_target_property(RPATH ${PROJECT_NAME} BUILD_RPATH)
+    get_target_property(RPATH test-executable BUILD_RPATH)
     list(APPEND RPATH ${CXX_STD_LIB_PATHS})
 
     set_target_properties(
-        ${PROJECT_NAME} PROPERTIES 
+        test-executable PROPERTIES 
         BUILD_RPATH "${RPATH}")
 
     set_target_properties(
-        ${PROJECT_NAME} PROPERTIES 
+        test-executable PROPERTIES 
         INSTALL_RPATH "${RPATH}")
 endif()
 
@@ -130,14 +131,14 @@ enable_testing()
 
 # define tests
 add_test(
-    NAME ${PROJECT_NAME}
-    COMMAND $<TARGET_FILE:${PROJECT_NAME}>
+    NAME test-executable
+    COMMAND $<TARGET_FILE:test-executable>
 	WORKING_DIRECTORY ${TEST_DIR})
 
 print_message("-------------------- INSTALLATION --------------------")
 
 # install the executable file to ${CMAKE_INSTALL_PREFIX}
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS test-executable
         CONFIGURATIONS Release
         PERMISSIONS OWNER_READ
                     GROUP_READ
