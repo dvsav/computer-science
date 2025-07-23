@@ -174,7 +174,8 @@ namespace cs
         int Height() const { return height; }
 
         // Returns the balance factor of this node.
-        // Balance factor of a node is the difference between its right and the left subtrees.
+        // Balance factor of a node is the difference between the heights
+        // of its right and the left subtrees.
         // This method is supposed to be called by the friend classes (trees).
         int BalanceFactor() const
         {
@@ -445,7 +446,8 @@ namespace cs
     /**
      * @brief Calculates the height of a tree rooted in @p root node.
      * Height of a tree is the maximal number of edges in a path from
-     * its root to any of its leaves.
+     * its root to any of its leaves. Thus, a tree comprised of just
+     * a single node has the height equal to 0.
      *
      * @param root - tree root.
      *
